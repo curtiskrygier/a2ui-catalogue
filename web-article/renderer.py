@@ -451,6 +451,108 @@ def _render_key_value(b: dict) -> str:
     )
 
 
+def _render_timeline(b: dict) -> str:
+    """Vertical timeline — date, title, body per event. Good for changelogs, journeys, release notes."""
+    events = b.get("events", [])
+    accent = b.get("accent", "#1a73e8")
+    title  = b.get("title", "")
+    title_html = f'<p style="font-weight:700;font-size:1.05rem;margin-bottom:20px;">{title}</p>' if title else ""
+
+    items_html = []
+    for i, event in enumerate(events):
+        is_last = i == len(events) - 1
+        date    = event.get("date", "")
+        label   = event.get("label", "")
+        text    = _md_inline(event.get("text", ""))
+        tag     = event.get("tag", "")
+        tag_html = (
+            f'<span style="background:{accent}18;color:{accent};font-size:0.72rem;font-weight:700;'
+            f'padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;">{tag}</span>'
+        ) if tag else ""
+
+        connector = "" if is_last else '<div style="width:2px;background:#e0e0e0;flex:1;min-height:24px;margin-top:4px;"></div>'
+        items_html.append(
+            f'<div style="display:flex;gap:0;position:relative;">'
+            # Left column — dot + line
+            f'<div style="display:flex;flex-direction:column;align-items:center;width:40px;flex:0 0 40px;">'
+            f'<div style="width:14px;height:14px;border-radius:50%;background:{accent};'
+            f'border:3px solid #fff;box-shadow:0 0 0 2px {accent};flex:0 0 14px;margin-top:3px;z-index:1;"></div>'
+            f'{connector}'
+            f'</div>'
+            # Right column — content
+            f'<div style="padding-bottom:28px;padding-left:12px;flex:1;min-width:0;">'
+            f'<div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:4px;">'
+            f'<span style="font-size:0.78rem;font-weight:600;color:{accent};font-family:monospace;letter-spacing:0.04em;">{date}</span>'
+            f'{tag_html}'
+            f'</div>'
+            f'<p style="font-weight:700;font-size:0.95rem;margin:0 0 4px;">{label}</p>'
+            f'<p style="color:#5f6368;font-size:0.88rem;line-height:1.6;margin:0;">{text}</p>'
+            f'</div>'
+            f'</div>'
+        )
+
+    return (
+        f'<div style="margin:1.5rem 0;padding:20px 20px 0;background:#fafafa;border-radius:10px;border:1px solid #e0e0e0;">'
+        f'{title_html}'
+        f'{"".join(items_html)}'
+        f'</div>'
+    )
+
+
+def _render_annotated_code(b: dict) -> str:
+    """Code block with numbered callout bubbles on specific lines, plus explanation list below."""
+    language    = b.get("language", "")
+    code_lines  = b.get("code", "").split("\n")
+    annotations = b.get("annotations", [])  # [{line: 3, text: "explanation"}]
+    caption     = b.get("caption", "")
+
+    # Build line-number → annotation-number map
+    line_map = {a["line"]: i + 1 for i, a in enumerate(annotations)}
+
+    # Render code with inline callout badges
+    rendered_lines = []
+    for i, line in enumerate(code_lines, 1):
+        escaped = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        if i in line_map:
+            num = line_map[i]
+            badge = (
+                f'<span style="display:inline-flex;align-items:center;justify-content:center;'
+                f'width:18px;height:18px;border-radius:50%;background:#f9ab00;color:#fff;'
+                f'font-size:0.7rem;font-weight:800;margin-left:8px;vertical-align:middle;'
+                f'flex-shrink:0;line-height:1;">{num}</span>'
+            )
+            rendered_lines.append(f'<span style="display:block;">{escaped}{badge}</span>')
+        else:
+            rendered_lines.append(f'<span style="display:block;">{escaped}</span>')
+
+    code_html = "".join(rendered_lines)
+    caption_html = f'<p style="font-size:0.8rem;opacity:0.6;margin:6px 0 0;text-align:center;">{caption}</p>' if caption else ""
+
+    # Annotation explanations
+    annotation_items = "".join(
+        f'<li style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;">'
+        f'<span style="flex:0 0 22px;height:22px;border-radius:50%;background:#f9ab00;color:#fff;'
+        f'font-size:0.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;">{i+1}</span>'
+        f'<span style="font-size:0.88rem;color:#3c4043;line-height:1.6;padding-top:2px;">{_md_inline(a.get("text",""))}</span>'
+        f'</li>'
+        for i, a in enumerate(annotations)
+    )
+
+    return (
+        f'<div style="margin:1.5rem 0;">'
+        f'<pre style="margin:0;padding:18px;background:#1e1e2e;border-radius:10px 10px 0 0;'
+        f'overflow-x:auto;font-size:0.84rem;line-height:1.7;color:#cdd6f4;">'
+        f'<code class="language-{language}">{code_html}</code>'
+        f'</pre>'
+        f'{caption_html}'
+        f'<ol style="list-style:none;padding:16px 20px;margin:0;background:#fffbf0;'
+        f'border:1px solid #f9ab0033;border-top:none;border-radius:0 0 10px 10px;">'
+        f'{annotation_items}'
+        f'</ol>'
+        f'</div>'
+    )
+
+
 # ── Registry ─────────────────────────────────────────────────────────────────
 
 _RENDERERS = {
@@ -474,6 +576,8 @@ _RENDERERS = {
     "table":        _render_table,
     "tabs":          _render_tabs,
     "key_value":     _render_key_value,
-    "before_after":  _render_before_after,
-    "api_reference": _render_api_reference,
+    "before_after":   _render_before_after,
+    "api_reference":  _render_api_reference,
+    "timeline":       _render_timeline,
+    "annotated_code": _render_annotated_code,
 }
