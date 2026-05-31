@@ -297,9 +297,8 @@ blocks:
   surfaces:
     works_on:
     - web
-    degraded_on:
-    - surface: meet-stage
-      note: CSS radio buttons may not work in sandboxed iframe — test before using
+    - meet-stage
+    degraded_on: []
     incompatible_on:
     - surface: googlechat
       reason: CSS radio button trick not supported — use separate code blocks
