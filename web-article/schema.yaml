@@ -167,6 +167,27 @@ blocks:
       after_label: string (optional)   # default "After"
       caption: string (optional)
 
+  - type: gallery
+    description: Responsive image grid with CSS-only lightbox on click
+    fields:
+      cols: 2 | 3 | 4 (optional, default 3)
+      caption: string (optional)
+      images:
+        - url: string
+          alt: string
+          caption: string (optional)
+
+  - type: video_pair
+    description: Two YouTube videos side by side with optional labels
+    fields:
+      caption: string (optional)
+      left:
+        url: string
+        label: string (optional)
+      right:
+        url: string
+        label: string (optional)
+
   - type: api_reference
     description: Full API/function reference block — name, description, parameters table, returns, example
     fields:

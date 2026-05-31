@@ -451,6 +451,251 @@ def _render_key_value(b: dict) -> str:
     )
 
 
+def _render_gallery(b: dict) -> str:
+    """Image gallery — responsive grid with CSS-only lightbox on click."""
+    images  = b.get("images", [])
+    cols    = b.get("cols", 3)
+    caption = b.get("caption", "")
+    caption_html = f'<p style="font-size:0.82rem;opacity:0.6;margin-top:10px;text-align:center;">{caption}</p>' if caption else ""
+
+    # Unique ID per gallery instance
+    import hashlib
+    gid = "g" + hashlib.md5("".join(i.get("url","") for i in images).encode()).hexdigest()[:6]
+
+    lightbox_css = f"""
+<style>
+.{gid}-wrap{{display:grid;grid-template-columns:repeat({cols},1fr);gap:10px;margin:1.5rem 0;}}
+@media(max-width:600px){{.{gid}-wrap{{grid-template-columns:repeat(2,1fr);}}}}
+.{gid}-item{{position:relative;overflow:hidden;border-radius:8px;cursor:zoom-in;aspect-ratio:16/10;background:#f1f3f4;}}
+.{gid}-item img{{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.2s ease;}}
+.{gid}-item:hover img{{transform:scale(1.04);}}
+.{gid}-item figcaption{{position:absolute;bottom:0;left:0;right:0;padding:6px 10px;
+  background:linear-gradient(transparent,rgba(0,0,0,0.6));color:#fff;font-size:0.75rem;
+  opacity:0;transition:opacity 0.2s ease;}}
+.{gid}-item:hover figcaption{{opacity:1;}}
+.{gid}-lb{{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;
+  align-items:center;justify-content:center;padding:20px;}}
+.{gid}-lb:target{{display:flex;}}
+.{gid}-lb img{{max-width:90vw;max-height:88vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5);}}
+.{gid}-lb-close{{position:absolute;top:16px;right:24px;color:#fff;font-size:2rem;
+  text-decoration:none;line-height:1;opacity:0.7;}}
+.{gid}-lb-close:hover{{opacity:1;}}
+.{gid}-lb figcaption{{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  color:rgba(255,255,255,0.7);font-size:0.85rem;text-align:center;}}
+</style>"""
+
+    items_html = []
+    lightboxes_html = []
+
+    for i, img in enumerate(images):
+        url     = img.get("url", "")
+        alt     = img.get("alt", "")
+        cap     = img.get("caption", "")
+        lb_id   = f"{gid}-lb{i}"
+        cap_html = f"<figcaption>{cap}</figcaption>" if cap else ""
+
+        items_html.append(
+            f'<figure class="{gid}-item">'
+            f'<a href="#{lb_id}" style="display:block;height:100%;">'
+            f'<img src="{url}" alt="{alt}" loading="lazy"/>'
+            f'</a>'
+            f'{cap_html}'
+            f'</figure>'
+        )
+        lightboxes_html.append(
+            f'<div id="{lb_id}" class="{gid}-lb">'
+            f'<a href="#" class="{gid}-lb-close">✕</a>'
+            f'<img src="{url}" alt="{alt}"/>'
+            f'{"<figcaption>" + cap + "</figcaption>" if cap else ""}'
+            f'</div>'
+        )
+
+    return (
+        f'{lightbox_css}'
+        f'<div class="{gid}-wrap">{"".join(items_html)}</div>'
+        f'{caption_html}'
+        f'{"".join(lightboxes_html)}'
+    )
+
+
+def _render_video_pair(b: dict) -> str:
+    """Two YouTube videos side by side with captions."""
+    left  = b.get("left",  {})
+    right = b.get("right", {})
+    caption = b.get("caption", "")
+    caption_html = f'<p style="font-size:0.82rem;opacity:0.6;margin-top:8px;text-align:center;">{caption}</p>' if caption else ""
+
+    def video_cell(v):
+        vid_id  = _youtube_id(v.get("url", ""))
+        label   = v.get("label", "")
+        label_html = f'<p style="font-size:0.82rem;font-weight:600;margin-bottom:6px;color:#3c4043;">{label}</p>' if label else ""
+        return (
+            f'<div style="flex:1;min-width:0;">'
+            f'{label_html}'
+            f'<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;">'
+            f'<iframe src="https://www.youtube.com/embed/{vid_id}" '
+            f'style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe>'
+            f'</div></div>'
+        )
+
+    return (
+        f'<div style="display:flex;gap:14px;margin:1.5rem 0;align-items:flex-start;">'
+        f'{video_cell(left)}{video_cell(right)}'
+        f'</div>'
+        f'{caption_html}'
+    )
+
+
+def _render_carousel(b: dict) -> str:
+    """CSS-only image/content carousel with dot indicators and prev/next arrows."""
+    slides  = b.get("slides", [])
+    caption = b.get("caption", "")
+    accent  = b.get("accent", "#1a73e8")
+    if not slides:
+        return ""
+
+    import hashlib
+    cid = "c" + hashlib.md5("".join(s.get("url", s.get("label","")) for s in slides).encode()).hexdigest()[:6]
+    n   = len(slides)
+
+    # CSS — scoped to this carousel instance
+    css_parts = [f"""
+<style>
+.{cid}{{position:relative;overflow:hidden;border-radius:12px;background:#000;margin:1.5rem 0;
+  box-shadow:0 4px 24px rgba(0,0,0,0.12);}}
+.{cid} input[type=radio]{{display:none;}}
+.{cid}-track{{display:flex;transition:transform 0.45s cubic-bezier(0.77,0,0.175,1);width:{n*100}%;}}
+.{cid}-slide{{width:{100//n}%;flex:0 0 {100//n}%;position:relative;}}
+.{cid}-slide img{{width:100%;display:block;max-height:480px;object-fit:cover;}}
+.{cid}-caption{{position:absolute;bottom:0;left:0;right:0;padding:14px 18px;
+  background:linear-gradient(transparent,rgba(0,0,0,0.72));color:#fff;}}
+.{cid}-caption strong{{display:block;font-size:1rem;margin-bottom:2px;}}
+.{cid}-caption span{{font-size:0.82rem;opacity:0.8;}}
+.{cid}-dots{{display:flex;justify-content:center;gap:8px;padding:12px;background:#111;}}
+.{cid}-dot{{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);
+  cursor:pointer;transition:all 0.2s;display:block;border:none;}}
+.{cid}-arrows{{position:absolute;top:50%;transform:translateY(-50%);width:100%;
+  display:flex;justify-content:space-between;padding:0 12px;pointer-events:none;z-index:10;box-sizing:border-box;}}
+.{cid}-arrow{{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(4px);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;cursor:pointer;pointer-events:all;transition:background 0.2s;text-decoration:none;
+  border:1px solid rgba(255,255,255,0.2);}}
+.{cid}-arrow:hover{{background:rgba(255,255,255,0.28);}}
+</style>"""]
+
+    # Per-slide checked states — move track and highlight dot
+    for i in range(1, n + 1):
+        offset = (i - 1) * (100 // n)
+        css_parts.append(
+            f'<style>#{cid}_s{i}:checked ~ .{cid}-inner .{cid}-track'
+            f'{{transform:translateX(-{offset}%);}}\n'
+            f'#{cid}_s{i}:checked ~ .{cid}-dots .{cid}-dot:nth-child({i})'
+            f'{{background:{accent};transform:scale(1.25);}}</style>'
+        )
+
+    # Radio inputs
+    inputs = "".join(
+        f'<input type="radio" id="{cid}_s{i}" name="{cid}" {"checked" if i == 1 else ""}>'
+        for i in range(1, n + 1)
+    )
+
+    # Slides
+    slides_html = ""
+    for slide in slides:
+        url        = slide.get("url", "")
+        label      = slide.get("label", "")
+        sub        = slide.get("subtitle", "")
+        label_html = (
+            f'<div class="{cid}-caption"><strong>{label}</strong>'
+            f'{"<span>" + sub + "</span>" if sub else ""}</div>'
+        ) if label else ""
+        slides_html += (
+            f'<div class="{cid}-slide">'
+            f'<img src="{url}" alt="{label}" loading="lazy"/>'
+            f'{label_html}'
+            f'</div>'
+        )
+
+    # Arrow nav — labels pointing to adjacent slides (wrapping)
+    def arrow(direction, target_idx):
+        symbol = "‹" if direction == "prev" else "›"
+        return (
+            f'<label for="{cid}_s{target_idx}" class="{cid}-arrow">'
+            f'{symbol}</label>'
+        )
+
+    arrows_html = []
+    for i in range(1, n + 1):
+        prev_i = n if i == 1 else i - 1
+        next_i = 1 if i == n else i + 1
+        css_parts.append(
+            f'<style>#{cid}_s{i}:checked ~ .{cid}-inner .{cid}-arrows '
+            f'.{cid}-prev{{display:flex;}} '
+            f'#{cid}_s{i}:checked ~ .{cid}-inner .{cid}-arrows '
+            f'.{cid}-next{{display:flex;}}</style>'
+        )
+        arrows_html.append(
+            f'<style>'
+            f'#{cid}_s{i}:checked ~ .{cid}-inner .{cid}-arrows '
+            f'.{cid}-prev{{content:"";}} </style>'
+        )
+
+    # Build per-slide arrow labels via stacking — simpler: always show prev/next for checked
+    prev_labels = "".join(
+        f'<label for="{cid}_s{n if i==1 else i-1}" '
+        f'class="{cid}-arrow" '
+        f'style="display:{"flex" if True else "none"};">‹</label>'
+        for i in range(1, n + 1)
+    )
+
+    # Simpler arrow approach — one prev, one next, update target via checked state CSS
+    prev_arrows = "".join(
+        f'<style>#{cid}_s{i}:checked ~ .{cid}-inner .{cid}-ap '
+        f'{{display:none;}} '
+        f'#{cid}_s{i}:checked ~ .{cid}-inner .{cid}-ap[data-t="{n if i==1 else i-1}"]'
+        f'{{display:flex;}}</style>'
+        for i in range(1, n + 1)
+    )
+    next_arrows = "".join(
+        f'<style>#{cid}_s{i}:checked ~ .{cid}-inner .{cid}-an '
+        f'{{display:none;}} '
+        f'#{cid}_s{i}:checked ~ .{cid}-inner .{cid}-an[data-t="{1 if i==n else i+1}"]'
+        f'{{display:flex;}}</style>'
+        for i in range(1, n + 1)
+    )
+
+    all_prev = "".join(
+        f'<label for="{cid}_s{i}" class="{cid}-arrow {cid}-ap" data-t="{i}">‹</label>'
+        for i in range(1, n + 1)
+    )
+    all_next = "".join(
+        f'<label for="{cid}_s{i}" class="{cid}-arrow {cid}-an" data-t="{i}">›</label>'
+        for i in range(1, n + 1)
+    )
+
+    dots = "".join(
+        f'<label for="{cid}_s{i}" class="{cid}-dot"></label>'
+        for i in range(1, n + 1)
+    )
+
+    caption_html = f'<p style="font-size:0.82rem;opacity:0.6;margin-top:8px;text-align:center;">{caption}</p>' if caption else ""
+
+    return (
+        "".join(css_parts)
+        + prev_arrows + next_arrows
+        + f'<div class="{cid}">'
+        + inputs
+        + f'<div class="{cid}-inner">'
+        + f'<div class="{cid}-track">{slides_html}</div>'
+        + f'<div class="{cid}-arrows"><div style="display:flex;">{all_prev}</div>'
+        + f'<div style="display:flex;">{all_next}</div></div>'
+        + f'</div>'
+        + f'<div class="{cid}-dots">{dots}</div>'
+        + f'</div>'
+        + caption_html
+    )
+
+
 def _render_timeline(b: dict) -> str:
     """Vertical timeline — date, title, body per event. Good for changelogs, journeys, release notes."""
     events = b.get("events", [])
@@ -580,4 +825,7 @@ _RENDERERS = {
     "api_reference":  _render_api_reference,
     "timeline":       _render_timeline,
     "annotated_code": _render_annotated_code,
+    "gallery":        _render_gallery,
+    "video_pair":     _render_video_pair,
+    "carousel":       _render_carousel,
 }
