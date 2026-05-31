@@ -723,6 +723,123 @@ def _render_carousel(b: dict) -> str:
     )
 
 
+def _render_stat_card(b: dict) -> str:
+    """Glowing neon stat card — large value with label and optional delta.
+
+    Inspired by UIverse.io neon card patterns (uiverse.io).
+    Credit: UIverse.io community — MIT License
+    """
+    value   = b.get("value", "—")
+    label   = b.get("label", "")
+    delta   = b.get("delta", "")
+    accent  = b.get("accent", "#00f2ff")
+    is_up   = b.get("is_up", True)
+    delta_color = "#00ff88" if is_up else "#ff4444"
+    delta_arrow = "▲" if is_up else "▼"
+    delta_html = (
+        f'<span style="font-size:0.85rem;font-weight:700;color:{delta_color};margin-left:10px;">'
+        f'{delta_arrow} {delta}</span>'
+    ) if delta else ""
+
+    return (
+        f'<div style="display:inline-block;background:linear-gradient(135deg,#0d1117 0%,#1a1f2e 100%);'
+        f'border:1px solid {accent}44;border-radius:12px;padding:24px 32px;margin:1rem 0;'
+        f'box-shadow:0 0 20px {accent}22,inset 0 0 20px {accent}08;min-width:200px;text-align:center;">'
+        f'<div style="font-size:0.75rem;font-weight:700;color:{accent};letter-spacing:0.12em;'
+        f'text-transform:uppercase;margin-bottom:8px;">{label}</div>'
+        f'<div style="font-size:2.8rem;font-weight:900;color:#ffffff;line-height:1;font-family:monospace;">'
+        f'{value}{delta_html}'
+        f'</div>'
+        f'</div>'
+    )
+
+
+def _render_progress_bar(b: dict) -> str:
+    """Animated CSS progress bar with glow effect.
+
+    Inspired by UIverse.io animated loader patterns (uiverse.io).
+    Credit: UIverse.io community — MIT License
+    """
+    import hashlib
+    pid     = "p" + hashlib.md5(b.get("label","").encode()).hexdigest()[:6]
+    value   = min(100, max(0, int(b.get("value", 0))))
+    label   = b.get("label", "")
+    accent  = b.get("accent", "#00f2ff")
+    show_pct = b.get("show_percent", True)
+    caption = b.get("caption", "")
+
+    pct_html = f'<span style="font-size:0.8rem;font-weight:700;color:{accent};">{value}%</span>' if show_pct else ""
+    caption_html = f'<p style="font-size:0.78rem;opacity:0.5;margin-top:4px;">{caption}</p>' if caption else ""
+
+    return (
+        f'<style>'
+        f'@keyframes {pid}-glow{{0%,100%{{box-shadow:0 0 6px {accent}88;}}50%{{box-shadow:0 0 16px {accent};}} }}'
+        f'</style>'
+        f'<div style="margin:1rem 0;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
+        f'<span style="font-size:0.85rem;font-weight:600;">{label}</span>'
+        f'{pct_html}'
+        f'</div>'
+        f'<div style="background:rgba(255,255,255,0.08);border-radius:100px;height:10px;overflow:hidden;">'
+        f'<div style="width:{value}%;height:100%;border-radius:100px;background:linear-gradient(90deg,{accent},{accent}99);'
+        f'animation:{pid}-glow 2s ease-in-out infinite;transition:width 0.8s ease;"></div>'
+        f'</div>'
+        f'{caption_html}'
+        f'</div>'
+    )
+
+
+def _render_badge_group(b: dict) -> str:
+    """Group of status badges with optional pulse animation.
+
+    Inspired by UIverse.io badge and chip patterns (uiverse.io).
+    Credit: UIverse.io community — MIT License
+    """
+    badges  = b.get("badges", [])
+    title   = b.get("title", "")
+    title_html = f'<p style="font-size:0.82rem;font-weight:600;margin-bottom:8px;opacity:0.7;">{title}</p>' if title else ""
+
+    COLOR_MAP = {
+        "green":  ("#00ff88", "#003322"),
+        "cyan":   ("#00f2ff", "#002233"),
+        "blue":   ("#4285f4", "#001a44"),
+        "yellow": ("#f9ab00", "#332200"),
+        "red":    ("#ff4444", "#330011"),
+        "purple": ("#a855f7", "#1a0033"),
+        "grey":   ("#9aa0a6", "#1a1a1a"),
+    }
+
+    badges_html = []
+    for badge in badges:
+        text   = badge.get("text", "")
+        color  = badge.get("color", "grey")
+        pulse  = badge.get("pulse", False)
+        fg, bg = COLOR_MAP.get(color, COLOR_MAP["grey"])
+
+        import hashlib
+        bid = "b" + hashlib.md5(text.encode()).hexdigest()[:5]
+        pulse_css = (
+            f'<style>@keyframes {bid}-p{{0%,100%{{box-shadow:0 0 0 0 {fg}66;}}70%{{box-shadow:0 0 0 6px transparent;}} }}</style>'
+            f'<style>.{bid}{{animation:{bid}-p 1.5s infinite;}}</style>'
+        ) if pulse else ""
+        dot = f'<span style="width:7px;height:7px;border-radius:50%;background:{fg};display:inline-block;margin-right:6px;"></span>' if pulse else ""
+
+        badges_html.append(
+            f'{pulse_css}'
+            f'<span class="{bid}" style="display:inline-flex;align-items:center;background:{bg};color:{fg};'
+            f'border:1px solid {fg}44;border-radius:100px;padding:4px 12px;font-size:0.78rem;'
+            f'font-weight:700;letter-spacing:0.04em;margin:3px;">'
+            f'{dot}{text}</span>'
+        )
+
+    return (
+        f'<div style="margin:1rem 0;">'
+        f'{title_html}'
+        f'<div style="display:flex;flex-wrap:wrap;gap:4px;">{"".join(badges_html)}</div>'
+        f'</div>'
+    )
+
+
 def _render_timeline(b: dict) -> str:
     """Vertical timeline — date, title, body per event. Good for changelogs, journeys, release notes."""
     events = b.get("events", [])
@@ -855,4 +972,7 @@ _RENDERERS = {
     "gallery":        _render_gallery,
     "video_pair":     _render_video_pair,
     "carousel":       _render_carousel,
+    "stat_card":      _render_stat_card,
+    "progress_bar":   _render_progress_bar,
+    "badge_group":    _render_badge_group,
 }

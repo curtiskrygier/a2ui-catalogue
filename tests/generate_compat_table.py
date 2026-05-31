@@ -37,22 +37,33 @@ def surface_status(atom: dict, surface: str) -> str:
     return SYMBOLS["unknown"]
 
 
+def source_label(atom: dict) -> str:
+    src = atom.get("source", {})
+    name = src.get("name", "—")
+    url  = src.get("url", "")
+    if url:
+        # Shorten label for table display
+        short = name.split("/")[-1] if "/" in name else name
+        return f"[{short}]({url})"
+    return name
+
+
 def generate_table(schema: dict) -> str:
     atoms = schema["blocks"]
-    header = "| Atom | " + " | ".join(SURFACES) + " |"
-    sep    = "|---|" + "---|" * len(SURFACES)
+    header = "| Atom | " + " | ".join(SURFACES) + " | Source |"
+    sep    = "|---|" + "---|" * len(SURFACES) + "---|"
     rows   = []
     for atom in atoms:
         name   = f"`{atom['type']}`"
         cells  = [surface_status(atom, s) for s in SURFACES]
-        rows.append(f"| {name} | " + " | ".join(cells) + " |")
+        source = source_label(atom)
+        rows.append(f"| {name} | " + " | ".join(cells) + f" | {source} |")
 
     legend = (
         "\n\n"
         f"{SYMBOLS['works']} works fully  "
         f"{SYMBOLS['degraded']} degraded — renders with caveats  "
-        f"{SYMBOLS['incompatible']} incompatible — do not use  "
-        f"— not declared\n"
+        f"{SYMBOLS['incompatible']} incompatible — do not use\n"
     )
 
     return "\n".join([header, sep] + rows) + legend

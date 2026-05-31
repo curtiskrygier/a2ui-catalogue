@@ -60,3 +60,13 @@ def test_no_overlap_works_and_incompatible(atoms):
 def test_atom_count(atoms):
     """Sanity check — catalogue should have at least 20 atoms."""
     assert len(atoms) >= 20, f"Only {len(atoms)} atoms found — expected at least 20"
+
+
+def test_all_atoms_have_source(atoms):
+    """Every atom must declare its origin for supply chain transparency."""
+    for name, atom in atoms.items():
+        assert "source" in atom, f"{name}: missing 'source' — every atom must credit its origin"
+        src = atom["source"]
+        assert src.get("name"), f"{name}: source missing 'name'"
+        assert src.get("url"), f"{name}: source missing 'url'"
+        assert src.get("license"), f"{name}: source missing 'license'"
