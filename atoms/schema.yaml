@@ -1,0 +1,411 @@
+# web-article schema — block vocabulary for long-form articles
+#
+# Surface compatibility tagging:
+#   works_on:        full support — use freely
+#   degraded_on:     renders with caveats — agent should note tradeoff
+#   incompatible_on: do not use — substitute hint provided
+#
+# Surfaces: web | meet-stage | googlechat | email | pdf
+#
+# Default assumption: works_on all surfaces unless tagged otherwise.
+
+blocks:
+
+  # ── Text ────────────────────────────────────────────────────────────────────
+
+  - type: intro
+    description: Italic series link and/or transparency note shown at the top
+    surfaces:
+      works_on: [web, meet-stage, googlechat, email, pdf]
+    fields:
+      series_label: string
+      series_url: url
+      continuation: string (optional)
+      note: string (optional)
+
+  - type: body
+    description: One or more prose paragraphs
+    surfaces:
+      works_on: [web, meet-stage, googlechat, email, pdf]
+    fields:
+      text: string
+
+  - type: heading
+    description: H2 section title
+    surfaces:
+      works_on: [web, meet-stage, googlechat, email, pdf]
+    fields:
+      text: string
+
+  - type: subheading
+    description: H3 subsection title
+    surfaces:
+      works_on: [web, meet-stage, googlechat, email, pdf]
+    fields:
+      text: string
+
+  - type: quote
+    description: Pull quote or blockquote
+    surfaces:
+      works_on: [web, meet-stage, email, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "blockquote styling stripped — renders as plain text"
+    fields:
+      text: string
+      attribution: string (optional)
+
+  - type: code
+    description: Fenced code block
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "renders as monospace text, no syntax highlighting"
+        - surface: email
+          note: "pre/code styling unreliable across email clients — use plain text or image"
+    fields:
+      language: string
+      content: string
+
+  - type: pipeline
+    description: Inline left-to-right flow (e.g. build pipeline steps)
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "monospace background stripped — use bullet_list instead"
+        - surface: email
+          note: "background colour unreliable — use bullet_list instead"
+    fields:
+      steps: list[string]
+
+  - type: bullet_list
+    description: Unordered list with optional bold lead-in per item
+    surfaces:
+      works_on: [web, meet-stage, googlechat, email, pdf]
+    fields:
+      items:
+        - label: string (optional)
+          text: string
+
+  - type: divider
+    description: Visual section break
+    surfaces:
+      works_on: [web, meet-stage, email, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "hr not supported in Chat cards — omit or use heading instead"
+
+  # ── Media ───────────────────────────────────────────────────────────────────
+
+  - type: youtube
+    description: Responsive 16:9 embedded YouTube video
+    surfaces:
+      works_on: [web, meet-stage]
+      incompatible_on:
+        - surface: googlechat
+          reason: "iframes not supported — use image with link instead"
+        - surface: email
+          reason: "iframes stripped by all email clients — use image thumbnail with link"
+        - surface: pdf
+          reason: "iframes not renderable in PDF — use image thumbnail"
+    fields:
+      url: string
+      caption: string (optional)
+
+  - type: image
+    description: Single image with caption, hosted at a public URL
+    surfaces:
+      works_on: [web, meet-stage, email, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "external images may be blocked by Chat security policy — use Chat-hosted URLs"
+    fields:
+      url: string
+      alt: string
+      caption: string (optional)
+      width: string (optional)
+
+  - type: image_pair
+    description: Two images side by side with individual captions
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "table layout may reflow — use two separate image blocks instead"
+        - surface: email
+          note: "side-by-side layout unreliable on mobile email — use two separate images"
+    fields:
+      left:
+        url: string
+        alt: string
+        caption: string (optional)
+      right:
+        url: string
+        alt: string
+        caption: string (optional)
+
+  - type: diagram
+    description: SVG architecture diagram hosted at a public URL
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "SVG may not render — use PNG export instead"
+        - surface: email
+          note: "SVG support inconsistent across email clients — use PNG export"
+    fields:
+      url: string
+      caption: string (optional)
+
+  # ── Structure ────────────────────────────────────────────────────────────────
+
+  - type: repo_links
+    description: Formatted GitHub repo link list at end of article
+    surfaces:
+      works_on: [web, meet-stage, email, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "list styling stripped — renders as plain links"
+    fields:
+      links:
+        - label: string
+          url: string
+
+  - type: closing
+    description: Final paragraph + optional hashtags
+    surfaces:
+      works_on: [web, meet-stage, googlechat, email, pdf]
+    fields:
+      text: string
+      tags: list[string] (optional)
+
+  # ── Enhanced ─────────────────────────────────────────────────────────────────
+
+  - type: callout
+    description: Highlighted alert box — info, warning, tip, or danger
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "border-left and background colour stripped — use bold text prefix instead"
+        - surface: email
+          note: "background colour unreliable — test across clients or use plain bold text"
+    fields:
+      kind: info | warning | tip | danger
+      title: string (optional)
+      text: string
+
+  - type: steps
+    description: Numbered sequential steps with blue circle indicators
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "custom list styling stripped — use bullet_list with manual numbering"
+        - surface: email
+          note: "flexbox layout unreliable — use ordered_list or bullet_list"
+    fields:
+      items:
+        - label: string (optional)
+          text: string
+
+  - type: table
+    description: HTML table with styled headers, alternating rows, horizontal scroll on mobile
+    surfaces:
+      works_on: [web, meet-stage, email, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "HTML tables not supported in Chat cards — use bullet_list or key_value instead"
+    fields:
+      caption: string (optional)
+      headers: list[string]
+      rows: list[list[string]]
+
+  - type: tabs
+    description: CSS-only tabbed panels — ideal for multi-language code examples
+    surfaces:
+      works_on: [web]
+      degraded_on:
+        - surface: meet-stage
+          note: "CSS radio buttons may not work in sandboxed iframe — test before using"
+      incompatible_on:
+        - surface: googlechat
+          reason: "CSS radio button trick not supported — use separate code blocks"
+        - surface: email
+          reason: "CSS :checked not supported in email — use separate code blocks"
+        - surface: pdf
+          reason: "interactive CSS not renderable — use separate code blocks"
+    fields:
+      accent: string (optional)
+      tabs:
+        - label: string
+          language: string
+          content: string
+
+  - type: key_value
+    description: Key-value table for env vars, config options, API fields
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "table layout stripped — use bullet_list with bold keys instead"
+        - surface: email
+          note: "table styling may vary — test or use bullet_list"
+    fields:
+      title: string (optional)
+      items:
+        - key: string
+          description: string
+          required: bool (optional)
+          default: string (optional)
+
+  - type: before_after
+    description: Side-by-side code comparison — red/green panels showing old vs new approach
+    surfaces:
+      works_on: [web, meet-stage]
+      degraded_on:
+        - surface: pdf
+          note: "colour panels may not export cleanly — use two separate code blocks"
+      incompatible_on:
+        - surface: googlechat
+          reason: "side-by-side layout and colour styling not supported — use two code blocks"
+        - surface: email
+          reason: "flexbox and background colour unreliable — use two separate code blocks"
+    fields:
+      language: string
+      before: string
+      after: string
+      before_label: string (optional)
+      after_label: string (optional)
+      caption: string (optional)
+
+  - type: api_reference
+    description: Full API/function reference block — name, description, parameters table, returns, example
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "complex table layout not supported — use key_value + code block instead"
+        - surface: email
+          note: "nested table styling unreliable — use key_value + code block"
+    fields:
+      name: string
+      kind: function | endpoint | class | method
+      method: string (optional)
+      description: string
+      deprecated: bool (optional)
+      parameters:
+        - name: string
+          type: string
+          required: bool (optional)
+          description: string
+          default: string (optional)
+      returns: string (optional)
+      example:
+        label: string (optional)
+        language: string
+        code: string
+
+  - type: gallery
+    description: Responsive image grid with CSS-only lightbox on click
+    surfaces:
+      works_on: [web]
+      degraded_on:
+        - surface: meet-stage
+          note: "CSS :target lightbox may not work in iframe — images show without lightbox"
+        - surface: pdf
+          note: "grid renders but lightbox is non-functional — use image_pair or image"
+      incompatible_on:
+        - surface: googlechat
+          reason: "CSS grid and :target not supported — use image_pair instead"
+        - surface: email
+          reason: "CSS grid and :target stripped — use individual image blocks"
+    fields:
+      cols: 2 | 3 | 4 (optional, default 3)
+      caption: string (optional)
+      images:
+        - url: string
+          alt: string
+          caption: string (optional)
+
+  - type: video_pair
+    description: Two YouTube videos side by side with optional labels
+    surfaces:
+      works_on: [web, meet-stage]
+      incompatible_on:
+        - surface: googlechat
+          reason: "iframes not supported — use two image thumbnails with links"
+        - surface: email
+          reason: "iframes stripped — use image thumbnails with links"
+        - surface: pdf
+          reason: "iframes not renderable — use image thumbnails"
+    fields:
+      caption: string (optional)
+      left:
+        url: string
+        label: string (optional)
+      right:
+        url: string
+        label: string (optional)
+
+  - type: carousel
+    description: CSS-only sliding carousel with dot indicators and prev/next arrows
+    surfaces:
+      works_on: [web]
+      degraded_on:
+        - surface: meet-stage
+          note: "CSS radio button navigation may not work in sandboxed iframe — use gallery instead"
+        - surface: pdf
+          note: "only first slide renders — use gallery instead"
+      incompatible_on:
+        - surface: googlechat
+          reason: "CSS radio button trick not supported — use image_pair or gallery"
+        - surface: email
+          reason: "CSS :checked not supported in email — use individual images"
+    fields:
+      accent: string (optional)
+      caption: string (optional)
+      slides:
+        - url: string
+          label: string (optional)
+          subtitle: string (optional)
+
+  - type: timeline
+    description: Vertical timeline with dot connectors, date badges, tag pills
+    surfaces:
+      works_on: [web, meet-stage, pdf]
+      degraded_on:
+        - surface: googlechat
+          note: "flexbox layout and custom styling stripped — use bullet_list with bold dates"
+        - surface: email
+          note: "flexbox unreliable on mobile email — use bullet_list with bold dates"
+    fields:
+      title: string (optional)
+      accent: string (optional)
+      events:
+        - date: string
+          label: string
+          text: string
+          tag: string (optional)
+
+  - type: annotated_code
+    description: Code block with numbered yellow callout bubbles on specific lines, explanation list below
+    surfaces:
+      works_on: [web, meet-stage]
+      degraded_on:
+        - surface: pdf
+          note: "callout bubbles may not render inline — consider code + steps instead"
+      incompatible_on:
+        - surface: googlechat
+          reason: "inline flexbox badges not supported — use code block + bullet_list"
+        - surface: email
+          reason: "inline positioning unreliable — use code block + bullet_list"
+    fields:
+      language: string
+      code: string
+      caption: string (optional)
+      annotations:
+        - line: integer
+          text: string
