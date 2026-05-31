@@ -114,3 +114,45 @@ blocks:
     fields:
       text: string
       tags: list[string] (optional)
+
+  # ── Enhanced ─────────────────────────────────────────────────────────────────
+
+  - type: callout
+    description: Highlighted alert box — info, warning, tip, or danger
+    fields:
+      kind: info | warning | tip | danger
+      title: string (optional)
+      text: string
+
+  - type: steps
+    description: Numbered sequential steps with blue circle indicators
+    fields:
+      items:
+        - label: string (optional)
+          text: string
+
+  - type: table
+    description: HTML table with styled headers, alternating rows, horizontal scroll on mobile
+    fields:
+      caption: string (optional)
+      headers: list[string]
+      rows: list[list[string]]
+
+  - type: tabs
+    description: CSS-only tabbed panels — ideal for multi-language code examples
+    fields:
+      accent: string (optional)     # hex color for active tab, default #1a73e8
+      tabs:
+        - label: string             # tab label e.g. "Python", "bash", "TypeScript"
+          language: string          # code language
+          content: string           # code content
+
+  - type: key_value
+    description: Key-value table for env vars, config options, API fields
+    fields:
+      title: string (optional)
+      items:
+        - key: string
+          description: string
+          required: bool (optional)
+          default: string (optional)

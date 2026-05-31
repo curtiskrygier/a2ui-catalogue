@@ -167,6 +167,164 @@ def _render_closing(b: dict) -> str:
     return text + tag_html
 
 
+def _render_callout(b: dict) -> str:
+    """Callout/alert box — info, warning, tip, note."""
+    kind = b.get("kind", "info")
+    styles = {
+        "info":    ("ℹ️",  "#e8f0fe", "#1a73e8", "#1a73e8"),
+        "warning": ("⚠️",  "#fef7e0", "#f9ab00", "#e37400"),
+        "tip":     ("💡",  "#e6f4ea", "#34a853", "#137333"),
+        "danger":  ("🚨",  "#fce8e6", "#ea4335", "#c5221f"),
+    }
+    emoji, bg, border, text_color = styles.get(kind, styles["info"])
+    title = b.get("title", "")
+    text = _md_inline(b.get("text", ""))
+    title_html = f'<strong style="color:{text_color};display:block;margin-bottom:4px;">{emoji} {title}</strong>' if title else f'<strong style="color:{text_color};">{emoji} </strong>'
+    return (
+        f'<div style="background:{bg};border-left:4px solid {border};border-radius:0 8px 8px 0;'
+        f'padding:16px 20px;margin:1.5rem 0;">'
+        f'{title_html}'
+        f'<span style="color:#3c4043;line-height:1.6;">{text}</span>'
+        f'</div>'
+    )
+
+
+def _render_steps(b: dict) -> str:
+    """Numbered sequential steps."""
+    items = b.get("items", [])
+    steps_html = []
+    for i, item in enumerate(items, 1):
+        label = f'<strong>{_md_inline(item["label"])}</strong><br/>' if item.get("label") else ""
+        text = _md_inline(item.get("text", ""))
+        steps_html.append(
+            f'<li style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;">'
+            f'<span style="flex:0 0 28px;height:28px;background:#1a73e8;color:white;border-radius:50%;'
+            f'display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;">{i}</span>'
+            f'<div style="padding-top:3px;">{label}{text}</div>'
+            f'</li>'
+        )
+    return (
+        f'<ol style="list-style:none;padding:0;margin:1.5rem 0;">'
+        f'{"".join(steps_html)}'
+        f'</ol>'
+    )
+
+
+def _render_table(b: dict) -> str:
+    """HTML table with optional caption."""
+    headers = b.get("headers", [])
+    rows = b.get("rows", [])
+    caption = b.get("caption", "")
+
+    caption_html = f'<caption style="font-size:0.85rem;opacity:0.6;margin-bottom:8px;text-align:left;">{caption}</caption>' if caption else ""
+    th_cells = "".join(
+        f'<th style="background:#f1f3f4;border:1px solid #dadce0;padding:10px 14px;text-align:left;font-weight:600;white-space:nowrap;">{h}</th>'
+        for h in headers
+    )
+    rows_html = []
+    for i, row in enumerate(rows):
+        bg = 'background:#f8f9fa;' if i % 2 else ''
+        cells = "".join(
+            f'<td style="border:1px solid #dadce0;padding:9px 14px;vertical-align:top;line-height:1.5;{bg}">{_md_inline(str(c))}</td>'
+            for c in row
+        )
+        rows_html.append(f'<tr>{cells}</tr>')
+
+    return (
+        f'<div style="overflow-x:auto;margin:1.5rem 0;">'
+        f'<table style="border-collapse:collapse;width:100%;font-size:0.9em;">'
+        f'{caption_html}'
+        f'<thead><tr>{th_cells}</tr></thead>'
+        f'<tbody>{"".join(rows_html)}</tbody>'
+        f'</table></div>'
+    )
+
+
+_TAB_CSS = """
+<style>
+.tm-tabs{margin:1.5rem 0;border-radius:10px;overflow:hidden;border:1px solid #e0e0e0;}
+.tm-tabs input[type=radio]{display:none;}
+.tm-tab-labels{display:flex;background:#f8f9fa;border-bottom:1px solid #e0e0e0;overflow-x:auto;}
+.tm-tab-label{padding:10px 20px;cursor:pointer;font-size:0.85rem;font-weight:600;color:#5f6368;
+  white-space:nowrap;border-right:1px solid #e0e0e0;transition:all 0.15s ease;user-select:none;
+  border-bottom:3px solid transparent;margin-bottom:-1px;}
+.tm-tab-label:hover{background:#fff;color:#1a73e8;}
+.tm-tab-panels{background:#fff;}
+.tm-tab-panel{display:none;padding:0;}
+.tm-tab-panel pre{margin:0;border-radius:0;border:none;}
+</style>
+"""
+
+def _render_tabs(b: dict, _tab_counter=[0]) -> str:
+    """CSS-only tabbed panels — typically used for multi-language code examples."""
+    _tab_counter[0] += 1
+    group = f"tmtabs{_tab_counter[0]}"
+    tabs = b.get("tabs", [])
+    if not tabs:
+        return ""
+
+    accent = b.get("accent", "#1a73e8")
+
+    # Dynamic CSS for this tab group's checked states
+    checked_css = "".join(
+        f'#{group}_t{i}:checked ~ .tm-tab-labels .tm-tab-label[for="{group}_t{i}"]'
+        f'{{background:#fff;color:{accent};border-bottom-color:{accent};}}\n'
+        f'#{group}_t{i}:checked ~ .tm-tab-panels .tm-tab-panel:nth-child({i})'
+        f'{{display:block;}}\n'
+        for i in range(1, len(tabs) + 1)
+    )
+
+    inputs = "".join(
+        f'<input type="radio" id="{group}_t{i}" name="{group}" {"checked" if i == 1 else ""}>'
+        for i, _ in enumerate(tabs, 1)
+    )
+    labels = "".join(
+        f'<label class="tm-tab-label" for="{group}_t{i}">{tab.get("label","Tab")}</label>'
+        for i, tab in enumerate(tabs, 1)
+    )
+    panels = "".join(
+        f'<div class="tm-tab-panel">{_render_code(tab)}</div>'
+        for tab in tabs
+    )
+
+    return (
+        f'{_TAB_CSS}'
+        f'<style>{checked_css}</style>'
+        f'<div class="tm-tabs">'
+        f'{inputs}'
+        f'<div class="tm-tab-labels">{labels}</div>'
+        f'<div class="tm-tab-panels">{panels}</div>'
+        f'</div>'
+    )
+
+
+def _render_key_value(b: dict) -> str:
+    """Key-value pairs — for env vars, config options, API fields."""
+    items = b.get("items", [])
+    title = b.get("title", "")
+    title_html = f'<p style="font-weight:600;margin-bottom:8px;">{title}</p>' if title else ""
+    def _kv_row(item):
+        required_html = "<strong>Required</strong> — " if item.get("required") else ""
+        default_val = item.get("default")
+        default_html = f'<br/><code style="color:#34a853;">default: {default_val}</code>' if default_val is not None else ""
+        return (
+            f'<tr>'
+            f'<td style="padding:8px 12px;font-family:monospace;font-size:0.85em;color:#1a73e8;white-space:nowrap;'
+            f'border-bottom:1px solid #f0f0f0;vertical-align:top;font-weight:600;">{item.get("key","")}</td>'
+            f'<td style="padding:8px 12px;color:#5f6368;font-size:0.85em;border-bottom:1px solid #f0f0f0;">'
+            f'{required_html}{_md_inline(item.get("description",""))}{default_html}'
+            f'</td></tr>'
+        )
+    rows = "".join(_kv_row(item) for item in items)
+    return (
+        f'{title_html}'
+        f'<div style="overflow-x:auto;margin:1.2rem 0;">'
+        f'<table style="border-collapse:collapse;width:100%;background:#fafafa;border-radius:8px;overflow:hidden;">'
+        f'<tbody>{rows}</tbody>'
+        f'</table></div>'
+    )
+
+
 # ── Registry ─────────────────────────────────────────────────────────────────
 
 _RENDERERS = {
@@ -185,4 +343,9 @@ _RENDERERS = {
     "diagram":      _render_diagram,
     "repo_links":   _render_repo_links,
     "closing":      _render_closing,
+    "callout":      _render_callout,
+    "steps":        _render_steps,
+    "table":        _render_table,
+    "tabs":         _render_tabs,
+    "key_value":    _render_key_value,
 }
