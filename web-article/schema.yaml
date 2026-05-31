@@ -156,3 +156,33 @@ blocks:
           description: string
           required: bool (optional)
           default: string (optional)
+
+  - type: before_after
+    description: Side-by-side code comparison — red/green panels showing old vs new approach
+    fields:
+      language: string              # code language for both panels
+      before: string                # code or text for left (bad) panel
+      after: string                 # code or text for right (good) panel
+      before_label: string (optional)  # default "Before"
+      after_label: string (optional)   # default "After"
+      caption: string (optional)
+
+  - type: api_reference
+    description: Full API/function reference block — name, description, parameters table, returns, example
+    fields:
+      name: string                  # function/endpoint name
+      kind: function | endpoint | class | method
+      method: string (optional)     # HTTP method for endpoints e.g. POST
+      description: string
+      deprecated: bool (optional)
+      parameters:
+        - name: string
+          type: string
+          required: bool (optional)
+          description: string
+          default: string (optional)
+      returns: string (optional)
+      example:
+        label: string (optional)    # default "Example"
+        language: string
+        code: string

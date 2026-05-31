@@ -158,6 +158,132 @@ def _render_repo_links(b: dict) -> str:
     return f'<ul style="list-style:none;padding:0;">{items}</ul>'
 
 
+def _render_before_after(b: dict) -> str:
+    """Before/after code comparison — two panels side by side with clear visual distinction."""
+    before_label = b.get("before_label", "Before")
+    after_label  = b.get("after_label",  "After")
+    language     = b.get("language", "")
+    before_code  = b.get("before", "").replace("<", "&lt;").replace(">", "&gt;")
+    after_code   = b.get("after",  "").replace("<", "&lt;").replace(">", "&gt;")
+    caption      = b.get("caption", "")
+    caption_html = f'<p style="font-size:0.82rem;opacity:0.6;margin-top:8px;text-align:center;">{caption}</p>' if caption else ""
+
+    def panel(label, code, color, bg):
+        return (
+            f'<div style="flex:1;min-width:0;">'
+            f'<div style="padding:6px 14px;background:{color};border-radius:6px 6px 0 0;display:flex;align-items:center;gap:8px;">'
+            f'<span style="font-size:0.78rem;font-weight:700;color:#fff;font-family:monospace;letter-spacing:0.05em;">{label}</span>'
+            f'</div>'
+            f'<pre style="margin:0;padding:16px;background:{bg};border-radius:0 0 6px 6px;'
+            f'overflow-x:auto;font-size:0.84rem;line-height:1.6;">'
+            f'<code class="language-{language}">{code}</code>'
+            f'</pre></div>'
+        )
+
+    return (
+        f'<div style="display:flex;gap:12px;margin:1.5rem 0;align-items:flex-start;">'
+        f'{panel(f"✗ {before_label}", before_code, "#c5221f", "#fff8f7")}'
+        f'{panel(f"✓ {after_label}", after_code, "#137333", "#f0faf4")}'
+        f'</div>'
+        f'{caption_html}'
+    )
+
+
+def _render_api_reference(b: dict) -> str:
+    """API / function reference block — name, description, parameters table, returns, example."""
+    name        = b.get("name", "")
+    kind        = b.get("kind", "function")   # function, endpoint, class, method
+    description = b.get("description", "")
+    params      = b.get("parameters", [])
+    returns     = b.get("returns", "")
+    example     = b.get("example", {})
+    http_method = b.get("method", "")         # GET, POST etc. for endpoints
+    deprecated  = b.get("deprecated", False)
+
+    # Header badge
+    kind_colors = {
+        "function": ("#e8f0fe", "#1a73e8"),
+        "endpoint": ("#e6f4ea", "#137333"),
+        "class":    ("#fef7e0", "#e37400"),
+        "method":   ("#f3e8fd", "#8430ce"),
+    }
+    bg, color = kind_colors.get(kind, kind_colors["function"])
+    method_badge = f'<span style="background:#137333;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;margin-right:8px;">{http_method}</span>' if http_method else ""
+    deprecated_html = '<span style="background:#c5221f;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;margin-left:8px;">DEPRECATED</span>' if deprecated else ""
+
+    # Parameters table
+    param_rows = ""
+    if params:
+        def _param_row(i, p):
+            bg = "background:#f8f9fa;" if i % 2 else ""
+            req = "✓" if p.get("required") else ""
+            default_val = p.get("default")
+            default_html = f'<br/><code style="color:#34a853;font-size:0.9em;">default: {default_val}</code>' if default_val is not None else ""
+            return (
+                f'<tr style="{bg}">'
+                f'<td style="padding:8px 12px;font-family:monospace;font-size:0.82em;color:#1a73e8;white-space:nowrap;">{p.get("name","")}</td>'
+                f'<td style="padding:8px 12px;font-family:monospace;font-size:0.82em;color:#e37400;">{p.get("type","")}</td>'
+                f'<td style="padding:8px 12px;font-size:0.82em;color:#c5221f;text-align:center;">{req}</td>'
+                f'<td style="padding:8px 12px;font-size:0.82em;color:#5f6368;">{_md_inline(p.get("description",""))}{default_html}</td>'
+                f'</tr>'
+            )
+        rows = "".join(_param_row(i, p) for i, p in enumerate(params))
+        param_rows = (
+            f'<div style="margin-top:12px;">'
+            f'<p style="font-size:0.8rem;font-weight:600;color:#5f6368;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Parameters</p>'
+            f'<div style="overflow-x:auto;border-radius:6px;border:1px solid #e0e0e0;">'
+            f'<table style="border-collapse:collapse;width:100%;font-size:0.9em;">'
+            f'<thead><tr style="background:#f1f3f4;">'
+            f'<th style="padding:8px 12px;text-align:left;font-size:0.78rem;color:#5f6368;">Name</th>'
+            f'<th style="padding:8px 12px;text-align:left;font-size:0.78rem;color:#5f6368;">Type</th>'
+            f'<th style="padding:8px 12px;text-align:center;font-size:0.78rem;color:#5f6368;">Req</th>'
+            f'<th style="padding:8px 12px;text-align:left;font-size:0.78rem;color:#5f6368;">Description</th>'
+            f'</tr></thead>'
+            f'<tbody>{rows}</tbody>'
+            f'</table></div></div>'
+        )
+
+    # Returns
+    returns_html = ""
+    if returns:
+        returns_html = (
+            f'<div style="margin-top:12px;">'
+            f'<p style="font-size:0.8rem;font-weight:600;color:#5f6368;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">Returns</p>'
+            f'<p style="font-size:0.88em;color:#3c4043;">{_md_inline(returns)}</p>'
+            f'</div>'
+        )
+
+    # Example
+    example_html = ""
+    if example:
+        ex_code = example.get("code", "").replace("<", "&lt;").replace(">", "&gt;")
+        ex_lang = example.get("language", "")
+        ex_label = example.get("label", "Example")
+        example_html = (
+            f'<div style="margin-top:12px;">'
+            f'<p style="font-size:0.8rem;font-weight:600;color:#5f6368;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">{ex_label}</p>'
+            f'<pre style="margin:0;padding:14px;background:#f8f9fa;border-radius:6px;overflow-x:auto;font-size:0.84rem;line-height:1.6;">'
+            f'<code class="language-{ex_lang}">{ex_code}</code>'
+            f'</pre></div>'
+        )
+
+    return (
+        f'<div style="border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin:1.5rem 0;">'
+        f'<div style="background:{bg};padding:14px 18px;border-bottom:1px solid #e0e0e0;">'
+        f'{method_badge}'
+        f'<code style="font-size:1rem;font-weight:700;color:{color};">{name}</code>'
+        f'{deprecated_html}'
+        f'<span style="font-size:0.78rem;color:#5f6368;margin-left:10px;text-transform:uppercase;letter-spacing:0.05em;">{kind}</span>'
+        f'</div>'
+        f'<div style="padding:14px 18px;">'
+        f'<p style="color:#3c4043;margin-bottom:8px;">{_md_inline(description)}</p>'
+        f'{param_rows}'
+        f'{returns_html}'
+        f'{example_html}'
+        f'</div></div>'
+    )
+
+
 def _render_closing(b: dict) -> str:
     text = f'<p>{_md_inline(b.get("text", ""))}</p>'
     tags = b.get("tags", [])
@@ -346,6 +472,8 @@ _RENDERERS = {
     "callout":      _render_callout,
     "steps":        _render_steps,
     "table":        _render_table,
-    "tabs":         _render_tabs,
-    "key_value":    _render_key_value,
+    "tabs":          _render_tabs,
+    "key_value":     _render_key_value,
+    "before_after":  _render_before_after,
+    "api_reference": _render_api_reference,
 }
