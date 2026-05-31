@@ -1,0 +1,116 @@
+# web-article schema — block vocabulary for long-form articles
+#
+# A post is a list of typed blocks. The renderer materialises each block
+# into HTML. Agents reference this schema to draft structured posts.
+#
+# Usage:
+#   post:
+#     title: "My Article"
+#     slug: my-article
+#     summary: "One line summary."
+#     topic: gcp
+#     blocks:
+#       - type: intro
+#         ...
+
+blocks:
+
+  # ── Text ────────────────────────────────────────────────────────────────────
+
+  - type: intro
+    description: Italic series link and/or transparency note shown at the top
+    fields:
+      series_label: string        # e.g. "the first article"
+      series_url: url             # link to previous article
+      note: string (optional)     # transparency / context note
+
+  - type: body
+    description: One or more prose paragraphs
+    fields:
+      text: string                # plain text, supports **bold** and *italic*
+
+  - type: heading
+    description: H2 section title
+    fields:
+      text: string
+
+  - type: subheading
+    description: H3 subsection title
+    fields:
+      text: string
+
+  - type: quote
+    description: Pull quote or blockquote
+    fields:
+      text: string
+      attribution: string (optional)
+
+  - type: code
+    description: Fenced code block
+    fields:
+      language: string            # e.g. bash, python, yaml, typescript
+      content: string
+
+  - type: pipeline
+    description: Inline left-to-right flow (e.g. build pipeline steps)
+    fields:
+      steps: list[string]         # rendered as step ──► step ──► step
+
+  - type: bullet_list
+    description: Unordered list with optional bold lead-in per item
+    fields:
+      items:
+        - label: string (optional)  # bold lead-in
+          text: string
+
+  - type: divider
+    description: Visual section break
+
+  # ── Media ───────────────────────────────────────────────────────────────────
+
+  - type: youtube
+    description: Responsive 16:9 embedded YouTube video
+    fields:
+      url: string                 # full youtube.com or youtu.be URL
+      caption: string (optional)
+
+  - type: image
+    description: Single image with caption, hosted at a public URL
+    fields:
+      url: string                 # public URL (GitHub raw, Cloud Storage, etc.)
+      alt: string
+      caption: string (optional)
+      width: string (optional)    # e.g. "60%" — defaults to 100%
+
+  - type: image_pair
+    description: Two images side by side with individual captions
+    fields:
+      left:
+        url: string
+        alt: string
+        caption: string (optional)
+      right:
+        url: string
+        alt: string
+        caption: string (optional)
+
+  - type: diagram
+    description: SVG architecture diagram hosted at a public URL
+    fields:
+      url: string
+      caption: string (optional)
+
+  # ── Structure ────────────────────────────────────────────────────────────────
+
+  - type: repo_links
+    description: Formatted GitHub repo link list at end of article
+    fields:
+      links:
+        - label: string           # e.g. "Catalogue (components & molecules)"
+          url: string
+
+  - type: closing
+    description: Final paragraph + optional hashtags
+    fields:
+      text: string
+      tags: list[string] (optional)
