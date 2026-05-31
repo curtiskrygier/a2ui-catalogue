@@ -110,6 +110,44 @@ The full **Google Meet Studio** add-on — FastAPI backend, WebSocket protocol, 
 
 ---
 
+## Surface Compatibility Matrix
+
+Auto-generated from `atoms/schema.yaml`. Run `python3 tests/generate_compat_table.py` to regenerate.
+
+| Atom | web | meet-stage | googlechat | email | pdf |
+|---|---|---|---|---|---|
+| `intro` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `body` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `heading` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `subheading` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `quote` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| `code` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `pipeline` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `bullet_list` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `divider` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| `youtube` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `image` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| `image_pair` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `diagram` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `repo_links` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| `closing` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `callout` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `steps` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `table` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| `tabs` | ✅ | ⚠️ | ❌ | ❌ | ❌ |
+| `key_value` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `before_after` | ✅ | ✅ | ❌ | ❌ | ⚠️ |
+| `api_reference` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `gallery` | ✅ | ⚠️ | ❌ | ❌ | ⚠️ |
+| `video_pair` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `carousel` | ✅ | ✅ | ❌ | ❌ | ⚠️ |
+| `timeline` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
+| `annotated_code` | ✅ | ✅ | ❌ | ❌ | ⚠️ |
+
+✅ works fully  ⚠️ degraded — renders with caveats  ❌ incompatible — use substitute
+
+---
+
 ## Surface Compatibility
 
 Atoms declare surface compatibility at the schema level. The tagging model uses three states:

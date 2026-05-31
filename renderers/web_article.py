@@ -10,8 +10,32 @@ from typing import List, Dict, Any
 import re
 
 
-def render(blocks: List[Dict[str, Any]]) -> str:
-    """Render a list of blocks to HTML."""
+_DARK_OVERRIDES = """
+<style>
+  /* meet-stage dark theme overrides */
+  body { background: transparent !important; color: #e8eaed !important; }
+  h2, h3 { color: #00f2ff !important; }
+  p, li, td, th, span { color: #e8eaed !important; }
+  pre, code { background: #0d1117 !important; color: #cdd6f4 !important; }
+  blockquote { border-color: #00f2ff !important; color: #9aa0a6 !important; }
+  table { background: transparent !important; }
+  th { background: rgba(0,242,255,0.1) !important; color: #00f2ff !important; border-color: rgba(255,255,255,0.1) !important; }
+  td { background: transparent !important; color: #e8eaed !important; border-color: rgba(255,255,255,0.08) !important; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.03) !important; }
+  .tm-tabs { border-color: rgba(255,255,255,0.1) !important; }
+  .tm-tab-labels { background: #0d1117 !important; border-color: rgba(255,255,255,0.08) !important; }
+  .tm-tab-label { color: #9aa0a6 !important; border-color: rgba(255,255,255,0.06) !important; }
+  .tm-tab-panels { background: #0d1117 !important; }
+</style>
+"""
+
+def render(blocks: List[Dict[str, Any]], theme: str = "light") -> str:
+    """Render a list of blocks to HTML.
+
+    Args:
+        blocks: List of block dicts conforming to atoms/schema.yaml
+        theme: 'light' (default, web/blog) or 'dark' (meet-stage)
+    """
     parts = []
     for block in blocks:
         btype = block.get("type")
@@ -20,7 +44,10 @@ def render(blocks: List[Dict[str, Any]]) -> str:
             parts.append(fn(block))
         else:
             parts.append(f'<!-- unknown block type: {btype} -->')
-    return "\n\n".join(parts)
+    html = "\n\n".join(parts)
+    if theme == "dark":
+        html = _DARK_OVERRIDES + html
+    return html
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
