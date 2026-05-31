@@ -62,6 +62,28 @@ def test_atom_count(atoms):
     assert len(atoms) >= 20, f"Only {len(atoms)} atoms found — expected at least 20"
 
 
+def test_googlechat_renderer_covers_works_on(atoms):
+    """Every atom tagged works_on: googlechat must have a renderer in googlechat.py."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from renderers.googlechat import RENDERERS as chat_renderers
+    for name, atom in atoms.items():
+        if 'googlechat' in atom['surfaces'].get('works_on', []):
+            assert name in chat_renderers, f"{name}: works_on googlechat but missing from renderers/googlechat.py"
+
+
+def test_web_renderer_covers_works_on(atoms):
+    """Every atom tagged works_on: web must have a renderer in web_article.py."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from renderers.web_article import _RENDERERS as web_renderers
+    for name, atom in atoms.items():
+        if 'web' in atom['surfaces'].get('works_on', []):
+            assert name in web_renderers, f"{name}: works_on web but missing from renderers/web_article.py"
+
+
 def test_all_atoms_have_source(atoms):
     """Every atom must declare its origin for supply chain transparency."""
     for name, atom in atoms.items():
