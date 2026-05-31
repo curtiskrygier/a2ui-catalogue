@@ -1,8 +1,8 @@
 # A2UI Catalogue — Component Vocabulary for Agent Composition
 
-A public component vocabulary for building agent-driven interfaces for Google Meet.
+A public component vocabulary for building agent-driven interfaces across surfaces — Google Meet, Google Chat, web articles, and beyond.
 
-**What this is:** A fixed set of 45 composable Lit web components that agents use to reason about and compose presentation surfaces. Agents don't generate new components; they compose from this vocabulary.
+**What this is:** A fixed set of composable primitives that agents use to reason about and compose presentation surfaces. Agents don't generate new components; they compose from this vocabulary. Each atom declares which surfaces it works on — agents assume compatibility and check exceptions.
 
 **What this is not:** A UI kit, a component showcase, or a finished design system. These are the primitives. The power is in the constraint.
 
@@ -107,6 +107,27 @@ The full **Google Meet Studio** add-on — FastAPI backend, WebSocket protocol, 
 3. Parse the agent's output and render using:
    - The Lit components here (Web Components)
    - Your own renderer (React, Vue, Angular, etc. — the spec is framework-agnostic)
+
+---
+
+## Surface Compatibility
+
+Atoms declare surface compatibility at the schema level. The tagging model uses three states:
+
+- **`works_on`** — full support, use freely
+- **`degraded_on`** — renders but with caveats, agent should note the tradeoff
+- **`incompatible_on`** — do not use on this surface, substitute hint provided
+
+This approach — universal by default, exceptions declared explicitly — is ahead of current industry practice. Related work and prior art:
+
+| Source | Relevance |
+|---|---|
+| [A2UI v0.9 — Google Developers Blog](https://developers.googleblog.com/a2ui-v0-9-generative-ui/) | Separates structure (agent) from implementation (renderer) — no surface compatibility layer yet |
+| [MCP-UI — Interactive UI for MCP](https://mcpui.dev/guide/introduction) | Capability negotiation at client handshake level, not component level |
+| [MCP Apps — Model Context Protocol Blog](https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/) | `io.modelcontextprotocol/ui` capability flag — server decides what to expose per client |
+| [W3C UI Specification Schema CG](https://www.w3.org/community/uispec/) | Machine-readable meta-model for cross-platform UI constraints — closest to this approach |
+| [The State of Agentic UI — CopilotKit](https://www.copilotkit.ai/blog/the-state-of-agentic-ui-comparing-ag-ui-mcp-ui-and-a2ui-protocols) | Compares AG-UI, MCP-UI, A2UI — none have atom-level surface tagging |
+| [MCP UI Discussion — GitHub](https://github.com/orgs/modelcontextprotocol/discussions/522) | Declarative UI + action protocol proposal — rendering constraints left to host |
 
 ---
 
