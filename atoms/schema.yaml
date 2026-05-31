@@ -1,13 +1,12 @@
 # atoms/schema.yaml — universal block vocabulary
 #
 # Surface compatibility:
-#   works_on:        full support
-#   degraded_on:     renders with caveats
-#   incompatible_on: do not use — substitute hint provided
+#   works_on: full support
+#   degraded_on: renders with caveats
+#   incompatible_on: do not use
 #
 # Source credit:
-#   Every atom declares its origin. a2ui-catalogue atoms are MIT.
-#   Third-party atoms credit the original author and license.
+#   Every atom declares its origin.
 #
 # Surfaces: web | meet-stage | googlechat | email | pdf
 
@@ -567,3 +566,1517 @@ blocks:
     - text: string
       color: green|cyan|blue|yellow|red|purple|grey
       pulse: bool (optional)
+- type: sparkline
+  description: Renders a small, simple line chart without axes or coordinates, showing
+    general trends.
+  source: &id003
+    name: UIverse.io community
+    url: https://uiverse.io
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires SVG or Canvas rendering which is not supported. Consider `metric_delta`
+        or `trend_indicator` for textual trends.
+    - surface: email
+      reason: Requires dynamic rendering or complex image generation, not suitable
+        for static email content.
+    - surface: pdf
+      reason: Requires dynamic rendering or complex image generation, not suitable
+        for static PDF content.
+  fields:
+    data: list of numbers (e.g., [10, 12, 8, 15, 13])
+    color: string (hex or named color, e.g., '#4CAF50' or 'green')
+    line_width: number (e.g., 2)
+    height: string (CSS height value, e.g., '20px')
+    width: string (CSS width value, e.g., '80px')
+- type: heatmap
+  description: Renders a graphical representation of data where individual values
+    are represented as colors in a matrix.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex grid and color rendering which is not supported. No
+        direct alternative.
+    - surface: email
+      reason: Requires complex rendering (SVG/Canvas/CSS Grid), not suitable for static
+        email content.
+    - surface: pdf
+      reason: Requires complex rendering (SVG/Canvas/CSS Grid), not suitable for static
+        PDF content.
+  fields:
+    data: list of lists of numbers (e.g., [[1, 2, 3], [4, 5, 6]])
+    labels_x: list of strings (labels for the x-axis, e.g., ['Mon', 'Tue', 'Wed'])
+    labels_y: list of strings (labels for the y-axis, e.g., ['AM', 'PM'])
+    color_scale: list of strings (colors for the gradient, e.g., ['#FFFFFF', '#FF0000']
+      for white to red)
+    unit: string (optional, unit for the data values, e.g., '°C')
+- type: donut_stat
+  description: Renders a single key metric with a surrounding donut chart indicating
+    its proportion or progress.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Only the metric value, label, and percentage will be rendered as text.
+        The visual donut chart is not supported.
+    incompatible_on:
+    - surface: email
+      reason: Requires SVG or Canvas rendering for the donut chart, which is not supported
+        in email clients.
+    - surface: pdf
+      reason: Requires dynamic rendering for the donut chart, not suitable for static
+        PDF content.
+  fields:
+    value: number (the current value, e.g., 75)
+    max_value: number (the maximum possible value, e.g., 100)
+    label: string (descriptive label for the metric, e.g., 'Completion')
+    unit: string (optional, unit for the value, e.g., '%')
+    color: string (hex or named color for the donut segment, e.g., '#2196F3')
+    size: string (CSS size value, e.g., '100px')
+- type: metric_delta
+  description: Renders a key performance indicator with its current value and a numerical
+    or percentage change from a previous period, often with an up/down indicator.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    label: string (descriptive label for the metric, e.g., 'Sales')
+    current_value: string (the current formatted value, e.g., '$12,345')
+    delta_value: string (the formatted change value, e.g., '+$1,234' or '+10%')
+    delta_type: enum (increase, decrease, no_change) - determines icon/color
+    unit: string (optional, unit for the current value, e.g., 'USD')
+    previous_period_label: string (optional, e.g., 'vs. last month')
+- type: trend_indicator
+  description: Renders a simple visual indicator (e.g., arrow, icon) representing
+    the direction of a trend, often accompanied by a descriptive text.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    trend_direction: enum (up, down, stable) - determines the icon or arrow direction
+    label: string (descriptive text for the trend, e.g., 'Improving', 'Declining',
+      'Steady')
+    context: string (optional, additional context, e.g., 'over last 30 days')
+    color: string (optional, hex or named color for the indicator, e.g., 'green' for
+      'up', 'red' for 'down')
+- type: breadcrumb
+  description: A navigation aid indicating the user's current location within a hierarchical
+    structure.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a series of linked text elements without visual separators
+        or interactive styling.
+    - surface: email
+      note: Renders as a simple list of text links, losing interactive styling and
+        visual separators.
+    - surface: pdf
+      note: Renders as a simple list of text links, losing interactive styling and
+        visual separators.
+  fields:
+    items: 'list of {label: string, url: string, is_current: boolean}'
+- type: pagination
+  description: A control for navigating through a series of pages or results.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a set of buttons or text links. Complex styling and active
+        page indication might be limited.
+    - surface: email
+      note: Renders as a simple list of links, losing interactive styling and current
+        page indication.
+    - surface: pdf
+      note: Renders as a simple list of links, losing interactive styling and current
+        page indication.
+  fields:
+    current_page: integer
+    total_pages: integer
+    base_url: string (the URL prefix for all page links)
+    page_param: string (e.g., 'page', the query parameter name for the page number)
+- type: stepper
+  description: A component that displays progress through a sequence of logical and
+    numbered steps.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a list of text items, possibly with emojis for status, but
+        without visual connectors or progress lines.
+    - surface: email
+      note: Renders as a simple ordered list, losing visual progress indicators and
+        interactive states.
+    - surface: pdf
+      note: Renders as a simple ordered list, losing visual progress indicators and
+        interactive states.
+  fields:
+    steps: 'list of {label: string, is_completed: boolean, is_current: boolean, is_optional:
+      boolean (optional), description: string (optional)}'
+- type: tab_bar
+  description: A horizontal navigation component displaying a set of clickable tabs,
+    typically leading to different sections or pages.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a series of buttons or text links. Visual tab styling and active
+        state might be limited.
+    - surface: email
+      note: Renders as a simple list of links, losing visual tab styling and active
+        state.
+    - surface: pdf
+      note: Renders as a simple list of links, losing visual tab styling and active
+        state.
+  fields:
+    tabs: 'list of {label: string, url: string, is_active: boolean, icon: string (optional,
+      e.g., ''home'')}'
+- type: anchor_list
+  description: A list of links that navigate to specific sections within the current
+    document or to external URLs.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a list of hyperlinks. Internal document anchors are not supported;
+        links must point to external URLs or other cards.
+  fields:
+    anchors: 'list of {label: string, url: string, target_id: string (optional, for
+      in-document navigation on web/pdf)}'
+- type: faq_accordion
+  description: Renders a list of questions and answers, where answers are hidden until
+    the question is clicked.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a simple list of questions and answers without interactive
+        collapse/expand functionality.
+    - surface: email
+      note: Renders as a simple list of questions and answers without interactive
+        collapse/expand functionality.
+  fields:
+    items: list of objects, each with 'question' (string) and 'answer' (string)
+- type: glossary_term
+  description: Renders a term with its definition, often with an optional link for
+    more details.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    term: string (the term itself)
+    definition: string (the explanation)
+    link_text: optional string (e.g., "Learn more")
+    link_url: optional string (URL for more details)
+- type: footnote
+  description: Renders a numbered footnote reference and its corresponding text, typically
+    at the bottom of a section or page.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    number: integer (the footnote number)
+    text: string (the footnote content)
+    id: string (unique identifier for linking, e.g., "fn1")
+- type: blockquote_with_avatar
+  description: Renders a blockquote with an associated avatar and attribution.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a simple blockquote with text attribution; avatar image is
+        not supported.
+    - surface: email
+      note: Renders as a simple blockquote with text attribution; avatar image is
+        not supported.
+  fields:
+    quote: string (the quoted text)
+    author_name: string (name of the person quoted)
+    author_title: optional string (title or role of the person)
+    avatar_url: optional string (URL to the author's avatar image)
+- type: pull_stat
+  description: Renders a prominent, large statistic or number, often with a brief
+    descriptive label.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    value: string (the prominent number/statistic, e.g., "99%", "1.2M")
+    label: string (descriptive text for the stat, e.g., "customer satisfaction")
+    unit: optional string (e.g., "%", "users", "USD")
+    color: optional string (hex code or named color for the value)
+- type: accordion_item
+  description: Renders a single section of content that can be expanded or collapsed
+    by clicking its header, using only CSS.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Relies on CSS `:checked` pseudo-class for interactivity, which is not
+        supported.
+    - surface: email
+      reason: Relies on CSS `:checked` pseudo-class for interactivity, which is not
+        supported.
+    - surface: pdf
+      reason: Relies on CSS `:checked` pseudo-class for interactivity, which is not
+        supported.
+  fields:
+    header: string The title or label for the collapsible section.
+    content: string The main content to be shown or hidden.
+- type: tooltip
+  description: Renders a small, informational popup that appears when a user hovers
+    over a specified trigger element, using only CSS.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Relies on CSS `:hover` pseudo-class for interactivity, which is not
+        supported.
+    - surface: email
+      reason: Relies on CSS `:hover` pseudo-class for interactivity, which is not
+        supported.
+    - surface: pdf
+      reason: Relies on CSS `:hover` pseudo-class for interactivity, which is not
+        supported.
+  fields:
+    trigger_text: string The text or element that, when hovered, reveals the tooltip.
+    tooltip_content: string The content displayed within the tooltip.
+- type: hover_card
+  description: Renders a rich content card that appears when a user hovers over a
+    specified trigger element, using only CSS.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Relies on CSS `:hover` pseudo-class for interactivity, which is not
+        supported.
+    - surface: email
+      reason: Relies on CSS `:hover` pseudo-class for interactivity, which is not
+        supported.
+    - surface: pdf
+      reason: Relies on CSS `:hover` pseudo-class for interactivity, which is not
+        supported.
+  fields:
+    trigger_element: string The text or element that, when hovered, reveals the card.
+    card_title: string The title of the hover card.
+    card_content: string The main content of the hover card, can include rich text
+      or simple HTML.
+    card_image_url: string, optional An optional image to display within the card.
+- type: collapsible_panel
+  description: Renders a standalone section of content that can be toggled between
+    visible and hidden states by clicking a control, using only CSS.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Relies on CSS `:checked` pseudo-class for interactivity, which is not
+        supported.
+    - surface: email
+      reason: Relies on CSS `:checked` pseudo-class for interactivity, which is not
+        supported.
+    - surface: pdf
+      reason: Relies on CSS `:checked` pseudo-class for interactivity, which is not
+        supported.
+  fields:
+    toggle_label: string The text for the control that expands/collapses the content.
+    initial_state: string, default "collapsed" The initial state of the panel ("expanded"
+      or "collapsed").
+    content: string The main content to be shown or hidden.
+- type: css_modal
+  description: Renders a modal dialog that appears on click and can be dismissed,
+    controlled purely by CSS without JavaScript.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Relies on CSS `:checked` pseudo-class for interactivity and fixed positioning,
+        which are not supported.
+    - surface: email
+      reason: Relies on CSS `:checked` pseudo-class for interactivity and fixed positioning,
+        which are not supported.
+    - surface: pdf
+      reason: Relies on CSS `:checked` pseudo-class for interactivity and fixed positioning,
+        which are not supported.
+  fields:
+    trigger_text: string The text or element that, when clicked, opens the modal.
+    modal_title: string The title displayed at the top of the modal.
+    modal_body: string The main content of the modal dialog.
+    close_button_label: string, default "Close" The label for the button to close
+      the modal.
+- type: audio_player
+  description: Renders an embedded audio player for a given URL.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a clickable link to the audio file, no embedded player.
+    - surface: email
+      note: Renders as a clickable link to the audio file, no embedded player.
+  fields:
+    audio_url: string
+    title: string
+    autoplay: boolean
+    loop: boolean
+- type: audio_link
+  description: Renders a clickable link to an audio file, often with an audio icon.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    audio_url: string
+    label: string
+    icon_type: string
+- type: pdf_preview
+  description: Renders an image thumbnail of a PDF document with a link to the full
+    PDF.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as an image followed by a clickable link to the PDF, without complex
+        layout.
+    - surface: email
+      note: Renders as an image followed by a clickable link to the PDF, without complex
+        layout.
+  fields:
+    pdf_url: string
+    thumbnail_url: string
+    title: string
+    alt_text: string
+- type: document_link
+  description: Renders a clickable link to a document (e.g., PDF, DOCX), often with
+    a document icon.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    document_url: string
+    label: string
+    icon_type: string
+- type: video_thumbnail
+  description: Renders a static image thumbnail for a video, with a play icon overlay
+    and a link to the video source.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as an image followed by a clickable link to the video, no play
+        icon overlay.
+    - surface: email
+      note: Renders as an image followed by a clickable link to the video, no play
+        icon overlay.
+  fields:
+    video_url: string
+    thumbnail_url: string
+    alt_text: string
+    title: string
+- type: video_card
+  description: Renders a card with a video thumbnail, title, and description, linking
+    to the video source.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a basic card with image, title, description, and link, without
+        advanced styling.
+    - surface: email
+      note: Renders as a basic card with image, title, description, and link, without
+        advanced styling.
+  fields:
+    video_url: string
+    thumbnail_url: string
+    title: string
+    description: string
+    alt_text: string
+- type: code_diff
+  description: Renders a side-by-side or inline comparison of two code blocks, highlighting
+    additions and deletions.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex HTML/CSS for diff highlighting and layout, which is
+        not supported.
+    - surface: email
+      reason: Requires complex HTML/CSS for diff highlighting and layout, which is
+        not supported.
+    - surface: pdf
+      reason: Requires dynamic rendering for diff highlighting and layout, which is
+        not supported.
+  fields:
+    old_code: string
+    new_code: string
+    language: string
+    diff_type: string
+- type: code_snippet_pair
+  description: Renders two distinct code snippets side-by-side or stacked, without
+    diff highlighting.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders code snippets stacked vertically instead of side-by-side.
+    - surface: email
+      note: Renders code snippets stacked vertically instead of side-by-side.
+  fields:
+    left_code: string
+    right_code: string
+    language: string
+    left_label: string
+    right_label: string
+- type: framed_screenshot
+  description: Renders an image within a decorative frame, simulating a device (e.g.,
+    browser, phone).
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex CSS for device framing, which is not supported.
+    - surface: email
+      reason: Requires complex CSS for device framing, which is not supported.
+    - surface: pdf
+      reason: Requires complex CSS for device framing, which is not supported.
+  fields:
+    image_url: string
+    alt_text: string
+    device_type: string
+    caption: string
+- type: image_with_caption
+  description: Renders a single image with a descriptive caption below it.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    image_url: string
+    alt_text: string
+    caption: string
+    link_url: string
+- type: alert_banner
+  description: A prominent banner displaying a message, often with an icon and an
+    optional action.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a basic card with text and button; no custom icons, complex
+        layouts, or animations.
+    incompatible_on:
+    - surface: email
+      reason: Relies on complex CSS for layout, icons, and interactive elements which
+        are not reliably supported.
+  fields:
+    message: string The main message to display in the banner.
+    type: string The type of alert (e.g., "info", "warning", "error", "success").
+    icon: string Optional icon name to display next to the message.
+    action_label: string Optional text for an action button.
+    action_url: string Optional URL for the action button.
+- type: toast_notification
+  description: A small, temporary, non-intrusive message that appears and disappears
+    automatically.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Google Chat does not support transient, non-blocking UI elements or
+        animations.
+    - surface: email
+      reason: Email does not support transient, non-blocking UI elements or animations.
+  fields:
+    message: string The message to display in the toast.
+    type: string The type of notification (e.g., "success", "error", "info").
+    duration: integer The time in milliseconds the toast should be visible.
+- type: loading_skeleton
+  description: A placeholder UI that shows the structure of content while it's loading,
+    indicating active data fetching.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Google Chat does not support custom UI elements with animated loading
+        states.
+    - surface: email
+      reason: Email does not support custom UI elements with animated loading states.
+  fields:
+    shape: string The general shape of the content being loaded (e.g., "card", "list",
+      "text_block").
+    lines: integer The number of lines of text to simulate in the skeleton.
+    has_image: boolean Indicates if the skeleton should include an image placeholder.
+- type: empty_state
+  description: A UI pattern displayed when there is no data to show, often with an
+    image, message, and an optional call to action.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a basic card with image, title, text, and button; limited layout
+        flexibility and styling.
+    - surface: email
+      note: Renders as a basic block with image, title, text, and button; limited
+        layout flexibility and styling.
+  fields:
+    image_url: string Optional URL for an illustrative image.
+    title: string The main title for the empty state.
+    description: string A descriptive message explaining why the state is empty.
+    action_label: string Optional text for a call to action button.
+    action_url: string Optional URL for the call to action button.
+- type: spinner
+  description: A simple rotating animation indicating that content is loading or an
+    operation is in progress.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Google Chat does not support custom animated loading indicators.
+    - surface: email
+      reason: Email does not support custom animated loading indicators.
+  fields:
+    size: string The size of the spinner (e.g., "small", "medium", "large").
+    color: string The color of the spinner (e.g., "primary", "gray").
+- type: status_pill
+  description: A small, colored label or "pill" used to display a concise status for
+    an item.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as plain text; no custom background colors, rounded corners, or
+        advanced styling.
+    - surface: email
+      note: Renders as plain text; limited styling for background colors or rounded
+        corners.
+  fields:
+    label: string The text label for the status.
+    color: string The semantic color of the pill (e.g., "success", "warning", "error",
+      "info", "neutral").
+    icon: string Optional icon to display within the pill.
+- type: inline_feedback_message
+  description: A small, contextual message displayed inline with content, often used
+    for validation feedback or hints.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as basic text; no custom icons, colors, or complex inline styling.
+    - surface: email
+      note: Renders as basic text; no custom icons, colors, or complex inline styling.
+  fields:
+    message: string The feedback message text.
+    type: string The type of feedback (e.g., "success", "error", "warning", "info").
+    icon: string Optional icon to display next to the message.
+- type: rating_stars
+  description: A visual component allowing users to rate an item using a series of
+    stars, or displaying a static rating.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Can display static stars using Unicode characters or images, but no interactive
+        rating functionality.
+    - surface: email
+      note: Can display static stars using Unicode characters or images, but no interactive
+        rating functionality.
+  fields:
+    rating: integer The current rating value (e.g., 3 for 3 stars).
+    max_rating: integer The maximum possible rating (e.g., 5 for 5 stars).
+    is_interactive: boolean Indicates if the stars are clickable for user input.
+- type: progress_circle
+  description: A circular progress indicator, often with a percentage or value displayed
+    in the center.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Google Chat does not support custom SVG or canvas-based circular progress
+        animations.
+    - surface: email
+      reason: Email does not support custom SVG or canvas-based circular progress
+        animations.
+  fields:
+    value: integer The current progress value (0-100).
+    label: string Optional text label to display inside the circle.
+    size: string The size of the progress circle (e.g., "small", "medium", "large").
+- type: action_required_card
+  description: A card highlighting an important status or issue that requires immediate
+    user attention, with a clear call to action.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    degraded_on:
+    - surface: email
+      note: Renders as a basic block with title, description, and button; limited
+        layout and styling options.
+  fields:
+    title: string The main title of the card, indicating the required action.
+    description: string A detailed explanation of the action needed.
+    action_label: string The text for the primary action button.
+    action_url: string The URL for the primary action button.
+    icon: string Optional icon to display on the card.
+- type: feature_matrix
+  description: Renders a table comparing features across multiple products or versions.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a series of lists or key-value pairs due to lack of table support.
+    incompatible_on:
+    - surface: email
+      reason: Complex table layouts may not render consistently across email clients.
+  fields:
+    product_names: array
+    features: array
+- type: pricing_tier_card
+  description: Renders a single pricing plan with its name, price, key features, and
+    an optional call to action.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    plan_name: string
+    price: string
+    currency: string
+    frequency: string
+    features: array
+    call_to_action_label: string
+    call_to_action_url: string
+    is_highlighted: boolean
+- type: pricing_tier_group
+  description: Renders a collection of pricing tier cards, typically for comparing
+    different subscription plans.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as stacked individual cards or sections within a single card.
+    - surface: email
+      note: Renders as stacked blocks without complex column layouts.
+  fields:
+    tiers: array
+- type: pros_cons_list
+  description: Renders a two-column list itemizing advantages and disadvantages for
+    a single subject.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    subject: string
+    pros: array
+    cons: array
+- type: side_by_side_spec
+  description: Renders a detailed comparison of two items, displaying their attributes
+    and values side-by-side.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as stacked lists of attributes and values for each item.
+    incompatible_on:
+    - surface: email
+      reason: Complex side-by-side layouts may not render consistently across email
+        clients.
+  fields:
+    item_a_name: string
+    item_b_name: string
+    specs: array
+- type: product_spec_table
+  description: Renders a table detailing technical specifications or features for
+    a single product.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a list of key-value pairs.
+    incompatible_on:
+    - surface: email
+      reason: Complex table layouts may not render consistently across email clients.
+  fields:
+    product_name: string
+    specs: array
+- type: comparison_grid
+  description: Renders a grid comparing multiple products or services with features,
+    often using icons or checkmarks to indicate presence.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a simplified list of products with their features, losing grid
+        layout and icons.
+    - surface: email
+      note: Renders as stacked blocks without complex grid layouts, potentially losing
+        icons.
+  fields:
+    products: array
+    features: array
+- type: versus_block
+  description: Renders a block explicitly comparing two entities with a prominent
+    "VS" separator.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as two stacked cards, losing the explicit 'VS' visual separation.
+    - surface: email
+      note: Renders as two stacked blocks, losing the explicit 'VS' visual separation
+        and side-by-side layout.
+  fields:
+    entity_a_name: string
+    entity_a_description: string
+    entity_a_image_url: string
+    entity_b_name: string
+    entity_b_description: string
+    entity_b_image_url: string
+    comparison_points: array
+- type: rating_comparison
+  description: Renders a comparison of multiple items based on star ratings or numerical
+    scores.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    items: array
+- type: capability_checklist
+  description: Renders a list of capabilities, indicating which items possess each
+    capability using checkmarks or similar indicators.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a simplified list of capabilities with text indicators for
+        each item.
+    incompatible_on:
+    - surface: email
+      reason: Table-like structures with checkmarks may not render consistently across
+        email clients.
+  fields:
+    capability_names: array
+    items: array
+- type: toggle_switch
+  description: Renders a visual on/off switch.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS pseudo-classes like :checked and advanced styling are not supported.
+    - surface: email
+      reason: CSS pseudo-classes like :checked and advanced styling are not supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    label: string
+    is_checked: boolean
+    name: string
+- type: expandable_text
+  description: Renders a block of text that can be expanded or collapsed to reveal
+    more content.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS pseudo-classes like :checked or :target and dynamic content display
+        are not supported.
+    - surface: email
+      reason: CSS pseudo-classes like :checked or :target and dynamic content display
+        are not supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    summary: string
+    details: string
+    initial_state_expanded: boolean
+- type: flip_card
+  description: Renders a card with a front and back side that flips on interaction.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS transforms, transitions, and pseudo-classes like :hover are not
+        supported.
+    - surface: email
+      reason: CSS transforms, transitions, and pseudo-classes like :hover are not
+        supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    front_content: string
+    back_content: string
+    trigger_on_hover: boolean
+- type: image_hotspots
+  description: Renders an image with interactive points that display information on
+    hover.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS positioning, pseudo-classes like :hover, and dynamic content display
+        are not supported.
+    - surface: email
+      reason: CSS positioning, pseudo-classes like :hover, and dynamic content display
+        are not supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    image_url: string
+    alt_text: string
+    hotspots: list of objects with label, x_position, y_position, content
+- type: css_dropdown_menu
+  description: Renders a menu that appears when a trigger element is hovered or focused.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS pseudo-classes like :hover or :focus-within and dynamic display
+        are not supported.
+    - surface: email
+      reason: CSS pseudo-classes like :hover or :focus-within and dynamic display
+        are not supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    trigger_text: string
+    menu_items: list of objects with label, url
+- type: star_rating_input
+  description: Renders an interactive star rating component for user input.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS pseudo-classes like :checked and :hover for interactive forms are
+        not supported.
+    - surface: email
+      reason: CSS pseudo-classes like :checked and :hover for interactive forms are
+        not supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    max_stars: integer
+    initial_rating: integer
+    name: string
+- type: segmented_control
+  description: Renders a group of mutually exclusive buttons for selection, styled
+    as a single control.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS pseudo-classes like :checked and advanced styling for form elements
+        are not supported.
+    - surface: email
+      reason: CSS pseudo-classes like :checked and advanced styling for form elements
+        are not supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    options: list of objects with label, value
+    selected_value: string
+    name: string
+- type: zoomable_image
+  description: Renders an image that magnifies when hovered over.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS transforms, transitions, and pseudo-classes like :hover are not
+        supported.
+    - surface: email
+      reason: CSS transforms, transitions, and pseudo-classes like :hover are not
+        supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    image_url: string
+    alt_text: string
+    zoom_factor: float
+- type: custom_checkbox_group
+  description: Renders a group of custom-styled checkboxes allowing multiple selections.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS pseudo-classes like :checked and advanced styling for form elements
+        are not supported.
+    - surface: email
+      reason: CSS pseudo-classes like :checked and advanced styling for form elements
+        are not supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    group_label: string
+    options: list of objects with label, value, is_checked
+    name: string
+- type: css_slide_panel
+  description: Renders a panel that slides into view from the side of the screen on
+    activation.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS transforms, transitions, and pseudo-classes like :target or :checked
+        are not supported.
+    - surface: email
+      reason: CSS transforms, transitions, and pseudo-classes like :target or :checked
+        are not supported.
+    - surface: pdf
+      reason: Interactivity and advanced CSS are not supported.
+  fields:
+    trigger_text: string
+    panel_content: string
+    slide_from_side: string
+- type: testimonial_card
+  description: Renders a single customer testimonial with text, author details, and
+    an optional avatar.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as basic text and author name; avatar and complex styling are
+        not supported.
+    - surface: email
+      note: Renders as basic text and author name; avatar and complex styling may
+        be rendered as a simple image or not at all depending on client.
+  fields:
+    text: string
+    author_name: string
+    author_title: string
+    author_avatar_url: string
+    rating: integer
+- type: star_rating_display
+  description: Renders a visual representation of a star rating, optionally with a
+    total review count.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as text (e.g., '4.5 stars') or using emoji stars; visual styling
+        of stars is not supported.
+    - surface: email
+      note: Renders as text (e.g., '4.5 stars') or a static image; interactive or
+        dynamic star rendering is not supported.
+  fields:
+    rating: number
+    max_rating: integer
+    review_count: integer
+- type: avatar_group
+  description: Renders a stack or row of small user avatars, often indicating a group
+    or community.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a limited number of small images or a text count; stacking/overlapping
+        is not supported.
+    - surface: email
+      note: Renders as a limited number of small images or a text count; stacking/overlapping
+        is not reliably supported across clients.
+  fields:
+    avatars: list
+    total_count: integer
+    label: string
+- type: contributor_list
+  description: Renders a list of individuals who have contributed to a project or
+    community, with their names, roles, and optional links or avatars.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a basic text list; avatars and rich formatting are not supported.
+    - surface: email
+      note: Renders as a basic text list; avatars and rich formatting may be rendered
+        as simple images or not at all.
+  fields:
+    contributors: list
+    title: string
+- type: customer_logo_grid
+  description: Renders a grid or row of logos from featured customers or partners.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a limited number of stacked images or a text list of names;
+        grid layout is not supported.
+    - surface: email
+      note: Renders as a limited number of stacked images or a text list of names;
+        grid layout is not reliably supported across clients.
+  fields:
+    logos: list
+    title: string
+- type: social_proof_banner
+  description: Renders a prominent banner highlighting a key social proof metric or
+    achievement.
+  source: *id003
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as basic text and icon; banner styling and rich layout are not
+        supported.
+    - surface: email
+      note: Renders as basic text and icon; banner styling and rich layout may be
+        rendered as a simple image or not at all.
+  fields:
+    metric_value: string
+    metric_label: string
+    icon_url: string
+    link_url: string
+- type: media_mention_card
+  description: Renders a card showcasing a mention or feature in a media publication.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as basic text and publication logo; card styling and rich layout
+        are not supported.
+    - surface: email
+      note: Renders as basic text and publication logo; card styling and rich layout
+        may be rendered as a simple image or not at all.
+  fields:
+    publication_name: string
+    publication_logo_url: string
+    headline: string
+    article_url: string
+    date: string
+- type: expert_endorsement
+  description: Renders an endorsement from an industry expert, including their quote,
+    name, and credentials.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as basic text and expert name; avatar and rich formatting are
+        not supported.
+    - surface: email
+      note: Renders as basic text and expert name; avatar and rich formatting may
+        be rendered as a simple image or not at all.
+  fields:
+    quote: string
+    expert_name: string
+    expert_title: string
+    expert_organization: string
+    expert_avatar_url: string
+- type: review_callout
+  description: Renders a short, impactful quote from a customer review, often accompanied
+    by a star rating.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as basic text and author name; star rating may be shown as emojis
+        or text.
+    - surface: email
+      note: Renders as basic text and author name; star rating may be shown as a static
+        image or text.
+  fields:
+    review_text: string
+    author_name: string
+    rating: number
+    max_rating: integer
+    product_name: string
+- type: social_feed_embed
+  description: Renders an embedded snippet of a social media post, such as a tweet
+    or Instagram post.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.com/catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Google Chat does not support embedding arbitrary HTML or iframes for
+        social media posts.
+    - surface: email
+      reason: Email clients do not support embedding arbitrary HTML or iframes for
+        social media posts.
+    - surface: pdf
+      reason: PDFs are static documents and do not support interactive embeds or iframes.
+  fields:
+    embed_code: string
+    platform: string
+    post_url: string

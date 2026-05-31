@@ -308,6 +308,18 @@ RENDERERS: Dict[str, Any] = {
     "gallery":      _render_gallery,
     "stat_card":    _render_stat_card,
     "badge_group":  _render_badge_group,
+    "metric_delta": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "metric_delta")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "trend_indicator": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "trend_indicator")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "glossary_term": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "glossary_term")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "footnote": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "footnote")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "pull_stat": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "pull_stat")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "audio_link": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "audio_link")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "document_link": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "document_link")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "image_with_caption": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "image_with_caption")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "action_required_card": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "action_required_card")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "pricing_tier_card": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "pricing_tier_card")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "pros_cons_list": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "pros_cons_list")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
+    "rating_comparison": lambda b: [{"textParagraph": {"text": "<b>" + b.get("label", b.get("title", "rating_comparison")) + "</b><br/>" + b.get("text", b.get("content", ""))}}],
 }
 
 
