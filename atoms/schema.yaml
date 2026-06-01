@@ -670,6 +670,75 @@ blocks:
     color_scale: list of strings (colors for the gradient, e.g., ['#FFFFFF', '#FF0000']
       for white to red)
     unit: string (optional, unit for the data values, e.g., '°C')
+- type: punch_card
+  description: Renders a Day-of-Week vs. Hour-of-Day bubble grid (punch card) of repository or commit activity, where bubble size is proportional to activity.
+  compact_description: 7x24 grid of glowing activity bubbles representing hourly commits
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex SVG bubble rendering which is not supported.
+    - surface: email
+      reason: Requires SVG, not supported in static emails.
+    - surface: pdf
+      reason: Requires SVG, not supported in static PDFs.
+  fields:
+    data: list of lists of numbers (7 rows representing days of week, each containing 24 numbers representing commit frequency for each hour)
+    labels_days: list of strings (optional, e.g., ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
+    color: string (optional, hex or named color for active bubbles, e.g., '#00f2ff')
+    title: string (optional, title of the repository or chart, e.g., 'Commit Activity')
+    subtitle: string (optional, subtitle, e.g., 'curtiskrygier/meetstudio')
+- type: sankey_flow
+  description: Renders a flow diagram (Sankey flow) where left-hand source nodes connect to right-hand target nodes via beautiful, curved gradient Bezier bands.
+  compact_description: curved dual-column gradient flow diagram for financial or pipeline streams
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex SVG path calculations.
+    - surface: email
+      reason: Requires SVG, not supported in static emails.
+    - surface: pdf
+      reason: Requires SVG, not supported in static PDFs.
+  fields:
+    nodes: "list of dictionaries representing columns (e.g., [{'id': 'revenue', 'label': 'Revenue', 'column': 0, 'color': '#10b981'}, ...])"
+    links: "list of dictionaries representing flows (e.g., [{'source': 'revenue', 'target': 'marketing', 'value': 25000, 'color': '#38bdf8'}, ...])"
+    title: string (optional, title of the chart, e.g., 'Financial Flow Allocation')
+- type: cohort_retention
+  description: Renders a SaaS subscription or customer cohort retention triangular matrix with color-coded continuous gradients.
+  compact_description: triangular cohort retention grid with continuous color-scale rendering
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex triangular layout and color scale.
+    - surface: email
+      reason: Requires SVG or CSS grid.
+    - surface: pdf
+      reason: Requires SVG or CSS grid.
+  fields:
+    cohorts: "list of dictionaries representing cohorts (e.g., [{'cohort_name': 'Jan 2026', 'original_size': 2500, 'retention_rates': [100.0, 93.4]}])"
+    periods: "list of strings representing period headers (e.g., ['Month 0', 'Month 1'])"
+    color_scale: "list of strings representing the continuous color scale (e.g., ['#1e293b', '#10b981'])"
+    title: "string (optional, chart title, e.g., 'SaaS Retention Cohorts')"
 - type: donut_stat
   description: Renders a single key metric with a surrounding donut chart indicating
   compact_description: CSS ring chart with centre value and percentage

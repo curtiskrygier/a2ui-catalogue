@@ -2776,6 +2776,440 @@ def _render_command_palette(b: dict) -> str:
 def _render_search_result_card(b: dict) -> str:
     return '<div style="margin:1rem 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;"><div style="font-weight:600;font-size:0.9rem;color:#7c3aed;margin-bottom:4px;">Result Title</div><div style="font-size:0.8rem;color:#6b7280;margin-bottom:6px;">Example result description with relevant content snippet.</div><div style="font-size:0.7rem;color:#9ca3af;">example.com › category › result</div></div>'
 
+def _render_punch_card(b: dict) -> str:
+    data        = b.get("data", [])
+    labels_days = b.get("labels_days", ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
+    color       = b.get("color", "#00f2ff")
+    title       = b.get("title", "")
+    subtitle    = b.get("subtitle", "")
+    
+    if not data or not data[0]:
+        return ""
+        
+    num_rows = len(data)
+    num_cols = len(data[0])
+    
+    flat_data = [float(val) for row in data for val in row]
+    mn, mx = min(flat_data), max(flat_data)
+    rng = (mx - mn) or 1
+    
+    cell_size = 28
+    cell_gap = 5
+    
+    pad_l, pad_r, pad_t, pad_b = 60, 25, 40, 25
+    
+    grid_w = num_cols * cell_size + (num_cols - 1) * cell_gap
+    grid_h = num_rows * cell_size + (num_rows - 1) * cell_gap
+    
+    w = pad_l + grid_w + pad_r
+    h = pad_t + grid_h + pad_b
+    
+    x_labels = ""
+    for c_idx in range(num_cols):
+        x = pad_l + c_idx * (cell_size + cell_gap) + cell_size / 2
+        lbl = f"{c_idx:02d}"
+        x_labels += f'<text x="{x}" y="{pad_t - 12}" fill="rgba(255,255,255,0.4)" font-size="8" font-family="monospace" text-anchor="middle">{lbl}</text>'
+        
+    y_labels = ""
+    for r_idx, lbl in enumerate(labels_days):
+        if r_idx < num_rows:
+            y = pad_t + r_idx * (cell_size + cell_gap) + cell_size / 2 + 3
+            y_labels += f'<text x="{pad_l - 12}" y="{y}" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace" text-anchor="end">{lbl}</text>'
+            
+    bubbles_html = []
+    punch_id = f"punch_{id(b)}"
+    
+    for r_idx, row in enumerate(data):
+        for c_idx, val in enumerate(row):
+            if val <= 0:
+                x = pad_l + c_idx * (cell_size + cell_gap) + cell_size / 2
+                y = pad_t + r_idx * (cell_size + cell_gap) + cell_size / 2
+                bubbles_html.append(f'<circle cx="{x}" cy="{y}" r="2" fill="rgba(255,255,255,0.06)" />')
+                continue
+                
+            weight = (val - mn) / rng if rng > 0 else 0.5
+            r = 3 + weight * 10
+            x = pad_l + c_idx * (cell_size + cell_gap) + cell_size / 2
+            y = pad_t + r_idx * (cell_size + cell_gap) + cell_size / 2
+            
+            opacity = 0.3 + weight * 0.7
+            
+            glow_attr = ""
+            if weight > 0.6:
+                glow_attr = f'filter="url(#{punch_id}_glow)"'
+                
+            bubbles_html.append(f"""
+            <circle cx="{x}" cy="{y}" r="{r:.1f}" fill="{color}" fill-opacity="{opacity:.2f}" {glow_attr}>
+              <title>{labels_days[r_idx]} {c_idx:02d}:00 - {val:,.0f} commits</title>
+            </circle>
+            """)
+            
+    svg_html = f"""
+    <svg viewBox="0 0 {w} {h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+      <defs>
+        <filter id="{punch_id}_glow" x="-30%" y="-30%" width="160%" height="140%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {y_labels}
+      {x_labels}
+      {"".join(bubbles_html)}
+    </svg>
+    """
+    
+    header_html = ""
+    if title or subtitle:
+        header_html = f"""
+        <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;">
+          <div>
+            {f'<div style="font-size:1.1rem;font-weight:800;color:#f1f5f9;margin-bottom:2px;">{title}</div>' if title else ''}
+            {f'<div style="font-size:0.75rem;color:rgba(255,255,255,0.4);font-family:monospace;">{subtitle}</div>' if subtitle else ''}
+          </div>
+          <div style="display:flex;gap:12px;font-size:0.75rem;color:rgba(255,255,255,0.4);font-family:monospace;align-items:center;">
+            <span>Less</span>
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{color};opacity:0.3;"></span>
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{color};opacity:0.6;"></span>
+            <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:{color};opacity:1.0;"></span>
+            <span>More</span>
+          </div>
+        </div>
+        """
+        
+    return f"""
+    <div style="margin:1.5rem 0;padding:24px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+      {header_html}
+      <div style="width:100%;overflow-x:auto;">
+        <div style="min-width:{w}px;max-width:100%;height:{h}px;margin:0 auto;">
+          {svg_html}
+        </div>
+      </div>
+    </div>
+    """
+
+def _render_sankey_flow(b: dict) -> str:
+    raw_nodes = b.get("nodes", [])
+    raw_links = b.get("links", [])
+    title     = b.get("title", "")
+    
+    if not raw_links:
+        return ""
+        
+    nodes_map = {n["id"]: n for n in raw_nodes}
+    
+    for link in raw_links:
+        s, t = link["source"], link["target"]
+        if s not in nodes_map:
+            nodes_map[s] = {"id": s, "label": s.capitalize(), "column": 0}
+        if t not in nodes_map:
+            nodes_map[t] = {"id": t, "label": t.capitalize(), "column": 1}
+            
+    left_nodes = []
+    right_nodes = []
+    
+    node_out_totals = {}
+    node_in_totals = {}
+    for link in raw_links:
+        s, t, v = link["source"], link["target"], float(link.get("value", 1))
+        node_out_totals[s] = node_out_totals.get(s, 0.0) + v
+        node_in_totals[t] = node_in_totals.get(t, 0.0) + v
+        
+    for nid, node in nodes_map.items():
+        col = node.get("column", 0)
+        if "column" not in node:
+            if nid in node_out_totals:
+                col = 0
+            else:
+                col = 1
+                
+        node_item = {
+            "id": nid,
+            "label": node.get("label", nid),
+            "color": node.get("color", "#38bdf8" if col == 0 else "#10b981"),
+            "total_out": node_out_totals.get(nid, 0.0),
+            "total_in": node_in_totals.get(nid, 0.0),
+        }
+        node_item["total"] = max(node_item["total_out"], node_item["total_in"], 1.0)
+        
+        if col == 0:
+            left_nodes.append(node_item)
+        else:
+            right_nodes.append(node_item)
+            
+    left_nodes.sort(key=lambda x: x["total"], reverse=True)
+    right_nodes.sort(key=lambda x: x["total"], reverse=True)
+    
+    w, h = 640, 340
+    pad_l, pad_r, pad_t, pad_b = 60, 60, 50, 40
+    usable_h = h - pad_t - pad_b
+    
+    x_left = pad_l
+    node_w = 16
+    x_right = w - pad_r - node_w
+    
+    gap_l = 16
+    total_gaps_l = (len(left_nodes) - 1) * gap_l if len(left_nodes) > 1 else 0
+    avail_h_l = max(usable_h - total_gaps_l, 100)
+    sum_left_totals = sum(n["total"] for n in left_nodes) or 1.0
+    scale_l = avail_h_l / sum_left_totals
+    
+    y = pad_t
+    left_positions = {}
+    for n in left_nodes:
+        n_h = max(n["total"] * scale_l, 10.0)
+        left_positions[n["id"]] = {
+            "x": x_left,
+            "y": y,
+            "w": node_w,
+            "h": n_h,
+            "color": n["color"],
+            "label": n["label"],
+            "total": n["total"],
+            "curr_offset": 0.0,
+            "scale": scale_l,
+        }
+        y += n_h + gap_l
+        
+    gap_r = 16
+    total_gaps_r = (len(right_nodes) - 1) * gap_r if len(right_nodes) > 1 else 0
+    avail_h_r = max(usable_h - total_gaps_r, 100)
+    sum_right_totals = sum(n["total"] for n in right_nodes) or 1.0
+    scale_r = avail_h_r / sum_right_totals
+    
+    y = pad_t
+    right_positions = {}
+    for n in right_nodes:
+        n_h = max(n["total"] * scale_r, 10.0)
+        right_positions[n["id"]] = {
+            "x": x_right,
+            "y": y,
+            "w": node_w,
+            "h": n_h,
+            "color": n["color"],
+            "label": n["label"],
+            "total": n["total"],
+            "curr_offset": 0.0,
+            "scale": scale_r,
+        }
+        y += n_h + gap_r
+        
+    gradients_html = []
+    links_html = []
+    
+    sankey_id = f"sankey_{id(b)}"
+    
+    for idx, link in enumerate(raw_links):
+        s, t, v = link["source"], link["target"], float(link.get("value", 1))
+        
+        if s not in left_positions or t not in right_positions:
+            continue
+            
+        lp = left_positions[s]
+        rp = right_positions[t]
+        
+        link_h_l = v * lp["scale"]
+        link_h_r = rp["scale"] * v if rp["total"] > 0 else rp["scale"] * v
+        # Ensure we don't scale by RP if total sum doesn't match
+        link_h_r = v * rp["scale"]
+        
+        y_l = lp["y"] + lp["curr_offset"]
+        y_r = rp["y"] + rp["curr_offset"]
+        
+        lp["curr_offset"] += link_h_l
+        rp["curr_offset"] += link_h_r
+        
+        x0 = lp["x"] + lp["w"]
+        x1 = rp["x"]
+        dx = (x1 - x0) / 2
+        
+        top_curve = f"C {x0 + dx} {y_l}, {x1 - dx} {y_r}, {x1} {y_r}"
+        bot_curve = f"C {x1 - dx} {y_r + link_h_r}, {x0 + dx} {y_l + link_h_l}, {x0} {y_l + link_h_l}"
+        
+        path_data = f"M {x0} {y_l} {top_curve} L {x1} {y_r + link_h_r} {bot_curve} Z"
+        
+        grad_id = f"{sankey_id}_grad_{idx}"
+        link_color = link.get("color")
+        
+        if link_color:
+            fill_val = link_color
+            opacity = 0.35
+        else:
+            gradients_html.append(f"""
+            <linearGradient id="{grad_id}" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="{lp['color']}" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="{rp['color']}" stop-opacity="0.3" />
+            </linearGradient>
+            """)
+            fill_val = f"url(#{grad_id})"
+            opacity = 1.0
+            
+        links_html.append(f"""
+        <path d="{path_data}" fill="{fill_val}" opacity="{opacity}" style="transition: opacity 0.2s;" onmouseover="this.setAttribute('opacity', '0.65')" onmouseout="this.setAttribute('opacity', '{opacity}')">
+          <title>{lp['label']} → {rp['label']}: {v:,.0f}</title>
+        </path>
+        """)
+        
+    nodes_html = []
+    labels_html = []
+    
+    for nid, lp in left_positions.items():
+        node_glow_id = f"{sankey_id}_node_glow_{nid}"
+        gradients_html.append(f"""
+        <linearGradient id="{node_glow_id}_grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="{lp['color']}" />
+          <stop offset="100%" stop-color="{lp['color']}" stop-opacity="0.6" />
+        </linearGradient>
+        """)
+        
+        nodes_html.append(f"""
+        <rect x="{lp['x']}" y="{lp['y']}" width="{lp['w']}" height="{lp['h']}" fill="url(#{node_glow_id}_grad)" rx="3" ry="3" />
+        """)
+        
+        labels_html.append(f"""
+        <text x="{lp['x'] - 8}" y="{lp['y'] + lp['h']/2 + 4}" fill="#f1f5f9" font-size="11" font-weight="700" font-family="monospace" text-anchor="end">{lp['label']}</text>
+        <text x="{lp['x'] - 8}" y="{lp['y'] + lp['h']/2 + 15}" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace" text-anchor="end">{lp['total']:,.0f}</text>
+        """)
+        
+    for nid, rp in right_positions.items():
+        node_glow_id = f"{sankey_id}_node_glow_{nid}"
+        gradients_html.append(f"""
+        <linearGradient id="{node_glow_id}_grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="{rp['color']}" />
+          <stop offset="100%" stop-color="{rp['color']}" stop-opacity="0.6" />
+        </linearGradient>
+        """)
+        
+        nodes_html.append(f"""
+        <rect x="{rp['x']}" y="{rp['y']}" width="{rp['w']}" height="{rp['h']}" fill="url(#{node_glow_id}_grad)" rx="3" ry="3" />
+        """)
+        
+        labels_html.append(f"""
+        <text x="{rp['x'] + rp['w'] + 8}" y="{rp['y'] + rp['h']/2 + 4}" fill="#f1f5f9" font-size="11" font-weight="700" font-family="monospace" text-anchor="start">{rp['label']}</text>
+        <text x="{rp['x'] + rp['w'] + 8}" y="{rp['y'] + rp['h']/2 + 15}" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace" text-anchor="start">{rp['total']:,.0f}</text>
+        """)
+        
+    svg_html = f"""
+    <svg viewBox="0 0 {w} {h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+      <defs>
+        {"".join(gradients_html)}
+      </defs>
+      {"".join(links_html)}
+      {"".join(nodes_html)}
+      {"".join(labels_html)}
+    </svg>
+    """
+    
+    header_html = ""
+    if title:
+        header_html = f"""
+        <div style="margin-bottom:16px;">
+          <div style="font-size:1.1rem;font-weight:800;color:#f1f5f9;letter-spacing:-0.2px;">{title}</div>
+        </div>
+        """
+        
+    return f"""
+    <div style="margin:1.5rem 0;padding:24px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+      {header_html}
+      <div style="width:100%;overflow-x:auto;">
+        <div style="min-width:{w}px;max-width:100%;height:{h}px;margin:0 auto;">
+          {svg_html}
+        </div>
+      </div>
+    </div>
+    """
+
+def _render_cohort_retention(b: dict) -> str:
+    cohorts     = b.get("cohorts", [])
+    periods     = b.get("periods", [])
+    color_scale = b.get("color_scale", ["#1e293b", "#10b981"])
+    title       = b.get("title", "")
+    
+    if not cohorts or not periods:
+        return ""
+        
+    num_periods = len(periods)
+    
+    headers = []
+    headers.append('<div style="font-weight:700;color:rgba(255,255,255,0.4);font-size:0.75rem;font-family:monospace;text-transform:uppercase;padding:12px;letter-spacing:0.05em;">Cohort</div>')
+    headers.append('<div style="font-weight:700;color:rgba(255,255,255,0.4);font-size:0.75rem;font-family:monospace;text-transform:uppercase;padding:12px;letter-spacing:0.05em;text-align:right;">Size</div>')
+    for p in periods:
+        headers.append(f'<div style="font-weight:700;color:rgba(255,255,255,0.4);font-size:0.75rem;font-family:monospace;text-transform:uppercase;padding:12px;letter-spacing:0.05em;text-align:center;">{p}</div>')
+        
+    rows_html = []
+    for row_idx, cohort in enumerate(cohorts):
+        name = cohort.get("cohort_name", f"Cohort {row_idx}")
+        size = cohort.get("original_size", "—")
+        if isinstance(size, (int, float)):
+            size_str = f"{size:,.0f}"
+        else:
+            size_str = str(size)
+            
+        rates = cohort.get("retention_rates", [])
+        
+        row_cells = []
+        row_cells.append(f'<div style="font-weight:700;color:#f1f5f9;font-size:0.85rem;padding:12px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;">{name}</div>')
+        row_cells.append(f'<div style="color:rgba(255,255,255,0.6);font-size:0.85rem;font-family:monospace;padding:12px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right;display:flex;align-items:center;justify-content:flex-end;">{size_str}</div>')
+        
+        for p_idx in range(num_periods):
+            if p_idx < len(rates):
+                rate = float(rates[p_idx])
+                weight = rate / 100.0
+                cell_bg = _get_color_from_scale(color_scale, weight)
+                
+                text_color = "#f1f5f9"
+                if weight > 0.65:
+                    text_color = "#0f172a"
+                    
+                cell_style = (
+                    f"background:{cell_bg};"
+                    f"color:{text_color};"
+                    f"font-weight:700;"
+                    f"font-size:0.8rem;"
+                    f"font-family:monospace;"
+                    f"text-align:center;"
+                    f"margin:2px;"
+                    f"border-radius:4px;"
+                    f"display:flex;"
+                    f"align-items:center;"
+                    f"justify-content:center;"
+                    f"transition:transform 0.15s, box-shadow 0.15s;"
+                )
+                
+                row_cells.append(f"""
+                <div style="{cell_style}" onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.3)';" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none';">
+                  {rate:.1f}%
+                </div>
+                """)
+            else:
+                row_cells.append('<div style="background:transparent;margin:2px;"></div>')
+                
+        rows_html.append("".join(row_cells))
+        
+    grid_cols_style = f"grid-template-columns: 140px 100px repeat({num_periods}, 1fr);"
+    
+    header_html = ""
+    if title:
+        header_html = f"""
+        <div style="margin-bottom:16px;">
+          <div style="font-size:1.1rem;font-weight:800;color:#f1f5f9;letter-spacing:-0.2px;">{title}</div>
+        </div>
+        """
+        
+    return f"""
+    <div style="margin:1.5rem 0;padding:24px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+      {header_html}
+      <div style="width:100%;overflow-x:auto;">
+        <div style="min-width:{240 + num_periods * 80}px;max-width:100%;display:grid;{grid_cols_style};background:rgba(15,23,42,0.3);border-radius:8px;padding:8px;gap:2px;">
+          {"".join(headers)}
+          {"".join(rows_html)}
+        </div>
+      </div>
+    </div>
+    """
+
 
 # ── Registry ─────────────────────────────────────────────────────────────────
 
@@ -2940,6 +3374,9 @@ _RENDERERS = {
     "data_table_sortable": _render_data_table_sortable,
     "donut_stat": _render_donut_stat,
     "heatmap": _render_heatmap,
+    "punch_card": _render_punch_card,
+    "sankey_flow": _render_sankey_flow,
+    "cohort_retention": _render_cohort_retention,
     "metric_comparison_card": _render_metric_comparison_card,
     "mini_sparkline_set": _render_mini_sparkline_set,
     "status_dashboard": _render_status_dashboard,
