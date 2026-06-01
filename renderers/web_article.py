@@ -1116,11 +1116,25 @@ def _render_glossary_term(b: dict) -> str:
     return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
 
 def _render_footnote(b: dict) -> str:
-    """TODO: Renders a numbered footnote reference and its corresponding text, typically at t"""
-    label = b.get("label", b.get("title", b.get("name", "")))
-    text  = b.get("text", b.get("content", b.get("value", "")))
-    inner = (f"<strong>{label}</strong><br/>" if label else "") + (f"{text}" if text else f"<em style='color:#999;'>[ footnote ]</em>")
-    return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
+    fid  = b.get("id", "1")
+    text = b.get("text", "")
+    return (f'<div style="margin:0.5rem 0;font-size:0.78rem;color:#6b7280;padding-left:1.2rem;'
+            f'border-left:2px solid #e5e7eb;">'
+            f'<sup style="color:#7c3aed;font-weight:600;">[{fid}]</sup> {text}'
+            f'</div>')
+
+def _render_footnote_group(b: dict) -> str:
+    footnotes = b.get("footnotes", [])
+    rows = "".join(
+        f'<div style="margin:4px 0;font-size:0.78rem;color:#6b7280;padding-left:1.2rem;">'
+        f'<sup style="color:#7c3aed;font-weight:600;">[{fn.get("id","?")}]</sup> {fn.get("text","")}'
+        f'</div>'
+        for fn in footnotes
+    )
+    return (f'<div style="margin:1.5rem 0;padding:12px 16px;border-top:1px solid #e5e7eb;">'
+            f'<div style="font-size:0.72rem;font-weight:600;color:#9ca3af;text-transform:uppercase;'
+            f'letter-spacing:0.05em;margin-bottom:8px;">Footnotes</div>'
+            f'{rows}</div>')
 
 def _render_blockquote_with_avatar(b: dict) -> str:
     """TODO: Renders a blockquote with an associated avatar and attribution."""
@@ -1144,32 +1158,44 @@ def _render_accordion_item(b: dict) -> str:
     return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
 
 def _render_tooltip(b: dict) -> str:
-    """TODO: Renders a small, informational popup that appears when a user hovers over a spec"""
-    label = b.get("label", b.get("title", b.get("name", "")))
-    text  = b.get("text", b.get("content", b.get("value", "")))
-    inner = (f"<strong>{label}</strong><br/>" if label else "") + (f"{text}" if text else f"<em style='color:#999;'>[ tooltip ]</em>")
-    return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
+    text   = b.get("text", "")
+    target = b.get("target", "hover me")
+    return (f'<div style="margin:1rem 0;display:inline-block;position:relative;">'
+            f'<span style="border-bottom:1px dashed #7c3aed;cursor:help;color:#7c3aed;">{target}</span>'
+            f'<div style="margin-top:6px;padding:6px 10px;background:#1f2937;color:#f9fafb;'
+            f'border-radius:6px;font-size:0.78rem;max-width:240px;line-height:1.4;">{text}</div>'
+            f'</div>')
 
 def _render_hover_card(b: dict) -> str:
-    """TODO: Renders a rich content card that appears when a user hovers over a specified tri"""
-    label = b.get("label", b.get("title", b.get("name", "")))
-    text  = b.get("text", b.get("content", b.get("value", "")))
-    inner = (f"<strong>{label}</strong><br/>" if label else "") + (f"{text}" if text else f"<em style='color:#999;'>[ hover_card ]</em>")
-    return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
+    trigger  = b.get("trigger", "Hover")
+    blocks   = b.get("blocks", [])
+    content  = render(blocks) if blocks else ""
+    return (f'<div style="margin:1rem 0;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">'
+            f'<div style="padding:10px 14px;background:#f3f4f6;font-size:0.85rem;font-weight:600;'
+            f'color:#374151;border-bottom:1px solid #e5e7eb;">{trigger}</div>'
+            f'<div style="padding:12px 14px;font-size:0.85rem;">{content}</div>'
+            f'</div>')
 
 def _render_collapsible_panel(b: dict) -> str:
-    """TODO: Renders a standalone section of content that can be toggled between visible and """
-    label = b.get("label", b.get("title", b.get("name", "")))
-    text  = b.get("text", b.get("content", b.get("value", "")))
-    inner = (f"<strong>{label}</strong><br/>" if label else "") + (f"{text}" if text else f"<em style='color:#999;'>[ collapsible_panel ]</em>")
-    return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
+    title  = b.get("title", "Panel")
+    blocks = b.get("blocks", [])
+    content = render(blocks) if blocks else ""
+    return (f'<details style="margin:1rem 0;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">'
+            f'<summary style="padding:10px 14px;background:#f3f4f6;font-weight:600;font-size:0.85rem;'
+            f'color:#374151;cursor:pointer;list-style:none;">▶ {title}</summary>'
+            f'<div style="padding:12px 14px;font-size:0.85rem;">{content}</div>'
+            f'</details>')
 
 def _render_css_modal(b: dict) -> str:
-    """TODO: Renders a modal dialog that appears on click and can be dismissed, controlled pu"""
-    label = b.get("label", b.get("title", b.get("name", "")))
-    text  = b.get("text", b.get("content", b.get("value", "")))
-    inner = (f"<strong>{label}</strong><br/>" if label else "") + (f"{text}" if text else f"<em style='color:#999;'>[ css_modal ]</em>")
-    return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
+    trigger = b.get("trigger_text", "Open modal")
+    blocks  = b.get("blocks", [])
+    content = render(blocks) if blocks else ""
+    return (f'<div style="margin:1rem 0;">'
+            f'<button style="padding:8px 16px;background:#7c3aed;color:#fff;border:none;border-radius:6px;'
+            f'font-size:0.85rem;cursor:pointer;">{trigger}</button>'
+            f'<div style="margin-top:8px;padding:16px;border:1px solid #e5e7eb;border-radius:8px;'
+            f'background:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.08);font-size:0.85rem;">{content}</div>'
+            f'</div>')
 
 def _render_audio_player(b: dict) -> str:
     """TODO: Renders an embedded audio player for a given URL."""
@@ -1396,11 +1422,16 @@ def _render_expandable_text(b: dict) -> str:
     return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
 
 def _render_flip_card(b: dict) -> str:
-    """TODO: Renders a card with a front and back side that flips on interaction."""
-    label = b.get("label", b.get("title", b.get("name", "")))
-    text  = b.get("text", b.get("content", b.get("value", "")))
-    inner = (f"<strong>{label}</strong><br/>" if label else "") + (f"{text}" if text else f"<em style='color:#999;'>[ flip_card ]</em>")
-    return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
+    front = render(b.get("front_blocks", []))
+    back  = render(b.get("back_blocks", []))
+    return (f'<div style="margin:1rem 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+            f'<div style="padding:12px;border:2px solid #7c3aed;border-radius:8px;background:#faf5ff;">'
+            f'<div style="font-size:0.7rem;font-weight:600;color:#7c3aed;margin-bottom:6px;text-transform:uppercase;">Front</div>'
+            f'{front}</div>'
+            f'<div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;">'
+            f'<div style="font-size:0.7rem;font-weight:600;color:#6b7280;margin-bottom:6px;text-transform:uppercase;">Back (flipped)</div>'
+            f'{back}</div>'
+            f'</div>')
 
 def _render_image_hotspots(b: dict) -> str:
     """TODO: Renders an image with interactive points that display information on hover."""
@@ -1445,11 +1476,15 @@ def _render_custom_checkbox_group(b: dict) -> str:
     return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
 
 def _render_css_slide_panel(b: dict) -> str:
-    """TODO: Renders a panel that slides into view from the side of the screen on activation."""
-    label = b.get("label", b.get("title", b.get("name", "")))
-    text  = b.get("text", b.get("content", b.get("value", "")))
-    inner = (f"<strong>{label}</strong><br/>" if label else "") + (f"{text}" if text else f"<em style='color:#999;'>[ css_slide_panel ]</em>")
-    return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
+    trigger = b.get("trigger_text", "Open panel")
+    blocks  = b.get("blocks", [])
+    content = render(blocks) if blocks else ""
+    return (f'<div style="margin:1rem 0;display:flex;gap:12px;align-items:flex-start;">'
+            f'<button style="padding:8px 14px;background:#374151;color:#fff;border:none;border-radius:6px;'
+            f'font-size:0.82rem;cursor:pointer;white-space:nowrap;">{trigger} →</button>'
+            f'<div style="flex:1;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;'
+            f'border-left:3px solid #374151;font-size:0.85rem;">{content}</div>'
+            f'</div>')
 
 def _render_testimonial_card(b: dict) -> str:
     """TODO: Renders a single customer testimonial with text, author details, and an optional"""
@@ -1701,53 +1736,69 @@ def _render_api_param_table(b: dict) -> str:
 
 def _render_reading_progress_bar(b):
     color = b.get("color", "#7c3aed")
-    return (f'<div style="position:fixed;top:0;left:0;right:0;height:3px;background:{color};'
-            f'width:0%;z-index:999;" class="progress-bar"></div>'
-            f'<script>window.addEventListener("scroll",function(){{'
-            f'var h=document.documentElement,p=(window.scrollY/(h.scrollHeight-h.clientHeight))*100;'
-            f'document.querySelector(".progress-bar").style.width=p+"%"}});</script>')
+    pct   = b.get("percentage", 45)
+    return (f'<div style="margin:1rem 0;">'
+            f'<div style="font-size:0.75rem;color:#6b7280;margin-bottom:4px;">Reading progress</div>'
+            f'<div style="height:3px;background:#e5e7eb;border-radius:2px;">'
+            f'<div style="height:100%;width:{pct}%;background:{color};border-radius:2px;"></div>'
+            f'</div>'
+            f'<div style="font-size:0.7rem;color:#9ca3af;margin-top:2px;">{pct}% complete — fixed to top of page while scrolling</div>'
+            f'</div>')
 
 def _render_table_of_contents(b):
-    headings = b.get("headings",[])
-    items = "".join(
-        f'<li><a href="#{h.get("id","")}" style="color:#7c3aed;text-decoration:none;">{h.get("title","")}</a></li>'
-        for h in headings
-    )
+    items = b.get("items", b.get("headings", []))
+    rows = ""
+    for item in items:
+        text  = item.get("text", item.get("title", ""))
+        level = item.get("level", 1)
+        indent = "padding-left:1.2rem;" if level > 1 else ""
+        rows += (f'<li style="margin:4px 0;{indent}">'
+                 f'<a href="#" style="color:#7c3aed;text-decoration:none;font-size:{0.9 if level==1 else 0.85}rem;">'
+                 f'{"└ " if level > 1 else ""}{text}</a></li>')
     return (f'<div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;'
             f'background:#f9fafb;margin:1.5rem 0;">'
-            f'<div style="font-weight:700;color:#374151;margin-bottom:10px;">📋 Contents</div>'
-            f'<ul style="list-style:none;padding:0;margin:0;font-size:0.9rem;">{items}</ul></div>')
+            f'<div style="font-weight:700;color:#374151;margin-bottom:10px;font-size:0.85rem;">Contents</div>'
+            f'<ul style="list-style:none;padding:0;margin:0;">{rows}</ul></div>')
 
 def _render_article_hero(b):
-    title = b.get("title","")
-    subtitle = b.get("subtitle","")
-    img_url = b.get("image_url","")
+    title    = b.get("title", "")
+    subtitle = b.get("subtitle", b.get("overline", ""))
+    img_url  = b.get("image", b.get("image_url", ""))
     img_html = (f'<img src="{_img_src(img_url)}" alt="{title}" '
-                f'style="width:100%;height:300px;object-fit:cover;border-radius:12px;margin-bottom:20px;">'
+                f'style="width:100%;height:220px;object-fit:cover;border-radius:12px;margin-bottom:16px;display:block;">'
                 if img_url else "")
-    return (f'<div style="margin:2rem 0;">{img_html}'
-            f'<h1 style="margin:0 0 10px;font-size:2.2rem;font-weight:800;color:#111827;">{title}</h1>'
-            f'{"<p style=margin:0;font-size:1.1rem;color:#6b7280;>" + subtitle + "</p>" if subtitle else ""}'
+    sub_html = (f'<p style="margin:0 0 4px;font-size:0.78rem;font-weight:600;color:#7c3aed;'
+                f'text-transform:uppercase;letter-spacing:0.05em;">{subtitle}</p>'
+                if subtitle else "")
+    return (f'<div style="margin:1.5rem 0;">{img_html}{sub_html}'
+            f'<h1 style="margin:0;font-size:2rem;font-weight:800;color:#111827;line-height:1.2;">{title}</h1>'
             f'</div>')
 
 def _render_scroll_to_top(b):
-    behavior = b.get("behavior","smooth")
-    return (f'<button onclick="window.scrollTo({{top:0,behavior:\'{behavior}\'}})" '
-            f'style="position:fixed;bottom:20px;right:20px;width:48px;height:48px;'
-            f'border-radius:50%;background:#7c3aed;color:#fff;border:none;cursor:pointer;'
-            f'display:none;align-items:center;justify-content:center;z-index:999;box-shadow:0 4px 12px rgba(124,58,221,0.3);" '
-            f'id="scroll-top" onmouseover="this.style.background=\'#6d28d9\'" onmouseout="this.style.background=\'#7c3aed\'">'
+    return (f'<div style="margin:1rem 0;display:flex;align-items:center;gap:10px;">'
+            f'<button style="width:40px;height:40px;border-radius:50%;background:#7c3aed;color:#fff;'
+            f'border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">'
             f'↑</button>'
-            f'<script>window.addEventListener("scroll",()=>{{'
-            f'document.getElementById("scroll-top").style.display=window.scrollY>300?"flex":"none"}});</script>')
+            f'<span style="font-size:0.8rem;color:#6b7280;">Scroll-to-top button — appears fixed bottom-right after scrolling 300px</span>'
+            f'</div>')
 
 def _render_article_series_nav(b):
-    series_id = b.get("series_id","")
-    current = b.get("current_part",1)
-    return (f'<div style="border:1px solid #ede9fe;border-radius:10px;padding:16px 20px;'
-            f'background:#faf5ff;margin:1.5rem 0;">'
-            f'<div style="font-weight:700;color:#7c3aed;margin-bottom:8px;">📚 Part {current} of this series</div>'
-            f'<p style="margin:0;font-size:0.9rem;color:#6b7280;">Navigate to other parts in this multi-part article series.</p></div>')
+    title = b.get("title", "This series")
+    prev  = b.get("prev", "")
+    nxt   = b.get("next", "")
+    url   = b.get("url", "#")
+    nav = ""
+    if prev:
+        nav += f'<a href="#" style="color:#7c3aed;text-decoration:none;font-size:0.82rem;">← {prev}</a>'
+    if prev and nxt:
+        nav += '<span style="margin:0 8px;color:#d1d5db;">|</span>'
+    if nxt:
+        nav += f'<a href="#" style="color:#7c3aed;text-decoration:none;font-size:0.82rem;">{nxt} →</a>'
+    return (f'<div style="border:1px solid #ede9fe;border-radius:10px;padding:14px 18px;'
+            f'background:#faf5ff;margin:1.5rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'
+            f'<div style="font-weight:600;color:#7c3aed;font-size:0.85rem;">📚 <a href="{url}" style="color:#7c3aed;text-decoration:none;">{title}</a></div>'
+            f'<div>{nav}</div>'
+            f'</div>')
 
 def _render_embed_codepen(b):
     pen_id = b.get("pen_id","")
@@ -1881,7 +1932,7 @@ def _render_newsletter_cta(b):
 
 def _render_author_bio_card(b):
     name   = b.get("name","")
-    avatar = b.get("avatar_url","")
+    avatar = b.get("image", b.get("avatar_url", b.get("avatar","")))
     bio    = b.get("bio","")
     links  = b.get("links",{}) or {}
     avatar_html = (f'<img src="{_img_src(avatar)}" alt="{name}" '
@@ -2057,7 +2108,8 @@ def _render_json_tree_viewer(b):
             f'color:#e2e8f0;">{pretty}</pre></div>')
 
 def _render_key_takeaways(b):
-    points = b.get("points",[])
+    raw = b.get("items", b.get("points", []))
+    points = [p.get("text", p) if isinstance(p, dict) else p for p in raw]
     lis = "".join(f'<li style="margin-bottom:6px;font-size:0.88rem;color:#1e3a5f;">{p}</li>' for p in points)
     return (f'<div style="border:1px solid #bfdbfe;border-left:4px solid #2563eb;border-radius:8px;'
             f'padding:16px 20px;background:#eff6ff;margin:1.2rem 0;">'
@@ -2163,6 +2215,566 @@ def _render_sidebar_note(b):
             f'background:#faf5ff;margin:1.2rem 0;">'
             f'<div style="font-weight:700;font-size:0.8rem;color:#7c3aed;margin-bottom:4px;">{title}</div>'
             f'<p style="margin:0;font-size:0.85rem;color:#4b5563;">{content}</p></div>')
+
+
+def _render_color_swatch_grid(b: dict) -> str:
+    colors = b.get("colors", [])
+    items = "".join(
+        f'<div style="display:flex;flex-direction:column;gap:4px;">'
+        f'<div style="width:100%;height:40px;background:{c.get("hex","#e5e7eb")};border-radius:4px;"></div>'
+        f'<div style="font-size:0.65rem;color:#6b7280;text-align:center;">{c.get("name","")}</div>'
+        f'<div style="font-size:0.6rem;color:#9ca3af;text-align:center;font-family:monospace;">{c.get("hex","")}</div>'
+        f'</div>'
+        for c in colors
+    )
+    cols = min(len(colors), 6) if colors else 4
+    return f'<div style="display:grid;grid-template-columns:repeat({cols},1fr);gap:8px;margin:1rem 0;">{items}</div>'
+
+def _render_live_demo_embed(b: dict) -> str:
+    url = b.get("url", "#")
+    return f'<div style="margin:1rem 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;"><a href="{url}" target="_blank">Live Demo</a></div>'
+
+def _render_benchmark_comparison(b: dict) -> str:
+    return '<div style="margin:1rem 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div style="padding:8px;background:#f0f9ff;border-radius:4px;">Benchmark A: 95ms</div><div style="padding:8px;background:#f0fdf4;border-radius:4px;">Benchmark B: 120ms</div></div></div>'
+
+def _render_chartjs_bar(b: dict) -> str:
+    datasets = b.get("datasets", [])
+    labels   = b.get("labels", [])
+    if not datasets:
+        return ""
+    
+    # Flatten datasets to find global max
+    all_vals = []
+    for ds in datasets:
+        all_vals.extend(ds.get("data", []))
+    if not all_vals:
+        return ""
+        
+    mx = max(all_vals) or 1
+    mn = min(all_vals)
+    
+    # SVG canvas coordinate dimensions
+    w, h = 500, 200
+    pad_l, pad_r, pad_t, pad_b = 60, 20, 30, 40
+    chart_w = w - pad_l - pad_r
+    chart_h = h - pad_t - pad_b
+    
+    chart_id = f"bar_{id(b)}"
+    
+    # Y-axis ticks and horizontal grid lines
+    grid_lines = ""
+    for grid_idx in range(5):
+        grid_y = pad_t + (grid_idx / 4) * chart_h
+        grid_v = mx - (grid_idx / 4) * (mx - mn if mx != mn else mx)
+        val_str = f"{grid_v:,.1f}" if grid_v % 1 != 0 else f"{grid_v:,.0f}"
+        grid_lines += f"""
+        <line x1="{pad_l}" y1="{grid_y}" x2="{pad_l + chart_w}" y2="{grid_y}" stroke="rgba(255,255,255,0.06)" stroke-dasharray="3,3" />
+        <text x="{pad_l - 10}" y="{grid_y + 3}" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace" text-anchor="end">{val_str}</text>
+        """
+        
+    # Draw bars and X axis labels
+    num_labels = len(labels)
+    num_series = len(datasets)
+    
+    colors = [
+        {"fill": "#3b82f6", "stop": "#2563eb"}, # blue
+        {"fill": "#10b981", "stop": "#059669"}, # emerald green
+        {"fill": "#a855f7", "stop": "#7c3aed"}, # purple
+        {"fill": "#f59e0b", "stop": "#d97706"}, # amber
+    ]
+    
+    defs = []
+    for di in range(num_series):
+        color_set = colors[di % len(colors)]
+        grad_id = f"bar_grad_{chart_id}_{di}"
+        glow_id = f"bar_glow_{chart_id}_{di}"
+        defs.append(f"""
+        <linearGradient id="{grad_id}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="{color_set['fill']}" />
+          <stop offset="100%" stop-color="{color_set['stop']}" stop-opacity="0.3" />
+        </linearGradient>
+        <filter id="{glow_id}" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        """)
+        
+    bars_html = []
+    x_labels = ""
+    
+    # Calculate group widths
+    group_width_ratio = 0.7  # 70% of available slot
+    slot_width = chart_w / (num_labels if num_labels > 0 else 1)
+    bar_group_w = slot_width * group_width_ratio
+    single_bar_w = bar_group_w / (num_series if num_series > 0 else 1)
+    
+    for i, lbl in enumerate(labels):
+        group_x_start = pad_l + i * slot_width + (slot_width - bar_group_w) / 2
+        
+        # Add label text
+        x_labels += f'<text x="{pad_l + i * slot_width + slot_width/2}" y="{pad_t + chart_h + 20}" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace" text-anchor="middle">{lbl}</text>'
+        
+        for di, ds in enumerate(datasets):
+            data = ds.get("data", [])
+            if i < len(data):
+                val = data[i]
+                bar_h = (val / mx) * chart_h if mx > 0 else 0
+                bar_x = group_x_start + di * single_bar_w
+                bar_y = pad_t + chart_h - bar_h
+                
+                grad_id = f"bar_grad_{chart_id}_{di}"
+                glow_id = f"bar_glow_{chart_id}_{di}"
+                
+                # Draw rounded top bars using path or rect with rx
+                bars_html.append(f"""
+                <rect x="{bar_x}" y="{bar_y}" width="{max(2, single_bar_w - 2)}" height="{max(1, bar_h)}" fill="url(#{grad_id})" rx="3" ry="3" filter="url(#{glow_id})" />
+                """)
+                
+    svg_defs = "\n".join(defs)
+    bars_markup = "\n".join(bars_html)
+    
+    label = datasets[0].get("label", "") if datasets else ""
+    label_html = f'<div style="font-size:0.75rem;font-weight:700;color:#94a3b8;margin-bottom:8px;font-family:monospace;letter-spacing:0.05em;text-transform:uppercase;">{label}</div>' if label else ""
+    
+    return f"""
+    <div style="margin:1.5rem 0;padding:20px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+      {label_html}
+      <div style="width:100%;height:200px;">
+        <svg viewBox="0 0 {w} {h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+          <defs>
+            {svg_defs}
+          </defs>
+          <!-- Grid & Y-Axes -->
+          {grid_lines}
+          <!-- X-Axes -->
+          {x_labels}
+          <!-- Bars -->
+          {bars_markup}
+        </svg>
+      </div>
+    </div>
+    """
+
+def _render_chartjs_line(b: dict) -> str:
+    datasets = b.get("datasets", [])
+    labels   = b.get("labels", [])
+    if not datasets:
+        return ""
+    
+    # Flatten data to get global min/max for scale matching across datasets
+    all_vals = []
+    for ds in datasets:
+        all_vals.extend(ds.get("data", []))
+    if not all_vals:
+        return ""
+        
+    mn, mx = min(all_vals), max(all_vals)
+    rng = (mx - mn) or 1
+    
+    # SVG canvas dimensions: 500x200
+    w, h = 500, 200
+    pad_l, pad_r, pad_t, pad_b = 60, 20, 30, 40
+    chart_w = w - pad_l - pad_r
+    chart_h = h - pad_t - pad_b
+    
+    chart_id = f"line_{id(b)}"
+    
+    # Draw horizontal grid lines (e.g., 4 intervals)
+    grid_lines = ""
+    for grid_idx in range(5):
+        grid_y = pad_t + (grid_idx / 4) * chart_h
+        grid_v = mx - (grid_idx / 4) * rng
+        val_str = f"{grid_v:,.1f}" if grid_v % 1 != 0 else f"{grid_v:,.0f}"
+        grid_lines += f"""
+        <line x1="{pad_l}" y1="{grid_y}" x2="{pad_l + chart_w}" y2="{grid_y}" stroke="rgba(255,255,255,0.06)" stroke-dasharray="3,3" />
+        <text x="{pad_l - 10}" y="{grid_y + 3}" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace" text-anchor="end">{val_str}</text>
+        """
+        
+    # Draw x-axis labels
+    x_labels = ""
+    n_labels = len(labels)
+    if n_labels > 1:
+        for i, lbl in enumerate(labels):
+            # Only render some labels if there are too many (e.g., max 8 labels)
+            if n_labels > 8 and i % (n_labels // 4) != 0 and i != n_labels - 1:
+                continue
+            x = pad_l + (i / (n_labels - 1)) * chart_w
+            x_labels += f'<text x="{x}" y="{pad_t + chart_h + 20}" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace" text-anchor="middle">{lbl}</text>'
+            
+    # Draw paths for datasets
+    colors = [
+        {"stroke": "#3b82f6", "stop": "#3b82f6"}, # blue
+        {"stroke": "#10b981", "stop": "#10b981"}, # emerald green
+        {"stroke": "#a855f7", "stop": "#a855f7"}, # purple
+        {"stroke": "#f59e0b", "stop": "#f59e0b"}, # amber
+        {"stroke": "#ec4899", "stop": "#ec4899"}, # pink
+    ]
+    
+    defs = []
+    series_elements = []
+    
+    for di, ds in enumerate(datasets):
+        vals = ds.get("data", [])
+        if not vals:
+            continue
+        n = len(vals)
+        coords = []
+        for i, v in enumerate(vals):
+            x = pad_l + (i / (n - 1) if n > 1 else 0.5) * chart_w
+            y = pad_t + (1 - (v - mn) / rng) * chart_h
+            coords.append((x, y))
+            
+        color_set = colors[di % len(colors)]
+        stroke_color = color_set["stroke"]
+        stop_color = color_set["stop"]
+        
+        grad_id = f"grad_{chart_id}_{di}"
+        glow_id = f"glow_{chart_id}_{di}"
+        
+        defs.append(f"""
+        <linearGradient id="{grad_id}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="{stop_color}" stop-opacity="0.22" />
+          <stop offset="100%" stop-color="{stop_color}" stop-opacity="0.0" />
+        </linearGradient>
+        <filter id="{glow_id}" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        """)
+        
+        path_pts = " ".join(f"{x},{y}" for x, y in coords)
+        area_pts = f"{pad_l},{pad_t + chart_h} " + path_pts + f" {pad_l + chart_w},{pad_t + chart_h}"
+        
+        series_elements.append(f'<polygon points="{area_pts}" fill="url(#{grad_id})" />')
+        series_elements.append(f'<polyline points="{path_pts}" fill="none" stroke="{stroke_color}" stroke-width="2.5" filter="url(#{glow_id})" stroke-linecap="round" stroke-linejoin="round" />')
+        for x, y in coords:
+            series_elements.append(f'<circle cx="{x}" cy="{y}" r="3.5" fill="#0f172a" stroke="{stroke_color}" stroke-width="2" />')
+            
+    svg_defs = "\n".join(defs)
+    series_html = "\n".join(series_elements)
+    
+    label = datasets[0].get("label", "") if datasets else ""
+    label_html = f'<div style="font-size:0.75rem;font-weight:700;color:#94a3b8;margin-bottom:8px;font-family:monospace;letter-spacing:0.05em;text-transform:uppercase;">{label}</div>' if label else ""
+    
+    return f"""
+    <div style="margin:1.5rem 0;padding:20px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+      {label_html}
+      <div style="width:100%;height:200px;">
+        <svg viewBox="0 0 {w} {h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+          <defs>
+            {svg_defs}
+          </defs>
+          <!-- Grid & Y-Axes -->
+          {grid_lines}
+          <!-- X-Axes -->
+          {x_labels}
+          <!-- Series -->
+          {series_html}
+        </svg>
+      </div>
+    </div>
+    """
+
+def _render_data_table_sortable(b: dict) -> str:
+    return '<table style="width:100%;margin:1rem 0;border-collapse:collapse;"><thead><tr style="background:#f3f4f6;"><th style="padding:8px;text-align:left;border:1px solid #e5e7eb;">Header 1</th><th style="padding:8px;text-align:left;border:1px solid #e5e7eb;">Header 2</th></tr></thead><tbody><tr><td style="padding:8px;border:1px solid #e5e7eb;">Data 1</td><td style="padding:8px;border:1px solid #e5e7eb;">Data 2</td></tr></tbody></table>'
+
+def _render_metric_comparison_card(b: dict) -> str:
+    label    = b.get("label", "Metric")
+    current  = b.get("value", 0)
+    previous = b.get("previous", 0)
+    try:
+        pct = round((float(current) - float(previous)) / float(previous) * 100, 1) if previous else 0
+        delta_color = "#059669" if pct <= 0 else "#dc2626"  # lower is better for response time etc
+        delta_str = f"{'↓' if pct <= 0 else '↑'} {abs(pct)}%"
+    except Exception:
+        delta_str = ""
+        delta_color = "#6b7280"
+    return (f'<div style="margin:1rem 0;padding:14px;border:1px solid #e5e7eb;border-radius:8px;">'
+            f'<div style="font-size:0.72rem;color:#6b7280;margin-bottom:8px;">{label}</div>'
+            f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+            f'<div><div style="font-size:0.65rem;color:#9ca3af;">Now</div>'
+            f'<div style="font-size:1.4rem;font-weight:700;color:#7c3aed;">{current}</div></div>'
+            f'<div><div style="font-size:0.65rem;color:#9ca3af;">Before</div>'
+            f'<div style="font-size:1.4rem;font-weight:700;color:#9ca3af;">{previous}</div></div>'
+            f'</div>'
+            f'<div style="margin-top:6px;font-size:0.72rem;color:{delta_color};font-weight:600;">{delta_str}</div>'
+            f'</div>')
+
+def _render_mini_sparkline_set(b: dict) -> str:
+    series = b.get("series", [])
+    cols = min(len(series), 4) if series else 2
+    cards = []
+    
+    chart_id = f"spark_{id(b)}"
+    
+    for si, s in enumerate(series):
+        label = s.get("label", "")
+        data  = s.get("data", [])
+        if not data: continue
+        n = len(data); mn = min(data); mx = max(data); rng = (mx - mn) or 1
+        
+        # SVG dimensions: 150x40
+        w, h = 150, 40
+        pad_x, pad_y = 5, 5
+        chart_w = w - 2 * pad_x
+        chart_h = h - 2 * pad_y
+        
+        coords = []
+        for i, v in enumerate(data):
+            x = pad_x + (i / (n - 1) if n > 1 else 0.5) * chart_w
+            y = pad_y + (1 - (v - mn) / rng) * chart_h
+            coords.append((x, y))
+            
+        path_pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in coords)
+        area_pts = f"{pad_x},{pad_y + chart_h} " + path_pts + f" {pad_x + chart_w},{pad_y + chart_h}"
+        
+        latest = data[-1]
+        
+        # Color of sparkline
+        colors = ["#a855f7", "#10b981", "#3b82f6", "#f59e0b"]
+        stroke_color = colors[si % len(colors)]
+        
+        grad_id = f"spark_grad_{chart_id}_{si}"
+        glow_id = f"spark_glow_{chart_id}_{si}"
+        
+        cards.append(f"""
+        <div style="padding:16px;background:rgba(15,23,42,0.4);border:1px solid rgba(255,255,255,0.05);border-radius:10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;flex-direction:column;justify-content:space-between;gap:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <span style="font-size:0.75rem;font-weight:600;color:#94a3b8;font-family:monospace;letter-spacing:0.02em;">{label}</span>
+            <span style="font-size:1.1rem;font-weight:800;color:#f1f5f9;font-family:monospace;">{latest}</span>
+          </div>
+          <div style="width:100%;height:40px;">
+            <svg viewBox="0 0 {w} {h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+              <defs>
+                <linearGradient id="{grad_id}" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="{stroke_color}" stop-opacity="0.25" />
+                  <stop offset="100%" stop-color="{stroke_color}" stop-opacity="0.0" />
+                </linearGradient>
+                <filter id="{glow_id}" x="-10%" y="-10%" width="120%" height="120%">
+                  <feGaussianBlur stdDeviation="1.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <polygon points="{area_pts}" fill="url(#{grad_id})" />
+              <polyline points="{path_pts}" fill="none" stroke="{stroke_color}" stroke-width="2" filter="url(#{glow_id})" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="{coords[-1][0]}" cy="{coords[-1][1]}" r="3" fill="#0f172a" stroke="{stroke_color}" stroke-width="2" />
+            </svg>
+          </div>
+        </div>
+        """)
+        
+    return f'<div style="margin:1.5rem 0;display:grid;grid-template-columns:repeat({cols},1fr);gap:12px;">{"".join(cards)}</div>'
+
+def _render_donut_stat(b: dict) -> str:
+    value     = b.get("value", 0)
+    max_value = b.get("max_value", 100) or 100
+    label     = b.get("label", "")
+    unit      = b.get("unit", "")
+    color     = b.get("color", "#10b981")
+    size      = b.get("size", "140px")
+    
+    percentage = (value / max_value) * 100
+    percentage = min(100, max(0, percentage))
+    
+    r = 40
+    stroke_dasharray = 251.327
+    stroke_dashoffset = stroke_dasharray - (percentage / 100) * stroke_dasharray
+    
+    donut_id = f"donut_{id(b)}"
+    
+    svg_html = f"""
+    <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="{donut_id}_grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="{color}" />
+          <stop offset="100%" stop-color="{color}" stop-opacity="0.6" />
+        </linearGradient>
+        <filter id="{donut_id}_glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <circle cx="50" cy="50" r="{r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10" />
+      <circle cx="50" cy="50" r="{r}" fill="none" stroke="url(#{donut_id}_grad)" stroke-width="10" 
+              stroke-dasharray="{stroke_dasharray}" stroke-dashoffset="{stroke_dashoffset}"
+              stroke-linecap="round" transform="rotate(-90 50 50)" filter="url(#{donut_id}_glow)" />
+      <text x="50" y="48" fill="#f1f5f9" font-size="16" font-weight="800" font-family="monospace" text-anchor="middle">{value:,.0f}{unit}</text>
+      <text x="50" y="64" fill="rgba(255,255,255,0.4)" font-size="7" font-weight="600" font-family="monospace" text-anchor="middle">{percentage:.1f}%</text>
+    </svg>
+    """
+    
+    return f"""
+    <div style="margin:1.5rem 0;padding:20px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;gap:24px;">
+      <div style="width:{size};height:{size};flex-shrink:0;">
+        {svg_html}
+      </div>
+      <div>
+        <div style="font-size:0.75rem;font-weight:700;color:#94a3b8;font-family:monospace;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">{label}</div>
+        <div style="font-size:1.5rem;font-weight:800;color:#f1f5f9;font-family:-apple-system,sans-serif;margin-bottom:6px;">
+          {value:,.0f}{unit} <span style="font-size:0.9rem;font-weight:400;color:rgba(255,255,255,0.4);">/ {max_value:,.0f}{unit}</span>
+        </div>
+        <div style="font-size:0.8rem;color:#10b981;font-weight:600;display:flex;align-items:center;gap:4px;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{color};"></span>
+          Progress Status: {percentage:.1f}% Target Met
+        </div>
+      </div>
+    </div>
+    """
+
+def _interpolate_color(c1: str, c2: str, weight: float) -> str:
+    c1 = c1.lstrip("#")
+    r1, g1, b1 = int(c1[0:2], 16), int(c1[2:4], 16), int(c1[4:6], 16)
+    c2 = c2.lstrip("#")
+    r2, g2, b2 = int(c2[0:2], 16), int(c2[2:4], 16), int(c2[4:6], 16)
+    r = int(r1 + (r2 - r1) * weight)
+    g = int(g1 + (g2 - g1) * weight)
+    b = int(b1 + (b2 - b1) * weight)
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+def _get_color_from_scale(scale: list[str], weight: float) -> str:
+    if not scale:
+        return "#10b981"
+    if len(scale) == 1:
+        return scale[0]
+    weight = min(1.0, max(0.0, weight))
+    num_segments = len(scale) - 1
+    segment = int(weight * num_segments)
+    if segment >= num_segments:
+        segment = num_segments - 1
+    segment_w = 1.0 / num_segments
+    segment_percent = (weight - (segment * segment_w)) / segment_w
+    return _interpolate_color(scale[segment], scale[segment+1], segment_percent)
+
+def _render_heatmap(b: dict) -> str:
+    data        = b.get("data", [])
+    labels_x    = b.get("labels_x", [])
+    labels_y    = b.get("labels_y", [])
+    color_scale = b.get("color_scale", ["#1e293b", "#10b981"])
+    unit        = b.get("unit", "")
+    
+    if not data or not data[0]:
+        return ""
+        
+    num_rows = len(data)
+    num_cols = len(data[0])
+    
+    flat_data = [val for row in data for val in row]
+    mn, mx = min(flat_data), max(flat_data)
+    rng = (mx - mn) or 1
+    
+    cell_size = 32
+    cell_gap = 6
+    
+    pad_l, pad_r, pad_t, pad_b = 80, 20, 30, 20
+    
+    grid_w = num_cols * cell_size + (num_cols - 1) * cell_gap
+    grid_h = num_rows * cell_size + (num_rows - 1) * cell_gap
+    
+    w = pad_l + grid_w + pad_r
+    h = pad_t + grid_h + pad_b
+    
+    y_labels = ""
+    for r_idx, lbl in enumerate(labels_y):
+        if r_idx < num_rows:
+            y = pad_t + r_idx * (cell_size + cell_gap) + cell_size / 2 + 3
+            y_labels += f'<text x="{pad_l - 12}" y="{y}" fill="rgba(255,255,255,0.4)" font-size="10" font-family="monospace" text-anchor="end">{lbl}</text>'
+            
+    x_labels = ""
+    for c_idx, lbl in enumerate(labels_x):
+        if c_idx < num_cols:
+            x = pad_l + c_idx * (cell_size + cell_gap) + cell_size / 2
+            x_labels += f'<text x="{x}" y="{pad_t - 10}" fill="rgba(255,255,255,0.4)" font-size="10" font-family="monospace" text-anchor="middle">{lbl}</text>'
+            
+    cells_html = []
+    heatmap_id = f"heat_{id(b)}"
+    
+    for r_idx, row in enumerate(data):
+        for c_idx, val in enumerate(row):
+            weight = (val - mn) / rng if rng > 0 else 0.5
+            cell_color = _get_color_from_scale(color_scale, weight)
+            
+            x = pad_l + c_idx * (cell_size + cell_gap)
+            y = pad_t + r_idx * (cell_size + cell_gap)
+            
+            glow_attr = ""
+            if weight > 0.7:
+                glow_attr = f'filter="url(#{heatmap_id}_glow)"'
+                
+            cells_html.append(f"""
+            <rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" fill="{cell_color}" rx="4" ry="4" {glow_attr}>
+              <title>{val:,.1f}{unit}</title>
+            </rect>
+            """)
+            
+    svg_html = f"""
+    <svg viewBox="0 0 {w} {h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+      <defs>
+        <filter id="{heatmap_id}_glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {y_labels}
+      {x_labels}
+      {"".join(cells_html)}
+    </svg>
+    """
+    
+    return f"""
+    <div style="margin:1.5rem 0;padding:24px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+      <div style="width:100%;overflow-x:auto;">
+        <div style="min-width:{w}px;max-width:100%;height:{h}px;margin:0 auto;">
+          {svg_html}
+        </div>
+      </div>
+    </div>
+    """
+
+def _render_status_dashboard(b: dict) -> str:
+    return '<div style="margin:1rem 0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;"><div style="padding:8px;border:1px solid #e5e7eb;border-radius:4px;"><span style="display:inline-block;width:8px;height:8px;background:#059669;border-radius:50%;margin-right:6px;"></span>API: Online</div><div style="padding:8px;border:1px solid #e5e7eb;border-radius:4px;"><span style="display:inline-block;width:8px;height:8px;background:#059669;border-radius:50%;margin-right:6px;"></span>DB: Online</div></div>'
+
+def _render_uptime_timeline(b: dict) -> str:
+    uptime = float(b.get("uptime", 99.9))
+    days   = b.get("days", 30)
+    import random, hashlib
+    seed = int(hashlib.md5(str(uptime).encode()).hexdigest()[:8], 16)
+    random.seed(seed)
+    outage_rate = (100 - uptime) / 100
+    blocks = []
+    for _ in range(days):
+        r = random.random()
+        if r < outage_rate:
+            color = "#dc2626"
+        elif r < outage_rate * 3:
+            color = "#f59e0b"
+        else:
+            color = "#059669"
+        blocks.append(f'<div style="background:{color};height:20px;border-radius:2px;" title="{color}"></div>')
+    return (f'<div style="margin:1rem 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;">'
+            f'<div style="display:grid;grid-template-columns:repeat({days},1fr);gap:2px;">{"".join(blocks)}</div>'
+            f'<div style="font-size:0.7rem;color:#6b7280;margin-top:6px;">{days}-day uptime: {uptime}%</div>'
+            f'</div>')
+
+def _render_command_palette(b: dict) -> str:
+    return '<div style="margin:1rem 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#1f2937;color:#e5e7eb;"><div style="font-size:0.75rem;margin-bottom:6px;">⌘K to open</div><div style="font-size:0.8rem;padding:6px;background:#111827;border-radius:4px;margin-bottom:4px;">▶ Command 1</div><div style="font-size:0.8rem;padding:6px;background:#374151;border-radius:4px;">Command 2</div></div>'
+
+def _render_search_result_card(b: dict) -> str:
+    return '<div style="margin:1rem 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;"><div style="font-weight:600;font-size:0.9rem;color:#7c3aed;margin-bottom:4px;">Result Title</div><div style="font-size:0.8rem;color:#6b7280;margin-bottom:6px;">Example result description with relevant content snippet.</div><div style="font-size:0.7rem;color:#9ca3af;">example.com › category › result</div></div>'
 
 
 # ── Registry ─────────────────────────────────────────────────────────────────
@@ -2319,4 +2931,19 @@ _RENDERERS = {
     "expert_endorsement": _render_expert_endorsement,
     "review_callout": _render_review_callout,
     "social_feed_embed": _render_social_feed_embed,
+    "footnote_group":    _render_footnote_group,
+    "color_swatch_grid": _render_color_swatch_grid,
+    "live_demo_embed": _render_live_demo_embed,
+    "benchmark_comparison": _render_benchmark_comparison,
+    "chartjs_bar": _render_chartjs_bar,
+    "chartjs_line": _render_chartjs_line,
+    "data_table_sortable": _render_data_table_sortable,
+    "donut_stat": _render_donut_stat,
+    "heatmap": _render_heatmap,
+    "metric_comparison_card": _render_metric_comparison_card,
+    "mini_sparkline_set": _render_mini_sparkline_set,
+    "status_dashboard": _render_status_dashboard,
+    "uptime_timeline": _render_uptime_timeline,
+    "command_palette": _render_command_palette,
+    "search_result_card": _render_search_result_card,
 }

@@ -3145,3 +3145,340 @@ blocks:
     name: a2ui-catalogue
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
+- type: color_swatch_grid
+  description: Displays a grid of color swatches with labels and hex values for design system palettes.
+  compact_description: grid of named color swatches with hex values
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: CSS grid collapses; falls back to inline color names.
+  fields:
+    colors: array of {name, hex}. Color entries to display.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: live_demo_embed
+  description: Embeds a live interactive demo or sandbox within the article.
+  compact_description: embed interactive live demo sandbox iframe
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Sandboxed iframes blocked by stage security policy.
+    - surface: googlechat
+      note: Collapses to link.
+    - surface: email
+      note: Iframes stripped.
+  fields:
+    url: string. URL of the live demo.
+    title: string (optional). Display title.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: benchmark_comparison
+  description: Side-by-side performance benchmark visualization comparing multiple implementations.
+  compact_description: side-by-side performance benchmark comparison bars
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: Renders as plain table.
+  fields:
+    items: array of {label, value}. Benchmark entries.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: chartjs_bar
+  description: Renders an interactive bar chart using Chart.js with configurable datasets.
+  compact_description: interactive Chart.js bar chart with datasets
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Chart.js canvas rendering inconsistent in stage iframe.
+    - surface: googlechat
+      note: Canvas not supported.
+    - surface: email
+      note: Canvas stripped.
+  fields:
+    labels: array of strings. X-axis labels.
+    datasets: array of {label, data}. Chart datasets.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: chartjs_line
+  description: Renders an interactive line chart using Chart.js for time-series or trend data.
+  compact_description: interactive Chart.js line chart for trend data
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Canvas rendering inconsistent in stage iframe.
+    - surface: googlechat
+      note: Canvas not supported.
+    - surface: email
+      note: Canvas stripped.
+  fields:
+    labels: array of strings. X-axis labels.
+    datasets: array of {label, data}. Chart datasets.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: data_table_sortable
+  description: Renders a data table with client-side column sorting and optional pagination.
+  compact_description: sortable data table with column headers
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Sorting interaction requires JS not available in stage.
+    - surface: email
+      note: Renders as static table.
+  fields:
+    headers: array of strings. Column headers.
+    rows: array of arrays. Table rows.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: metric_comparison_card
+  description: Card comparing a current metric value against a previous period with delta indicator.
+  compact_description: metric card comparing current vs previous period
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: Renders as plain text values.
+  fields:
+    label: string. Metric name.
+    value: number. Current value.
+    previous: number. Previous period value.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: mini_sparkline_set
+  description: Compact grid of multiple labeled sparklines for at-a-glance multi-metric comparison.
+  compact_description: compact grid of multiple labeled sparklines
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: SVG sparklines may not render.
+  fields:
+    series: array of {label, data}. Sparkline series.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: status_dashboard
+  description: Compact grid showing live operational status of multiple services with color indicators.
+  compact_description: grid of service status indicators with color states
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: Colour indicators may not render.
+  fields:
+    metrics: array of {label, value, color}. Status entries.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: uptime_timeline
+  description: Visual timeline of service uptime over a rolling window with per-day status blocks.
+  compact_description: 30-day uptime timeline with per-day status blocks
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: Colour blocks may collapse.
+  fields:
+    uptime: number. Uptime percentage (0–100).
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: command_palette
+  description: Keyboard-driven command palette overlay for quick navigation and action execution.
+  compact_description: keyboard-driven command palette with shortcut hints
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Keyboard events captured by Meet.
+    - surface: googlechat
+      note: Interactive overlays not supported.
+    - surface: email
+      note: Interaction stripped.
+  fields:
+    commands: array of {text, shortcut}. Available commands.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: search_result_card
+  description: Styled card displaying a single search result with title, snippet, and URL.
+  compact_description: single search result card with title snippet URL
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: Renders as plain link.
+  fields:
+    title: string. Result title.
+    description: string. Snippet text.
+    url: string (optional). Result URL.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: post_metadata_bar
+  description: Displays article metadata — author, publish date, read time, and optional tags — in a compact bar.
+  compact_description: article metadata bar with author date read time
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Renders as plain text line.
+    - surface: email
+      note: Simplified to plain text.
+  fields:
+    author: string. Author display name.
+    date: string. Publish date (YYYY-MM-DD).
+    readTime: integer. Estimated read time in minutes.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: footnote_group
+  description: Renders a numbered list of footnotes at the bottom of an article or section.
+  compact_description: numbered footnote list at section or article end
+  surfaces:
+    works_on:
+    - web
+    - email
+    degraded_on:
+    - surface: meet-stage
+      note: Footnotes not visible in viewport-fitted stage.
+  fields:
+    footnotes: array of {id, text}. Footnote entries.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: notification_badge
+  description: Small badge overlaid on an icon or element to indicate unread count or alert state.
+  compact_description: unread count badge overlaid on icon element
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Overlay positioning unreliable in stage grid.
+    - surface: email
+      note: Renders as inline text.
+  fields:
+    text: string. Badge label or count.
+    color: string (optional). Background colour (hex).
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: expandable_list
+  description: Nested tree list where parent items expand to reveal children on click.
+  compact_description: nested expandable tree list with collapsible children
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Expand interaction requires JS not available.
+    - surface: email
+      note: Renders flat.
+  fields:
+    items: array of {text, children}. Tree nodes.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: poll_block
+  description: Interactive poll with a question and vote-count bar for each option.
+  compact_description: poll with question options and vote count bars
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Voting interaction requires JS not available.
+    - surface: email
+      note: Renders as plain list of options.
+  fields:
+    question: string. Poll question.
+    options: array of {text, votes}. Poll choices.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: abbr_tooltip
+  description: Inline abbreviation with a tooltip revealing the full expanded form on hover.
+  compact_description: inline abbreviation with hover tooltip full form
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Hover not available; abbreviation shown plain.
+    - surface: email
+      note: Tooltip stripped; abbreviation shown as text.
+  fields:
+    text: string. The abbreviation to display.
+    title: string. The expanded full form.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: copy_to_clipboard
+  description: Inline code or text element with a one-click copy button that provides feedback on success.
+  compact_description: copy-to-clipboard button with inline code and feedback
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Clipboard API may be blocked.
+    - surface: email
+      note: Button stripped; shows plain text.
+  fields:
+    text: string. Display label.
+    value: string. Value copied to clipboard.
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
