@@ -112,39 +112,111 @@ The full **Google Meet Studio** add-on — FastAPI backend, WebSocket protocol, 
 
 ## Surface Compatibility Matrix
 
-Auto-generated from `atoms/schema.yaml`. Run `python3 tests/generate_compat_table.py` to regenerate.
+| Atom | web | meet-stage | googlechat | email | pdf | Source |
+|---|---|---|---|---|---|---|
+| `intro` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `body` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `heading` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `subheading` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `quote` | ✅ | ✅ | ⚠️ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `code` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `pipeline` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `bullet_list` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `divider` | ✅ | ✅ | ⚠️ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `youtube` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `image` | ✅ | ✅ | ⚠️ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `image_pair` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `diagram` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `repo_links` | ✅ | ✅ | ⚠️ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `closing` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `callout` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `steps` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `table` | ✅ | ✅ | ⚠️ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `tabs` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `key_value` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `before_after` | ✅ | ✅ | ❌ | ❌ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `api_reference` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `gallery` | ✅ | ⚠️ | ❌ | ❌ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `video_pair` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `carousel` | ✅ | ✅ | ❌ | ❌ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `timeline` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `annotated_code` | ✅ | ✅ | ❌ | ❌ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `stat_card` | ✅ | ✅ | ❌ | ❌ | ⚠️ | [UIverse.io community](https://uiverse.io) |
+| `progress_bar` | ✅ | ✅ | ❌ | ❌ | ⚠️ | [UIverse.io community](https://uiverse.io) |
+| `badge_group` | ✅ | ✅ | ❌ | ⚠️ | ⚠️ | [UIverse.io community](https://uiverse.io) |
+| `sparkline` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `heatmap` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `donut_stat` | ✅ | ✅ | ⚠️ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `metric_delta` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.dev) |
+| `trend_indicator` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.dev) |
+| `breadcrumb` | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | [a2ui-catalogue](https://a2ui.com) |
+| `pagination` | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | [a2ui-catalogue](https://a2ui.com) |
+| `stepper` | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | [a2ui-catalogue](https://a2ui.com) |
+| `tab_bar` | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | [a2ui-catalogue](https://a2ui.com) |
+| `anchor_list` | ✅ | ✅ | ⚠️ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.com) |
+| `faq_accordion` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com) |
+| `glossary_term` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.com) |
+| `footnote` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.com) |
+| `blockquote_with_avatar` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com) |
+| `pull_stat` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.com) |
+| `accordion_item` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `tooltip` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `hover_card` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `collapsible_panel` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `css_modal` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `audio_player` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `audio_link` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `pdf_preview` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `document_link` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `video_thumbnail` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `video_card` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `code_diff` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `code_snippet_pair` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `framed_screenshot` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `image_with_caption` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `alert_banner` | ✅ | ✅ | ⚠️ | ❌ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `toast_notification` | ✅ | ✅ | ❌ | ❌ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `loading_skeleton` | ✅ | ✅ | ❌ | ❌ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `empty_state` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `spinner` | ✅ | ✅ | ❌ | ❌ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `status_pill` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `inline_feedback_message` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `rating_stars` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `progress_circle` | ✅ | ✅ | ❌ | ❌ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `action_required_card` | ✅ | ✅ | ✅ | ⚠️ | — | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `feature_matrix` | ✅ | ✅ | ⚠️ | ❌ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `pricing_tier_card` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `pricing_tier_group` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `pros_cons_list` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `side_by_side_spec` | ✅ | ✅ | ⚠️ | ❌ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `product_spec_table` | ✅ | ✅ | ⚠️ | ❌ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `comparison_grid` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `versus_block` | ✅ | ✅ | ⚠️ | ⚠️ | — | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `rating_comparison` | ✅ | ✅ | ✅ | ✅ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `capability_checklist` | ✅ | ✅ | ⚠️ | ❌ | ✅ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `toggle_switch` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `expandable_text` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `flip_card` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `image_hotspots` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `css_dropdown_menu` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `star_rating_input` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `segmented_control` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `zoomable_image` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `custom_checkbox_group` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `css_slide_panel` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.dev) |
+| `testimonial_card` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `star_rating_display` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `avatar_group` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `contributor_list` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `customer_logo_grid` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `social_proof_banner` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `media_mention_card` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `expert_endorsement` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `review_callout` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://a2ui.com/catalogue) |
+| `social_feed_embed` | ✅ | ✅ | ❌ | ❌ | ❌ | [a2ui-catalogue](https://a2ui.com/catalogue) |
 
-| Atom | web | meet-stage | googlechat | email | pdf |
-|---|---|---|---|---|---|
-| `intro` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `body` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `heading` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `subheading` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `quote` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
-| `code` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `pipeline` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `bullet_list` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `divider` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
-| `youtube` | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `image` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
-| `image_pair` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `diagram` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `repo_links` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
-| `closing` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `callout` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `steps` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `table` | ✅ | ✅ | ⚠️ | ✅ | ✅ |
-| `tabs` | ✅ | ⚠️ | ❌ | ❌ | ❌ |
-| `key_value` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `before_after` | ✅ | ✅ | ❌ | ❌ | ⚠️ |
-| `api_reference` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `gallery` | ✅ | ⚠️ | ❌ | ❌ | ⚠️ |
-| `video_pair` | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `carousel` | ✅ | ✅ | ❌ | ❌ | ⚠️ |
-| `timeline` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
-| `annotated_code` | ✅ | ✅ | ❌ | ❌ | ⚠️ |
+✅ works fully  ⚠️ degraded — renders with caveats  ❌ incompatible — do not use
 
-✅ works fully  ⚠️ degraded — renders with caveats  ❌ incompatible — use substitute
 
 ---
 

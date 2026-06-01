@@ -7,7 +7,8 @@ No markdown conversion. No Quill. No stripping surprises.
 """
 
 from typing import List, Dict, Any
-import re
+import re, base64, urllib.request, urllib.error, json as _json
+from datetime import datetime, timezone
 
 
 _DARK_OVERRIDES = """
@@ -139,12 +140,27 @@ def _render_youtube(b: dict) -> str:
     )
 
 
+def _img_src(url: str) -> str:
+    """Fetch an image URL and return a base64 data URI, falling back to the URL on error."""
+    if not url or url.startswith("data:"):
+        return url
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            mime = resp.headers.get_content_type() or "image/png"
+            data = base64.b64encode(resp.read()).decode()
+            return f"data:{mime};base64,{data}"
+    except Exception:
+        return url
+
+
 def _render_image(b: dict) -> str:
     width = b.get("width", "100%")
     caption = f'<p style="font-size:0.8rem;opacity:0.6;margin-top:6px;text-align:center;">{b.get("caption","")}</p>' if b.get("caption") else ""
+    src = _img_src(b["url"])
     return (
         f'<div style="margin:1.2rem 0;text-align:center;">'
-        f'<img src="{b["url"]}" alt="{b.get("alt","")}" '
+        f'<img src="{src}" alt="{b.get("alt","")}" '
         f'style="width:{width};height:auto;border-radius:8px;display:block;margin:0 auto;"/>'
         f'{caption}</div>'
     )
@@ -153,9 +169,10 @@ def _render_image(b: dict) -> str:
 def _render_image_pair(b: dict) -> str:
     def cell(side):
         caption = f'<p style="font-size:0.78rem;opacity:0.6;margin-top:6px;">{side.get("caption","")}</p>' if side.get("caption") else ""
+        src = _img_src(side["url"])
         return (
             f'<td style="width:50%;padding:0 8px;vertical-align:top;text-align:center;">'
-            f'<img src="{side["url"]}" alt="{side.get("alt","")}" '
+            f'<img src="{src}" alt="{side.get("alt","")}" '
             f'style="width:100%;height:auto;border-radius:8px;display:block;"/>'
             f'{caption}</td>'
         )
@@ -174,6 +191,76 @@ def _render_diagram(b: dict) -> str:
         f'<div style="margin:1.2rem 0;text-align:center;">'
         f'<img src="{b["url"]}" alt="diagram" style="max-width:100%;height:auto;border-radius:8px;"/>'
         f'{caption}</div>'
+    )
+
+
+def _render_github_repo_card(b: dict) -> str:
+    """Fetch repo metadata from GitHub API and render a self-contained card."""
+    repo = b.get("repo", "")          # e.g. "curtiskrygier/a2ui-catalogue"
+    label = b.get("label", "")        # optional override label
+    description_override = b.get("description", "")
+
+    # Defaults for fallback
+    name = repo.split("/")[-1] if "/" in repo else repo
+    description = description_override or ""
+    stars = forks = 0
+    language = ""
+    updated = ""
+    url = f"https://github.com/{repo}" if repo else b.get("url", "#")
+
+    if repo:
+        try:
+            api_req = urllib.request.Request(
+                f"https://api.github.com/repos/{repo}",
+                headers={"User-Agent": "a2ui-renderer", "Accept": "application/vnd.github+json"}
+            )
+            with urllib.request.urlopen(api_req, timeout=8) as resp:
+                data = _json.loads(resp.read())
+                name        = data.get("name", name)
+                description = description_override or data.get("description", "")
+                stars       = data.get("stargazers_count", 0)
+                forks       = data.get("forks_count", 0)
+                language    = data.get("language", "")
+                url         = data.get("html_url", url)
+                pushed      = data.get("pushed_at", "")
+                if pushed:
+                    dt = datetime.fromisoformat(pushed.replace("Z", "+00:00"))
+                    updated = dt.strftime("Updated %b %Y")
+        except Exception:
+            pass
+
+    display_label = label or name
+    lang_html = (
+        f'<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem;color:#9aa0a6;">'
+        f'<span style="width:10px;height:10px;border-radius:50%;background:#f9ab00;display:inline-block;"></span>'
+        f'{language}</span>'
+    ) if language else ""
+    updated_html = f'<span style="font-size:0.78rem;color:#9aa0a6;">{updated}</span>' if updated else ""
+    desc_html    = f'<p style="margin:6px 0 10px;font-size:0.85rem;color:#555;line-height:1.5;">{description}</p>' if description else ""
+
+    return (
+        f'<a href="{url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;margin:0.8rem 0;">'
+        f'<div style="border:1px solid #d0d7de;border-radius:10px;padding:16px 20px;'
+        f'background:#fff;transition:box-shadow 0.15s;font-family:system-ui,sans-serif;" '
+        f'onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.1)\'" '
+        f'onmouseout="this.style.boxShadow=\'none\'">'
+        f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">'
+        f'<svg width="16" height="16" viewBox="0 0 16 16" fill="#555" style="flex-shrink:0;">'
+        f'<path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8Z"/>'
+        f'</svg>'
+        f'<span style="font-size:0.9rem;font-weight:600;color:#0969da;">{display_label}</span>'
+        f'</div>'
+        f'{desc_html}'
+        f'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">'
+        f'{lang_html}'
+        f'<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem;color:#9aa0a6;">'
+        f'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>'
+        f'{stars}</span>'
+        f'<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem;color:#9aa0a6;">'
+        f'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/></svg>'
+        f'{forks}</span>'
+        f'{updated_html}'
+        f'</div></div></a>'
     )
 
 
@@ -1435,6 +1522,649 @@ def _render_social_feed_embed(b: dict) -> str:
     return f'<div style="margin:1rem 0;padding:12px 16px;border:1px solid #e0e0e0;border-radius:8px;">{inner}</div>'
 
 
+def _render_terminal_block(b: dict) -> str:
+    shell   = b.get("shell", "bash")
+    command = b.get("command", "").replace("<", "&lt;").replace(">", "&gt;")
+    output  = b.get("output",  "").replace("<", "&lt;").replace(">", "&gt;")
+    prompt  = {"zsh": "%", "powershell": "PS>", "cmd": ">"}.get(shell, "$")
+    out_html = f'<div style="color:#9ca3af;white-space:pre-wrap;margin-top:8px;">{output}</div>' if output else ""
+    return (
+        f'<div style="background:#1e1e2e;border-radius:10px;overflow:hidden;margin:1.2rem 0;'
+        f'font-family:\'JetBrains Mono\',monospace;font-size:0.82rem;">'
+        f'<div style="background:#2a2a3e;padding:8px 14px;display:flex;align-items:center;gap:6px;">'
+        f'<span style="width:10px;height:10px;border-radius:50%;background:#ff5f56;display:inline-block;"></span>'
+        f'<span style="width:10px;height:10px;border-radius:50%;background:#ffbd2e;display:inline-block;"></span>'
+        f'<span style="width:10px;height:10px;border-radius:50%;background:#27c93f;display:inline-block;"></span>'
+        f'<span style="margin-left:8px;color:#9ca3af;font-size:0.75rem;">{shell}</span>'
+        f'</div>'
+        f'<div style="padding:14px 18px;">'
+        f'<span style="color:#a78bfa;">{prompt}</span> '
+        f'<span style="color:#e2e8f0;">{command}</span>'
+        f'{out_html}</div></div>'
+    )
+
+
+def _render_file_tree(b: dict) -> str:
+    def _node(item, depth=0):
+        indent  = "  " * depth
+        icon    = "📁 " if item.get("type") == "dir" else "📄 "
+        name    = item.get("name", "")
+        color   = "#60a5fa" if item.get("type") == "dir" else "#e2e8f0"
+        html    = f'<div style="padding:1px 0;color:{color};font-size:0.82rem;">{indent}{icon}{name}</div>'
+        for child in item.get("children", []):
+            html += _node(child, depth + 1)
+        return html
+    nodes    = b.get("nodes", [])
+    title    = b.get("title", "")
+    title_html = f'<div style="font-size:0.78rem;color:#9ca3af;margin-bottom:8px;">{title}</div>' if title else ""
+    inner    = "".join(_node(n) for n in nodes)
+    return (
+        f'<div style="background:#1e1e2e;border-radius:10px;padding:16px 20px;margin:1.2rem 0;'
+        f'font-family:\'JetBrains Mono\',monospace;">'
+        f'{title_html}{inner}</div>'
+    )
+
+
+def _render_tabbed_code(b: dict) -> str:
+    tabs = b.get("tabs", [])
+    if not tabs:
+        return ""
+    uid = abs(hash(str(tabs))) % 100000
+    labels = "".join(
+        f'<label for="tc-{uid}-{i}" style="padding:6px 14px;cursor:pointer;font-size:0.78rem;'
+        f'font-weight:600;border-bottom:2px solid {"#7c3aed" if i==0 else "transparent"};'
+        f'color:{"#7c3aed" if i==0 else "#9ca3af"};">{t.get("label", t.get("language","Tab"))}</label>'
+        for i, t in enumerate(tabs)
+    )
+    panels = "".join(
+        f'<div style="{"display:block" if i==0 else "display:none"}">'
+        f'<pre style="margin:0;padding:16px;background:#1e1e2e;font-size:0.82rem;color:#e2e8f0;overflow:auto;">'
+        f'<code>{t.get("code","").replace("<","&lt;").replace(">","&gt;")}</code></pre></div>'
+        for i, t in enumerate(tabs)
+    )
+    return (
+        f'<div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin:1.2rem 0;">'
+        f'<div style="display:flex;background:#f9fafb;border-bottom:1px solid #e5e7eb;gap:0;">{labels}</div>'
+        f'{panels}</div>'
+    )
+
+
+def _render_http_request_block(b: dict) -> str:
+    method  = b.get("method", "GET").upper()
+    url     = b.get("url", "")
+    headers = b.get("headers", {})
+    body    = b.get("body", "")
+    colors  = {"GET":"#2563eb","POST":"#16a34a","PUT":"#d97706","DELETE":"#dc2626","PATCH":"#7c3aed"}
+    color   = colors.get(method, "#6b7280")
+    hdrs_html = "".join(
+        f'<div style="font-size:0.78rem;font-family:monospace;color:#374151;">'
+        f'<span style="color:#6b7280;">{k}:</span> {v}</div>'
+        for k, v in (headers or {}).items()
+    )
+    body_html = (
+        f'<pre style="background:#f9fafb;border-radius:6px;padding:10px;margin-top:10px;'
+        f'font-size:0.78rem;overflow:auto;color:#374151;">{body}</pre>'
+    ) if body else ""
+    return (
+        f'<div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin:1.2rem 0;">'
+        f'<div style="padding:10px 16px;display:flex;align-items:center;gap:10px;background:#f9fafb;">'
+        f'<span style="background:{color};color:#fff;font-weight:700;font-size:0.75rem;'
+        f'padding:3px 10px;border-radius:5px;font-family:monospace;">{method}</span>'
+        f'<span style="font-family:monospace;font-size:0.85rem;color:#374151;">{url}</span>'
+        f'</div>'
+        f'{"<div style=padding:10px 16px;>" + hdrs_html + "</div>" if hdrs_html else ""}'
+        f'{body_html}</div>'
+    )
+
+
+def _render_env_var_list(b: dict) -> str:
+    variables = b.get("variables", [])
+    rows = "".join(
+        f'<tr>'
+        f'<td style="padding:8px 12px;font-family:monospace;font-size:0.82rem;color:#7c3aed;'
+        f'white-space:nowrap;border-bottom:1px solid #f3f4f6;">{v.get("key","")}</td>'
+        f'<td style="padding:8px 12px;font-size:0.82rem;color:#374151;border-bottom:1px solid #f3f4f6;">{v.get("description","")}</td>'
+        f'<td style="padding:8px 12px;font-family:monospace;font-size:0.78rem;color:#6b7280;border-bottom:1px solid #f3f4f6;">{v.get("default","—")}</td>'
+        f'<td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;">'
+        f'{"<span style=color:#dc2626;font-size:0.72rem;font-weight:700;>required</span>" if v.get("required") else "<span style=color:#9ca3af;font-size:0.72rem;>optional</span>"}'
+        f'</td></tr>'
+        for v in variables
+    )
+    return (
+        f'<div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin:1.2rem 0;">'
+        f'<table style="width:100%;border-collapse:collapse;">'
+        f'<thead><tr style="background:#f9fafb;">'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Variable</th>'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Description</th>'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Default</th>'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Required</th>'
+        f'</tr></thead><tbody>{rows}</tbody></table></div>'
+    )
+
+
+def _render_prerequisite_checklist(b: dict) -> str:
+    title = b.get("title", "Before you start")
+    items = b.get("items", [])
+    lis = "".join(
+        f'<li style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:0.88rem;">'
+        f'<span style="color:#16a34a;flex-shrink:0;margin-top:1px;">✓</span>'
+        f'<span style="color:#374151;">{item}</span></li>'
+        for item in items
+    )
+    return (
+        f'<div style="border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;'
+        f'background:#f0fdf4;margin:1.2rem 0;">'
+        f'<div style="font-weight:700;color:#15803d;margin-bottom:10px;">{title}</div>'
+        f'<ul style="list-style:none;padding:0;margin:0;">{lis}</ul></div>'
+    )
+
+
+def _render_keyboard_shortcut(b: dict) -> str:
+    keys   = b.get("keys", [])
+    action = b.get("action", "")
+    key_html = " + ".join(
+        f'<kbd style="display:inline-block;padding:2px 8px;font-family:monospace;font-size:0.8rem;'
+        f'border:1px solid #d1d5db;border-bottom:3px solid #9ca3af;border-radius:4px;'
+        f'background:#f9fafb;color:#374151;">{k}</kbd>'
+        for k in keys
+    )
+    action_html = f'<span style="margin-left:10px;font-size:0.85rem;color:#6b7280;">{action}</span>' if action else ""
+    return f'<div style="margin:0.5rem 0;display:inline-flex;align-items:center;">{key_html}{action_html}</div>'
+
+
+def _render_api_param_table(b: dict) -> str:
+    params = b.get("parameters", [])
+    rows = "".join(
+        f'<tr>'
+        f'<td style="padding:8px 12px;font-family:monospace;font-size:0.82rem;color:#7c3aed;border-bottom:1px solid #f3f4f6;">{p.get("name","")}</td>'
+        f'<td style="padding:8px 12px;font-family:monospace;font-size:0.78rem;color:#2563eb;border-bottom:1px solid #f3f4f6;">{p.get("type","")}</td>'
+        f'<td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;">'
+        f'{"<span style=color:#dc2626;font-size:0.72rem;font-weight:700;>required</span>" if p.get("required") else "<span style=color:#9ca3af;font-size:0.72rem;>optional</span>"}'
+        f'</td>'
+        f'<td style="padding:8px 12px;font-family:monospace;font-size:0.78rem;color:#6b7280;border-bottom:1px solid #f3f4f6;">{p.get("default","—")}</td>'
+        f'<td style="padding:8px 12px;font-size:0.82rem;color:#374151;border-bottom:1px solid #f3f4f6;">{p.get("description","")}</td>'
+        f'</tr>'
+        for p in params
+    )
+    return (
+        f'<div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin:1.2rem 0;overflow-x:auto;">'
+        f'<table style="width:100%;border-collapse:collapse;min-width:600px;">'
+        f'<thead><tr style="background:#f9fafb;">'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Parameter</th>'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Type</th>'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Required</th>'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Default</th>'
+        f'<th style="padding:8px 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Description</th>'
+        f'</tr></thead><tbody>{rows}</tbody></table></div>'
+    )
+
+
+def _render_reading_progress_bar(b):
+    color = b.get("color", "#7c3aed")
+    return (f'<div style="position:fixed;top:0;left:0;right:0;height:3px;background:{color};'
+            f'width:0%;z-index:999;" class="progress-bar"></div>'
+            f'<script>window.addEventListener("scroll",function(){{'
+            f'var h=document.documentElement,p=(window.scrollY/(h.scrollHeight-h.clientHeight))*100;'
+            f'document.querySelector(".progress-bar").style.width=p+"%"}});</script>')
+
+def _render_table_of_contents(b):
+    headings = b.get("headings",[])
+    items = "".join(
+        f'<li><a href="#{h.get("id","")}" style="color:#7c3aed;text-decoration:none;">{h.get("title","")}</a></li>'
+        for h in headings
+    )
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;'
+            f'background:#f9fafb;margin:1.5rem 0;">'
+            f'<div style="font-weight:700;color:#374151;margin-bottom:10px;">📋 Contents</div>'
+            f'<ul style="list-style:none;padding:0;margin:0;font-size:0.9rem;">{items}</ul></div>')
+
+def _render_article_hero(b):
+    title = b.get("title","")
+    subtitle = b.get("subtitle","")
+    img_url = b.get("image_url","")
+    img_html = (f'<img src="{_img_src(img_url)}" alt="{title}" '
+                f'style="width:100%;height:300px;object-fit:cover;border-radius:12px;margin-bottom:20px;">'
+                if img_url else "")
+    return (f'<div style="margin:2rem 0;">{img_html}'
+            f'<h1 style="margin:0 0 10px;font-size:2.2rem;font-weight:800;color:#111827;">{title}</h1>'
+            f'{"<p style=margin:0;font-size:1.1rem;color:#6b7280;>" + subtitle + "</p>" if subtitle else ""}'
+            f'</div>')
+
+def _render_scroll_to_top(b):
+    behavior = b.get("behavior","smooth")
+    return (f'<button onclick="window.scrollTo({{top:0,behavior:\'{behavior}\'}})" '
+            f'style="position:fixed;bottom:20px;right:20px;width:48px;height:48px;'
+            f'border-radius:50%;background:#7c3aed;color:#fff;border:none;cursor:pointer;'
+            f'display:none;align-items:center;justify-content:center;z-index:999;box-shadow:0 4px 12px rgba(124,58,221,0.3);" '
+            f'id="scroll-top" onmouseover="this.style.background=\'#6d28d9\'" onmouseout="this.style.background=\'#7c3aed\'">'
+            f'↑</button>'
+            f'<script>window.addEventListener("scroll",()=>{{'
+            f'document.getElementById("scroll-top").style.display=window.scrollY>300?"flex":"none"}});</script>')
+
+def _render_article_series_nav(b):
+    series_id = b.get("series_id","")
+    current = b.get("current_part",1)
+    return (f'<div style="border:1px solid #ede9fe;border-radius:10px;padding:16px 20px;'
+            f'background:#faf5ff;margin:1.5rem 0;">'
+            f'<div style="font-weight:700;color:#7c3aed;margin-bottom:8px;">📚 Part {current} of this series</div>'
+            f'<p style="margin:0;font-size:0.9rem;color:#6b7280;">Navigate to other parts in this multi-part article series.</p></div>')
+
+def _render_embed_codepen(b):
+    pen_id = b.get("pen_id","")
+    user = b.get("user_handle","")
+    return (f'<p><iframe height="600" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;'
+            f'margin:1.2rem 0;" src="https://codepen.io/{user}/embed/{pen_id}?default-tab=result" '
+            f'loading="lazy" allowtransparency="true" allowfullscreen="true"></iframe></p>')
+
+def _render_embed_stackblitz(b):
+    project_id = b.get("project_id","")
+    return (f'<iframe src="https://stackblitz.com/edit/{project_id}?embed=1" '
+            f'style="width:100%;height:500px;border:1px solid #e5e7eb;border-radius:8px;margin:1.2rem 0;" '
+            f'loading="lazy"></iframe>')
+
+def _render_embed_gist(b):
+    gist_id = b.get("gist_id","")
+    return (f'<script src="https://gist.github.com/{gist_id}.js"></script>')
+
+def _render_embed_tweet(b):
+    tweet_id = b.get("tweet_id","")
+    return (f'<blockquote class="twitter-tweet" style="margin:1.2rem 0;"><a href="https://twitter.com/twitter/status/{tweet_id}"></a></blockquote>'
+            f'<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>')
+
+def _render_embed_google_slides(b):
+    pres_id = b.get("presentation_id","")
+    return (f'<iframe src="https://docs.google.com/presentation/d/{pres_id}/embed" '
+            f'frameborder="0" width="100%" height="569" allowfullscreen="true" mozallowfullscreen="true" '
+            f'webkitallowfullscreen="true" style="border:1px solid #e5e7eb;border-radius:8px;margin:1.2rem 0;"></iframe>')
+
+def _render_lottie_animation(b):
+    url = b.get("src_url","")
+    loop = b.get("loop",True)
+    return (f'<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>'
+            f'<lottie-player src="{url}" background="transparent" speed="1" style="width:100%;max-height:400px;margin:1.2rem 0;" '
+            f'{"loop" if loop else ""} autoplay></lottie-player>')
+
+def _render_figma_embed(b):
+    url = b.get("embed_url","")
+    return (f'<iframe style="border:1px solid #e5e7eb;border-radius:8px;width:100%;height:500px;margin:1.2rem 0;" '
+            f'src="{url}" allowfullscreen></iframe>')
+
+
+def _render_difficulty_badge(b):
+    level = b.get("level", "beginner")
+    cfg = {"beginner": ("#16a34a","#f0fdf4","Beginner"), "intermediate": ("#d97706","#fffbeb","Intermediate"), "advanced": ("#dc2626","#fef2f2","Advanced")}
+    color, bg, label = cfg.get(level, cfg["beginner"])
+    return (f'<span style="display:inline-flex;align-items:center;gap:5px;border:1px solid {color}44;'
+            f'border-radius:100px;padding:3px 12px;font-size:0.75rem;font-weight:700;'
+            f'color:{color};background:{bg};">{"⚡" if level=="beginner" else "🔧" if level=="intermediate" else "🚀"} {label}</span>')
+
+def _render_caution_block(b):
+    msg = b.get("message","")
+    return (f'<div style="border:1px solid #fca5a5;border-left:4px solid #ef4444;border-radius:8px;'
+            f'padding:14px 18px;background:#fef2f2;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#991b1b;margin-bottom:6px;">⚠ Caution</div>'
+            f'<p style="margin:0;font-size:0.88rem;color:#7f1d1d;">{msg}</p></div>')
+
+def _render_checklist_interactive(b):
+    items = b.get("items", [])
+    lis = "".join(
+        f'<li style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6;">'
+        f'<input type="checkbox" style="width:16px;height:16px;accent-color:#7c3aed;cursor:pointer;">'
+        f'<span style="font-size:0.88rem;color:#374151;">{item}</span></li>'
+        for item in items
+    )
+    return (f'<ul style="list-style:none;padding:0;margin:1.2rem 0;'
+            f'border:1px solid #e5e7eb;border-radius:10px;padding:12px 18px;">{lis}</ul>')
+
+def _render_glossary_inline(b):
+    term = b.get("term","")
+    defn = b.get("definition","").replace('"','&quot;')
+    return (f'<span style="position:relative;display:inline-block;">'
+            f'<span style="border-bottom:2px dotted #7c3aed;cursor:help;color:#7c3aed;font-weight:600;" '
+            f'title="{defn}">{term}</span></span>')
+
+def _render_time_estimate(b):
+    mins = b.get("minutes", 5)
+    return (f'<span style="display:inline-flex;align-items:center;gap:5px;'
+            f'font-size:0.78rem;color:#6b7280;background:#f3f4f6;'
+            f'padding:3px 10px;border-radius:100px;">🕐 {mins} min read</span>')
+
+def _render_progress_checkpoint(b):
+    current = b.get("current_step", 1)
+    total   = b.get("total_steps", 1)
+    pct     = int(current / total * 100) if total else 0
+    steps   = "".join(
+        f'<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;'
+        f'justify-content:center;font-size:0.75rem;font-weight:700;'
+        f'background:{"#7c3aed" if i < current else "#e5e7eb"};'
+        f'color:{"#fff" if i < current else "#9ca3af"};">{i}</div>'
+        for i in range(1, total + 1)
+    )
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px 18px;margin:1.2rem 0;">'
+            f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">{steps}</div>'
+            f'<div style="background:#f3f4f6;border-radius:100px;height:6px;overflow:hidden;">'
+            f'<div style="height:100%;background:#7c3aed;width:{pct}%;border-radius:100px;"></div>'
+            f'</div>'
+            f'<div style="font-size:0.78rem;color:#6b7280;margin-top:6px;">Step {current} of {total}</div>'
+            f'</div>')
+
+def _render_social_share_bar(b):
+    platforms = b.get("platforms", ["twitter","linkedin"])
+    url       = b.get("url", "")
+    cfg = {
+        "twitter":  ("#1da1f2", "X / Twitter", f"https://twitter.com/intent/tweet?url={url}"),
+        "linkedin": ("#0a66c2", "LinkedIn",     f"https://www.linkedin.com/sharing/share-offsite/?url={url}"),
+        "facebook": ("#1877f2", "Facebook",     f"https://www.facebook.com/sharer/sharer.php?u={url}"),
+        "reddit":   ("#ff4500", "Reddit",       f"https://reddit.com/submit?url={url}"),
+    }
+    btns = "".join(
+        f'<a href="{cfg[p][2]}" target="_blank" rel="noopener" '
+        f'style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;'
+        f'background:{cfg[p][0]};color:#fff;font-size:0.8rem;font-weight:600;text-decoration:none;">'
+        f'{cfg[p][1]}</a>'
+        for p in platforms if p in cfg
+    )
+    return f'<div style="display:flex;flex-wrap:wrap;gap:8px;margin:1.2rem 0;">{btns}</div>'
+
+def _render_newsletter_cta(b):
+    headline    = b.get("headline", "Stay in the loop")
+    button_label = b.get("button_label", "Subscribe")
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:12px;padding:24px 28px;'
+            f'background:linear-gradient(135deg,#f9fafb,#f3f4f6);margin:1.5rem 0;text-align:center;">'
+            f'<div style="font-size:1.1rem;font-weight:700;color:#111827;margin-bottom:8px;">{headline}</div>'
+            f'<div style="display:flex;gap:8px;max-width:400px;margin:12px auto 0;">'
+            f'<input type="email" placeholder="you@example.com" '
+            f'style="flex:1;padding:8px 14px;border:1px solid #d1d5db;border-radius:6px;font-size:0.88rem;">'
+            f'<button style="padding:8px 18px;background:#7c3aed;color:#fff;border:none;'
+            f'border-radius:6px;font-weight:600;font-size:0.88rem;cursor:pointer;">{button_label}</button>'
+            f'</div></div>')
+
+def _render_author_bio_card(b):
+    name   = b.get("name","")
+    avatar = b.get("avatar_url","")
+    bio    = b.get("bio","")
+    links  = b.get("links",{}) or {}
+    avatar_html = (f'<img src="{_img_src(avatar)}" alt="{name}" '
+                   f'style="width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+                   if avatar else
+                   f'<div style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;'
+                   f'display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">👤</div>')
+    links_html = "".join(
+        f'<a href="{v}" target="_blank" rel="noopener" '
+        f'style="font-size:0.78rem;color:#6b7280;text-decoration:none;margin-right:10px;">{k}</a>'
+        for k, v in links.items()
+    )
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:12px;padding:18px 22px;'
+            f'display:flex;gap:16px;align-items:flex-start;margin:1.5rem 0;">'
+            f'{avatar_html}'
+            f'<div><div style="font-weight:700;color:#111827;margin-bottom:4px;">{name}</div>'
+            f'<p style="margin:0 0 8px;font-size:0.85rem;color:#6b7280;line-height:1.5;">{bio}</p>'
+            f'{"<div>" + links_html + "</div>" if links_html else ""}'
+            f'</div></div>')
+
+def _render_related_posts_grid(b):
+    posts = b.get("posts",[])
+    cards = "".join(
+        f'<a href="{p.get("url","#")}" style="display:block;border:1px solid #e5e7eb;border-radius:8px;'
+        f'padding:14px 16px;text-decoration:none;transition:box-shadow 0.15s;" '
+        f'onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.08)\'" '
+        f'onmouseout="this.style.boxShadow=\'none\'">'
+        f'{"<div style=font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#7c3aed;margin-bottom:4px;>" + p.get("topic","") + "</div>" if p.get("topic") else ""}'
+        f'<div style="font-size:0.88rem;font-weight:600;color:#111827;line-height:1.4;">{p.get("title","")}</div>'
+        f'</a>'
+        for p in posts
+    )
+    return (f'<div style="margin:1.5rem 0;">'
+            f'<div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;'
+            f'letter-spacing:0.08em;color:#6b7280;margin-bottom:10px;">Related reading</div>'
+            f'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">'
+            f'{cards}</div></div>')
+
+def _render_series_overview_card(b):
+    name  = b.get("series_name","")
+    parts = b.get("parts",[])
+    items = "".join(
+        f'<a href="{p.get("url","#")}" style="display:flex;align-items:center;gap:10px;padding:8px 0;'
+        f'border-bottom:1px solid #f3f4f6;text-decoration:none;">'
+        f'<span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;'
+        f'justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;'
+        f'background:{"#7c3aed" if p.get("current") else "#f3f4f6"};'
+        f'color:{"#fff" if p.get("current") else "#6b7280"};">{i+1}</span>'
+        f'<span style="font-size:0.85rem;{"font-weight:700;color:#7c3aed;" if p.get("current") else "color:#374151;"}">'
+        f'{p.get("title","")}</span></a>'
+        for i, p in enumerate(parts)
+    )
+    return (f'<div style="border:1px solid #ede9fe;border-radius:10px;padding:16px 20px;'
+            f'background:#faf5ff;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#7c3aed;margin-bottom:10px;">📖 {name}</div>'
+            f'{items}</div>')
+
+def _render_reaction_group(b):
+    emojis_cfg = {"thumbs_up":("👍","0"),"heart":("❤️","0"),"rocket":("🚀","0"),"mind_blown":("🤯","0")}
+    enabled = b.get("enabled_emojis", list(emojis_cfg.keys()))
+    btns = "".join(
+        f'<button onclick="this.querySelector(\'span\').textContent=String(parseInt(this.querySelector(\'span\').textContent)+1)" '
+        f'style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border:1px solid #e5e7eb;'
+        f'border-radius:100px;background:#f9fafb;cursor:pointer;font-size:0.88rem;">'
+        f'{emojis_cfg[e][0]} <span style="font-size:0.78rem;color:#6b7280;">{emojis_cfg[e][1]}</span></button>'
+        for e in enabled if e in emojis_cfg
+    )
+    return f'<div style="display:flex;flex-wrap:wrap;gap:8px;margin:1rem 0;">{btns}</div>'
+
+def _render_share_quote(b):
+    text   = b.get("text","")
+    author = b.get("author","")
+    tweet_text = f"{text[:200]} — {author}" if author else text[:200]
+    return (f'<div style="border-left:4px solid #7c3aed;padding:16px 20px;background:#faf5ff;'
+            f'border-radius:0 10px 10px 0;margin:1.5rem 0;position:relative;">'
+            f'<p style="font-size:1rem;font-style:italic;color:#1e1b4b;line-height:1.6;margin:0 0 10px;">"{text}"</p>'
+            f'{"<div style=font-size:0.8rem;color:#7c3aed;font-weight:600;>— " + author + "</div>" if author else ""}'
+            f'<a href="https://twitter.com/intent/tweet?text={tweet_text.replace(" ","+")}" target="_blank" rel="noopener" '
+            f'style="display:inline-flex;align-items:center;gap:5px;font-size:0.75rem;color:#6b7280;'
+            f'text-decoration:none;margin-top:8px;">Share this →</a></div>')
+
+def _render_follow_cta(b):
+    msg   = b.get("message","Follow for more")
+    links = b.get("platform_links",{}) or {}
+    btns  = "".join(
+        f'<a href="{v}" target="_blank" rel="noopener" '
+        f'style="padding:8px 18px;border:1px solid #d1d5db;border-radius:6px;font-size:0.85rem;'
+        f'font-weight:600;color:#374151;text-decoration:none;">{k}</a>'
+        for k, v in links.items()
+    )
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:12px;padding:20px 24px;'
+            f'display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;'
+            f'gap:12px;margin:1.5rem 0;background:#f9fafb;">'
+            f'<span style="font-size:0.95rem;font-weight:600;color:#111827;">{msg}</span>'
+            f'<div style="display:flex;gap:8px;flex-wrap:wrap;">{btns}</div></div>')
+
+def _render_follow_button(b):
+    handle   = b.get("target_handle","")
+    platform = b.get("platform","twitter")
+    urls = {"twitter": f"https://twitter.com/{handle}", "github": f"https://github.com/{handle}", "linkedin": f"https://linkedin.com/in/{handle}"}
+    url = urls.get(platform, "#")
+    return (f'<a href="{url}" target="_blank" rel="noopener" '
+            f'style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;'
+            f'border:1px solid #d1d5db;border-radius:6px;font-size:0.85rem;font-weight:600;'
+            f'color:#374151;text-decoration:none;background:#f9fafb;">Follow @{handle}</a>')
+
+
+def _render_version_badge(b):
+    v = b.get("version","")
+    status = b.get("status","stable")
+    colors = {"stable":"#16a34a","beta":"#2563eb","alpha":"#d97706","rc":"#7c3aed"}
+    c = colors.get(status,"#6b7280")
+    return (f'<span style="display:inline-flex;align-items:center;gap:5px;border:1px solid {c};'
+            f'border-radius:100px;padding:2px 10px;font-size:0.75rem;font-weight:700;color:{c};'
+            f'font-family:monospace;">v{v}'
+            f'{"<span style=opacity:0.7;font-weight:400;margin-left:2px;> · " + status + "</span>" if status != "stable" else ""}'
+            f'</span>')
+
+def _render_deprecation_notice(b):
+    alt = b.get("alternative","")
+    rv  = b.get("removal_version","")
+    rv_html = f'<div style="margin-top:6px;font-size:0.8rem;color:#991b1b;">Removed in: <code>{rv}</code></div>' if rv else ""
+    alt_html = f'<div style="margin-top:4px;font-size:0.85rem;">Use instead: <code style="background:#fef2f2;padding:1px 6px;border-radius:4px;">{alt}</code></div>' if alt else ""
+    return (f'<div style="border:1px solid #fca5a5;border-left:4px solid #ef4444;border-radius:8px;'
+            f'padding:14px 18px;background:#fef2f2;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#991b1b;margin-bottom:4px;">⚠ Deprecated</div>'
+            f'{alt_html}{rv_html}</div>')
+
+def _render_experimental_banner(b):
+    msg = b.get("message","")
+    return (f'<div style="border:1px solid #fbbf24;border-left:4px solid #f59e0b;border-radius:8px;'
+            f'padding:14px 18px;background:#fffbeb;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#92400e;margin-bottom:4px;">🧪 Experimental</div>'
+            f'{"<p style=font-size:0.85rem;color:#78350f;margin:0;>" + msg + "</p>" if msg else ""}</div>')
+
+def _render_cli_command(b):
+    cmd = b.get("command","").replace("<","&lt;").replace(">","&gt;")
+    return (f'<div style="display:flex;align-items:center;background:#1e1e2e;border-radius:8px;'
+            f'padding:10px 16px;margin:0.8rem 0;font-family:\'JetBrains Mono\',monospace;font-size:0.85rem;">'
+            f'<span style="color:#a78bfa;margin-right:10px;user-select:none;">$</span>'
+            f'<code style="color:#e2e8f0;flex:1;">{cmd}</code></div>')
+
+def _render_copy_code_button(b):
+    text = b.get("text_to_copy","").replace('"','&quot;').replace("<","&lt;").replace(">","&gt;")
+    return (f'<div style="display:inline-block;margin:0.5rem 0;">'
+            f'<button onclick="navigator.clipboard.writeText(\'{text}\')" '
+            f'style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;'
+            f'border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;cursor:pointer;'
+            f'font-size:0.82rem;color:#374151;">'
+            f'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">'
+            f'<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/>'
+            f'<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/>'
+            f'</svg>Copy</button></div>')
+
+def _render_log_output(b):
+    logs = b.get("logs","").replace("<","&lt;").replace(">","&gt;")
+    return (f'<div style="background:#0d1117;border-radius:8px;padding:14px 18px;margin:1.2rem 0;'
+            f'max-height:300px;overflow-y:auto;">'
+            f'<pre style="margin:0;font-family:\'JetBrains Mono\',monospace;font-size:0.78rem;'
+            f'color:#9ca3af;white-space:pre-wrap;word-break:break-all;">{logs}</pre></div>')
+
+def _render_json_tree_viewer(b):
+    import json as _json2
+    raw = b.get("data","")
+    try:
+        pretty = _json2.dumps(_json2.loads(raw), indent=2)
+    except Exception:
+        pretty = raw
+    pretty = pretty.replace("<","&lt;").replace(">","&gt;")
+    return (f'<div style="background:#1e1e2e;border-radius:10px;padding:16px;margin:1.2rem 0;'
+            f'max-height:400px;overflow:auto;">'
+            f'<pre style="margin:0;font-family:\'JetBrains Mono\',monospace;font-size:0.8rem;'
+            f'color:#e2e8f0;">{pretty}</pre></div>')
+
+def _render_key_takeaways(b):
+    points = b.get("points",[])
+    lis = "".join(f'<li style="margin-bottom:6px;font-size:0.88rem;color:#1e3a5f;">{p}</li>' for p in points)
+    return (f'<div style="border:1px solid #bfdbfe;border-left:4px solid #2563eb;border-radius:8px;'
+            f'padding:16px 20px;background:#eff6ff;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#1d4ed8;margin-bottom:10px;">🔑 Key takeaways</div>'
+            f'<ul style="margin:0;padding-left:1.2em;">{lis}</ul></div>')
+
+def _render_summary_box(b):
+    text = b.get("text","")
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:10px;padding:18px 22px;'
+            f'background:#f9fafb;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#374151;margin-bottom:8px;font-size:0.82rem;'
+            f'text-transform:uppercase;letter-spacing:0.08em;">Summary</div>'
+            f'<p style="margin:0;color:#4b5563;font-size:0.9rem;line-height:1.6;">{text}</p></div>')
+
+def _render_learning_objectives(b):
+    objs = b.get("objectives",[])
+    lis = "".join(
+        f'<li style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:0.88rem;">'
+        f'<span style="color:#2563eb;flex-shrink:0;margin-top:1px;">→</span>'
+        f'<span style="color:#1e3a5f;">{o}</span></li>'
+        for o in objs
+    )
+    return (f'<div style="border:1px solid #bfdbfe;border-radius:10px;padding:16px 20px;'
+            f'background:#eff6ff;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#1d4ed8;margin-bottom:10px;">🎯 What you\'ll learn</div>'
+            f'<ul style="list-style:none;padding:0;margin:0;">{lis}</ul></div>')
+
+def _render_changelog_entry(b):
+    version = b.get("version","")
+    date    = b.get("date","")
+    changes = b.get("changes",[])
+    tag_colors = {"added":"#16a34a","fixed":"#2563eb","changed":"#d97706","removed":"#dc2626","deprecated":"#7c3aed"}
+    items_html = "".join(
+        f'<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px;">'
+        f'<span style="font-size:0.7rem;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0;'
+        f'background:{tag_colors.get(str(c.get("type","changed")).lower(),"#6b7280")}22;'
+        f'color:{tag_colors.get(str(c.get("type","changed")).lower(),"#6b7280")};">{c.get("type","changed").upper()}</span>'
+        f'<span style="font-size:0.85rem;color:#374151;">{c.get("text","")}</span></div>'
+        for c in changes
+    )
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin:1.2rem 0;">'
+            f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+            f'<span style="font-family:monospace;font-weight:700;font-size:0.95rem;color:#374151;">v{version}</span>'
+            f'{"<span style=font-size:0.8rem;color:#9ca3af;>" + date + "</span>" if date else ""}'
+            f'</div>{items_html}</div>')
+
+def _render_release_notes(b):
+    title   = b.get("title","Release Notes")
+    added   = b.get("added",[])
+    fixed   = b.get("fixed",[])
+    changed = b.get("changed",[])
+    def section(label, items, color):
+        if not items: return ""
+        lis = "".join(f'<li style="font-size:0.85rem;color:#374151;margin-bottom:3px;">{i}</li>' for i in items)
+        return (f'<div style="margin-bottom:14px;">'
+                f'<div style="font-weight:700;font-size:0.78rem;text-transform:uppercase;'
+                f'letter-spacing:0.08em;color:{color};margin-bottom:6px;">{label}</div>'
+                f'<ul style="margin:0;padding-left:1.2em;">{lis}</ul></div>')
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:10px;padding:18px 22px;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;font-size:1rem;color:#111827;margin-bottom:14px;">{title}</div>'
+            f'{section("Added", added, "#16a34a")}'
+            f'{section("Fixed", fixed, "#2563eb")}'
+            f'{section("Changed", changed, "#d97706")}'
+            f'</div>')
+
+def _render_further_reading(b):
+    links = b.get("links",[])
+    items = "".join(
+        f'<a href="{l.get("url","#")}" target="_blank" rel="noopener" '
+        f'style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;'
+        f'border-bottom:1px solid #f3f4f6;text-decoration:none;">'
+        f'<span style="color:#2563eb;flex-shrink:0;margin-top:2px;">→</span>'
+        f'<div><div style="font-size:0.88rem;font-weight:600;color:#1d4ed8;">{l.get("title","")}</div>'
+        f'{"<div style=font-size:0.78rem;color:#6b7280;margin-top:2px;>" + l.get("annotation","") + "</div>" if l.get("annotation") else ""}'
+        f'</div></a>'
+        for l in links
+    )
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#374151;margin-bottom:4px;">📚 Further reading</div>'
+            f'{items}</div>')
+
+def _render_resources_list(b):
+    items = b.get("items",[])
+    rows = "".join(
+        f'<a href="{i.get("url","#")}" target="_blank" rel="noopener" '
+        f'style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;'
+        f'border-bottom:1px solid #f3f4f6;text-decoration:none;">'
+        f'<span style="font-size:0.88rem;color:#1d4ed8;font-weight:500;">{i.get("title","")}</span>'
+        f'<div style="display:flex;align-items:center;gap:8px;">'
+        f'{"<span style=font-size:0.75rem;color:#9ca3af;>" + i.get("size","") + "</span>" if i.get("size") else ""}'
+        f'{"<span style=font-size:0.72rem;background:#f3f4f6;padding:2px 6px;border-radius:4px;color:#6b7280;>" + i.get("type","").upper() + "</span>" if i.get("type") else ""}'
+        f'</div></a>'
+        for i in items
+    )
+    return (f'<div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;color:#374151;margin-bottom:4px;">📎 Resources</div>'
+            f'{rows}</div>')
+
+def _render_sidebar_note(b):
+    title   = b.get("title","Note")
+    content = b.get("content","")
+    return (f'<div style="border-left:3px solid #7c3aed;border-radius:0 8px 8px 0;padding:12px 16px;'
+            f'background:#faf5ff;margin:1.2rem 0;">'
+            f'<div style="font-weight:700;font-size:0.8rem;color:#7c3aed;margin-bottom:4px;">{title}</div>'
+            f'<p style="margin:0;font-size:0.85rem;color:#4b5563;">{content}</p></div>')
+
+
 # ── Registry ─────────────────────────────────────────────────────────────────
 
 _RENDERERS = {
@@ -1451,7 +2181,58 @@ _RENDERERS = {
     "image":        _render_image,
     "image_pair":   _render_image_pair,
     "diagram":      _render_diagram,
-    "repo_links":   _render_repo_links,
+    "repo_links":              _render_repo_links,
+    "github_repo_card":        _render_github_repo_card,
+    "terminal_block":          _render_terminal_block,
+    "file_tree":               _render_file_tree,
+    "tabbed_code":             _render_tabbed_code,
+    "http_request_block":      _render_http_request_block,
+    "env_var_list":            _render_env_var_list,
+    "prerequisite_checklist":  _render_prerequisite_checklist,
+    "keyboard_shortcut":       _render_keyboard_shortcut,
+    "api_param_table":         _render_api_param_table,
+    "version_badge":           _render_version_badge,
+    "deprecation_notice":      _render_deprecation_notice,
+    "experimental_banner":     _render_experimental_banner,
+    "cli_command":             _render_cli_command,
+    "copy_code_button":        _render_copy_code_button,
+    "log_output":              _render_log_output,
+    "json_tree_viewer":        _render_json_tree_viewer,
+    "key_takeaways":           _render_key_takeaways,
+    "summary_box":             _render_summary_box,
+    "learning_objectives":     _render_learning_objectives,
+    "changelog_entry":         _render_changelog_entry,
+    "release_notes":           _render_release_notes,
+    "further_reading":         _render_further_reading,
+    "resources_list":          _render_resources_list,
+    "sidebar_note":            _render_sidebar_note,
+    "difficulty_badge":        _render_difficulty_badge,
+    "caution_block":           _render_caution_block,
+    "checklist_interactive":   _render_checklist_interactive,
+    "glossary_inline":         _render_glossary_inline,
+    "time_estimate":           _render_time_estimate,
+    "progress_checkpoint":     _render_progress_checkpoint,
+    "social_share_bar":        _render_social_share_bar,
+    "newsletter_cta":          _render_newsletter_cta,
+    "author_bio_card":         _render_author_bio_card,
+    "related_posts_grid":      _render_related_posts_grid,
+    "series_overview_card":    _render_series_overview_card,
+    "reaction_group":          _render_reaction_group,
+    "share_quote":             _render_share_quote,
+    "follow_cta":              _render_follow_cta,
+    "follow_button":           _render_follow_button,
+    "reading_progress_bar":    _render_reading_progress_bar,
+    "table_of_contents":       _render_table_of_contents,
+    "article_hero":            _render_article_hero,
+    "scroll_to_top":           _render_scroll_to_top,
+    "article_series_nav":      _render_article_series_nav,
+    "embed_codepen":           _render_embed_codepen,
+    "embed_stackblitz":        _render_embed_stackblitz,
+    "embed_gist":              _render_embed_gist,
+    "embed_tweet":             _render_embed_tweet,
+    "embed_google_slides":     _render_embed_google_slides,
+    "lottie_animation":        _render_lottie_animation,
+    "figma_embed":             _render_figma_embed,
     "closing":      _render_closing,
     "callout":      _render_callout,
     "steps":        _render_steps,
