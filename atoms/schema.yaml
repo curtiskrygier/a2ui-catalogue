@@ -788,6 +788,50 @@ blocks:
     delta_type: enum (increase, decrease, no_change) - determines icon/color
     unit: string (optional, unit for the current value, e.g., 'USD')
     previous_period_label: string (optional, e.g., 'vs. last month')
+- type: task_list
+  description: Renders a premium, glassmorphic checklist and action item tracker with status checkboxes, priorities, assignees, and due dates.
+  compact_description: glassmorphic structured checklist with priority and assignee badges
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires detailed HTML/SVG listing styles.
+    - surface: email
+      reason: Requires complex SVG layouts.
+    - surface: pdf
+      reason: Requires interactive layout rendering.
+  fields:
+    title: "string (optional, e.g., 'Google Tasks & Action Items')"
+    tasks: "list of dictionaries representing tasks, where each dictionary contains: {'id': string, 'text': string, 'completed': boolean, 'priority': string (high|medium|low), 'due_date': string (optional), 'assignee': string (optional, initials e.g. 'CK')}"
+- type: sentiment_summary
+  description: Renders an emotional summary and sentiment tracker for a call or meeting, showing positive/negative/neutral mix, sentiment index progress arc, and emotional journey area timeline.
+  compact_description: meeting sentiment analyzer with index arc and timeline chart
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex SVG emotional timeline path rendering.
+    - surface: email
+      reason: Requires SVG path calculations.
+    - surface: pdf
+      reason: Requires dynamic visual projections.
+  fields:
+    title: "string (optional, e.g., 'Call Sentiment & Mood Analysis')"
+    sentiment_index: "number representing overall positive sentiment percentage (0-100, e.g., 78)"
+    emotional_journey: "list of numbers representing call sentiment score over time intervals (values -1.0 to 1.0, e.g., [0.1, -0.2, 0.4, 0.8, 0.6])"
+    themes: "list of dictionaries representing key themes with weights or moods: [{'theme': 'Technical Alignment', 'mood': 'Analytical', 'score': 85}, ...]"
 - type: trend_indicator
   description: Renders a simple visual indicator (e.g., arrow, icon) representing
   compact_description: compact inline value with mini trend bar

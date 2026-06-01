@@ -3211,6 +3211,264 @@ def _render_cohort_retention(b: dict) -> str:
     """
 
 
+def _render_task_list(b: dict) -> str:
+    title = b.get("title", "")
+    tasks = b.get("tasks", [])
+    
+    header_html = ""
+    if title:
+        header_html = f"""
+        <div style="margin-bottom:20px; display:flex; align-items:center; justify-content:space-between;">
+          <div style="font-size:1.15rem;font-weight:800;color:#f1f5f9;letter-spacing:-0.2px; display:flex; align-items:center; gap:8px;">
+            <span style="color:#00f2ff; font-weight:900;">⬡</span> {title}
+          </div>
+          <div style="font-size:0.75rem; font-family:monospace; color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.04); padding:4px 8px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+            {len(tasks)} Tasks
+          </div>
+        </div>
+        """
+        
+    tasks_html = []
+    for task in tasks:
+        text = task.get("text", "")
+        completed = task.get("completed", False)
+        priority = task.get("priority", "medium").lower()
+        due_date = task.get("due_date", "")
+        assignee = task.get("assignee", "")
+        
+        if completed:
+            checkbox_style = "background:#10b981; border-color:#10b981; color:#0f172a; box-shadow: 0 0 10px rgba(16,185,129,0.4);"
+            checkbox_inner = '<span style="font-size:11px; font-weight:900;">✓</span>'
+            text_style = "text-decoration:line-through; color:rgba(255,255,255,0.4);"
+        else:
+            checkbox_style = "background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.2); color:transparent;"
+            checkbox_inner = ""
+            text_style = "color:#f3f4f6;"
+            
+        if priority == "high":
+            p_style = "background:rgba(239, 68, 68, 0.1); color:#ef4444; border: 1px solid rgba(239,68,68,0.25);"
+            p_label = "HIGH"
+        elif priority == "low":
+            p_style = "background:rgba(59, 130, 246, 0.1); color:#3b82f6; border: 1px solid rgba(59,130,246,0.25);"
+            p_label = "LOW"
+        else:
+            p_style = "background:rgba(245, 158, 11, 0.1); color:#f59e0b; border: 1px solid rgba(245,158,11,0.25);"
+            p_label = "MED"
+            
+        assignee_html = ""
+        if assignee:
+            assignee_html = f"""
+            <div style="width:24px; height:24px; border-radius:50%; background:linear-gradient(135deg, #00f2ff 0%, #0072ff 100%); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:#fff; font-family:monospace; border:1px solid rgba(255,255,255,0.2); flex-shrink:0;" title="Assignee: {assignee}">
+              {assignee[:2].upper()}
+            </div>
+            """
+            
+        due_html = ""
+        if due_date:
+            due_html = f"""
+            <div style="font-size:0.75rem; font-family:monospace; color:rgba(255,255,255,0.5); display:flex; align-items:center; gap:4px; padding:3px 8px; border-radius:4px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); flex-shrink:0;">
+              <span style="font-size:0.7rem;">📅</span> {due_date}
+            </div>
+            """
+            
+        tasks_html.append(f"""
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:rgba(15,23,42,0.2); border:1px solid rgba(255,255,255,0.04); border-radius:8px; gap:16px; transition:all 0.2s ease-in-out;" onmouseover="this.style.background='rgba(255,255,255,0.03)';this.style.borderColor='rgba(0,242,255,0.15)';" onmouseout="this.style.background='rgba(15,23,42,0.2)';this.style.borderColor='rgba(255,255,255,0.04)';">
+          <div style="display:flex; align-items:center; gap:12px; flex-grow:1; min-width:0;">
+            <div style="width:18px; height:18px; border-radius:4px; border:1.5px solid; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; transition:all 0.15s ease-in-out; {checkbox_style}">
+              {checkbox_inner}
+            </div>
+            <div style="font-size:0.9rem; font-weight:500; font-family:sans-serif; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; {text_style}">
+              {text}
+            </div>
+          </div>
+          
+          <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+            <div style="font-size:0.65rem; font-weight:800; font-family:monospace; padding:3px 6px; border-radius:4px; letter-spacing:0.05em; {p_style}">
+              {p_label}
+            </div>
+            {due_html}
+            {assignee_html}
+          </div>
+        </div>
+        """)
+        
+    tasks_container = f'<div style="display:flex; flex-direction:column; gap:8px;">{"".join(tasks_html)}</div>'
+    
+    return f"""
+    <div style="margin:1.5rem 0;padding:24px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+      {header_html}
+      {tasks_container}
+    </div>
+    """
+
+
+def _render_sentiment_summary(b: dict) -> str:
+    title = b.get("title", "")
+    sentiment_index = b.get("sentiment_index", 75)
+    emotional_journey = b.get("emotional_journey", [])
+    themes = b.get("themes", [])
+    
+    header_html = ""
+    if title:
+        header_html = f"""
+        <div style="margin-bottom:20px;">
+          <div style="font-size:1.15rem;font-weight:800;color:#f1f5f9;letter-spacing:-0.2px; display:flex; align-items:center; gap:8px;">
+            <span style="color:#ec4899; font-weight:900;">⬡</span> {title}
+          </div>
+        </div>
+        """
+        
+    gauge_id = f"sent_gauge_{id(b)}"
+    stroke_dasharray = 109.956
+    stroke_dashoffset = stroke_dasharray - (sentiment_index / 100.0) * stroke_dasharray
+    
+    if sentiment_index >= 75:
+        sentiment_color = "#10b981"
+        sentiment_label = "POSITIVE"
+    elif sentiment_index >= 50:
+        sentiment_color = "#38bdf8"
+        sentiment_label = "BALANCED"
+    else:
+        sentiment_color = "#f59e0b"
+        sentiment_label = "ATTENTION"
+        
+    gauge_svg = f"""
+    <div style="width:160px; height:140px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); border-radius:12px; padding:10px; flex-shrink:0;">
+      <svg viewBox="0 0 100 80" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="{gauge_id}_grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#f59e0b" />
+            <stop offset="50%" stop-color="#38bdf8" />
+            <stop offset="100%" stop-color="#10b981" />
+          </linearGradient>
+          <filter id="{gauge_id}_glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <path d="M 15 60 A 35 35 0 0 1 85 60" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" stroke-linecap="round" />
+        <path d="M 15 60 A 35 35 0 0 1 85 60" fill="none" stroke="url(#{gauge_id}_grad)" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="{stroke_dasharray}" stroke-dashoffset="{stroke_dashoffset}" filter="url(#{gauge_id}_glow)" />
+        <text x="50" y="53" text-anchor="middle" font-weight="900" font-size="18" fill="#f1f5f9" font-family="monospace">{sentiment_index}%</text>
+        <text x="50" y="70" text-anchor="middle" font-weight="800" font-size="7" fill="{sentiment_color}" font-family="monospace" letter-spacing="0.1em">{sentiment_label}</text>
+      </svg>
+    </div>
+    """
+    
+    journey_svg = ""
+    if emotional_journey:
+        points = []
+        width = 280
+        height = 120
+        n_points = len(emotional_journey)
+        center_y = height / 2.0
+        x_min = 15
+        x_max = width - 15
+        y_min = 15
+        y_max = height - 15
+        
+        for i, val in enumerate(emotional_journey):
+            x = x_min + (i / max(1, n_points - 1)) * (x_max - x_min)
+            y = center_y - val * (center_y - y_min)
+            points.append((x, y))
+            
+        line_path = " ".join(f"{'M' if i == 0 else 'L'} {px:.1f} {py:.1f}" for i, (px, py) in enumerate(points))
+        
+        area_points = list(points)
+        area_points.append((points[-1][0], center_y))
+        area_points.append((points[0][0], center_y))
+        area_path = " ".join(f"{'M' if i == 0 else 'L'} {px:.1f} {py:.1f}" for i, (px, py) in enumerate(area_points)) + " Z"
+        
+        journey_id = f"sent_journey_{id(b)}"
+        
+        journey_svg = f"""
+        <div style="flex-grow:1; height:140px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); border-radius:12px; padding:10px; display:flex; flex-direction:column; justify-content:space-between; min-width:240px;">
+          <div style="font-size:0.7rem; font-family:monospace; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Emotional Journey (Timeline)</div>
+          <div style="width:100%; height:110px;">
+            <svg viewBox="0 0 {width} {height}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="{journey_id}_line_grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10b981" />
+                  <stop offset="50%" stop-color="#38bdf8" />
+                  <stop offset="100%" stop-color="#ef4444" />
+                </linearGradient>
+                <linearGradient id="{journey_id}_area_grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10b981" stop-opacity="0.25" />
+                  <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.1" />
+                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0.02" />
+                </linearGradient>
+                <filter id="{journey_id}_glow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feGaussianBlur stdDeviation="1.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <line x1="{x_min}" y1="{center_y}" x2="{x_max}" y2="{center_y}" stroke="rgba(255,255,255,0.15)" stroke-dasharray="3,3" stroke-width="1" />
+              <path d="{area_path}" fill="url(#{journey_id}_area_grad)" />
+              <path d="{line_path}" stroke="url(#{journey_id}_line_grad)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#{journey_id}_glow)" />
+              <text x="{x_max}" y="{y_min+4}" text-anchor="end" font-size="8" fill="#10b981" font-family="monospace">Positive</text>
+              <text x="{x_max}" y="{center_y-4}" text-anchor="end" font-size="8" fill="rgba(255,255,255,0.3)" font-family="monospace">Neutral</text>
+              <text x="{x_max}" y="{y_max-4}" text-anchor="end" font-size="8" fill="#ef4444" font-family="monospace">Negative</text>
+            </svg>
+          </div>
+        </div>
+        """
+        
+    themes_html = []
+    for theme in themes:
+        theme_name = theme.get("theme", "")
+        mood = theme.get("mood", "")
+        score = theme.get("score", 50)
+        
+        if mood.lower() in ("analytical", "calm", "neutral"):
+            theme_color = "#38bdf8"
+        elif mood.lower() in ("engaged", "excited", "happy", "positive"):
+            theme_color = "#10b981"
+        elif mood.lower() in ("hesitant", "skeptical", "concerned", "negative"):
+            theme_color = "#f59e0b"
+        else:
+            theme_color = "#a7f3d0"
+            
+        themes_html.append(f"""
+        <div style="display:flex; flex-direction:column; gap:4px; padding:8px 12px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.03); border-radius:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem;">
+            <div style="font-weight:600; color:#f1f5f9; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:70%;">{theme_name}</div>
+            <div style="font-size:0.7rem; font-family:monospace; color:{theme_color}; background:rgba(255,255,255,0.03); padding:1px 6px; border-radius:4px; border:1px solid rgba(255,255,255,0.05); text-transform:uppercase;">{mood}</div>
+          </div>
+          <div style="width:100%; height:4px; background:rgba(255,255,255,0.04); border-radius:2px; overflow:hidden;">
+            <div style="width:{score}%; height:100%; background:{theme_color}; border-radius:2px; box-shadow:0 0 4px {theme_color};"></div>
+          </div>
+        </div>
+        """)
+        
+    themes_container = ""
+    if themes:
+        themes_container = f"""
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:0.7rem; font-family:monospace; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Top Moods & Themes Analysis</div>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+            {"".join(themes_html)}
+          </div>
+        </div>
+        """
+        
+    return f"""
+    <div style="margin:1.5rem 0;padding:24px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px); display:flex; flex-direction:column; gap:20px;">
+      {header_html}
+      <div style="display:flex; flex-wrap:wrap; gap:16px;">
+        {gauge_svg}
+        {journey_svg}
+      </div>
+      {themes_container}
+    </div>
+    """
+
+
 # ── Registry ─────────────────────────────────────────────────────────────────
 
 _RENDERERS = {
@@ -3377,6 +3635,8 @@ _RENDERERS = {
     "punch_card": _render_punch_card,
     "sankey_flow": _render_sankey_flow,
     "cohort_retention": _render_cohort_retention,
+    "task_list": _render_task_list,
+    "sentiment_summary": _render_sentiment_summary,
     "metric_comparison_card": _render_metric_comparison_card,
     "mini_sparkline_set": _render_mini_sparkline_set,
     "status_dashboard": _render_status_dashboard,
