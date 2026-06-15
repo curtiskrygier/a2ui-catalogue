@@ -177,7 +177,7 @@
         "label": {
           "type": "string",
           "required": false,
-          "description": "Caption chip (e.g. `\"\ud83c\udfa5 Live Camera\"`)."
+          "description": "Caption chip (e.g. `\"🎥 Live Camera\"`)."
         },
         "mirrored": {
           "type": "boolean",
@@ -333,7 +333,7 @@
         "revealDelay": {
           "type": "number",
           "required": false,
-          "description": "Seconds to delay the entrance \u2014 stagger across panels to choreograph a staged \"set the stage\" reveal."
+          "description": "Seconds to delay the entrance — stagger across panels to choreograph a staged \"set the stage\" reveal."
         },
         "columns": {
           "type": "number",
@@ -423,7 +423,7 @@
         "columns": {
           "type": "string",
           "required": false,
-          "description": "Grid columns: a number (\u2192 equal columns) or a grid-template string (e.g. \"2fr 1fr\")."
+          "description": "Grid columns: a number (→ equal columns) or a grid-template string (e.g. \"2fr 1fr\")."
         },
         "rows": {
           "type": "string",
@@ -694,7 +694,7 @@
         "targetUrl": {
           "type": "string",
           "required": false,
-          "description": "Legacy shorthand for openUrl call \u2014 opens this URL in a new tab."
+          "description": "Legacy shorthand for openUrl call — opens this URL in a new tab."
         },
         "type": {
           "type": "string",
@@ -887,7 +887,7 @@
         "emoji": {
           "type": "string",
           "required": false,
-          "description": "The emoji to launch (default `\"\ud83d\udc4f\"`)."
+          "description": "The emoji to launch (default `\"👏\"`)."
         },
         "count": {
           "type": "number",
@@ -909,7 +909,7 @@
         "strokes": {
           "type": "array of objects",
           "required": true,
-          "description": "Stroke objects with `points` (array of `[x, y]` pairs, coordinates normalized 0\u20131), optional `color` (string) and `width` (number)."
+          "description": "Stroke objects with `points` (array of `[x, y]` pairs, coordinates normalized 0–1), optional `color` (string) and `width` (number)."
         },
         "active": {
           "type": "boolean",
@@ -931,12 +931,12 @@
         "x": {
           "type": "number",
           "required": true,
-          "description": "Normalized 0\u20131 horizontal position."
+          "description": "Normalized 0–1 horizontal position."
         },
         "y": {
           "type": "number",
           "required": true,
-          "description": "Normalized 0\u20131 vertical position."
+          "description": "Normalized 0–1 vertical position."
         },
         "active": {
           "type": "boolean",
@@ -1117,7 +1117,7 @@
         "scrollSpeed": {
           "type": "number",
           "required": false,
-          "description": "Scroll animation duration in seconds \u2014 lower = faster (default `35`)."
+          "description": "Scroll animation duration in seconds — lower = faster (default `35`)."
         }
       }
     },
@@ -1187,7 +1187,7 @@
     },
     "gdm-captions": {
       "group": "overlay",
-      "description": "Lower-third live caption overlay \u2014 renders the current spoken/narrated line as a large centered pill, keeping the previous line faded above it so each point reads clearly one at a time. Use this to display captions compositionally via render_stage (preferred over the out-of-band transcript stream for agent-driven caption points).",
+      "description": "Lower-third live caption overlay — renders the current spoken/narrated line as a large centered pill, keeping the previous line faded above it so each point reads clearly one at a time. Use this to display captions compositionally via render_stage (preferred over the out-of-band transcript stream for agent-driven caption points).",
       "strict": false,
       "properties": {
         "text": {
@@ -1452,6 +1452,551 @@
         }
       },
       "in_prompt": false
+    },
+    "gdm-theme-slider": {
+      "group": "molecule",
+      "description": "Discrete 3-step theme selector for the AeroPulse GTM demo. Emits `aeropulse-theme-change` events on selection.",
+      "strict": false,
+      "in_prompt": false,
+      "properties": {
+        "value": {
+          "type": "string",
+          "required": false,
+          "description": "Active theme id: `\"cyberpunk\"`, `\"quiet_luxury\"`, `\"eco_futurism\"`."
+        },
+        "participantId": {
+          "type": "string",
+          "required": false,
+          "description": "Participant space id for event routing."
+        },
+        "disabled": {
+          "type": "boolean",
+          "required": false,
+          "description": "Locks the slider."
+        },
+        "order": {
+          "type": "string",
+          "required": false,
+          "description": "JSON array of theme ids controlling display order."
+        }
+      }
+    },
+    "gdm-media-review": {
+      "group": "molecule",
+      "description": "Theme brand review panel: video preview + brief table for the AeroPulse GTM demo. Reacts to `aeropulse-theme-change` events.",
+      "strict": false,
+      "in_prompt": false,
+      "properties": {
+        "theme": {
+          "type": "string",
+          "required": false,
+          "description": "Active theme id."
+        },
+        "videoSrc": {
+          "type": "string",
+          "required": false,
+          "description": "Single video URL (legacy)."
+        },
+        "videos": {
+          "type": "string",
+          "required": false,
+          "description": "JSON map of theme_id → video URL."
+        },
+        "participantId": {
+          "type": "string",
+          "required": false,
+          "description": "Participant space id."
+        },
+        "votingActive": {
+          "type": "boolean",
+          "required": false,
+          "description": "Enables voting interaction."
+        },
+        "briefMap": {
+          "type": "string",
+          "required": false,
+          "description": "JSON map of theme_id → [{label, value}] brief items."
+        },
+        "hideVideo": {
+          "type": "boolean",
+          "required": false,
+          "description": "Hides video panel, shows brief only."
+        },
+        "order": {
+          "type": "string",
+          "required": false,
+          "description": "JSON array of theme ids controlling display order."
+        }
+      }
+    },
+    "gdm-lock-trigger": {
+      "group": "molecule",
+      "description": "Vote lock-in button for the AeroPulse GTM demo. Tracks current theme via events; fires lock endpoint on click.",
+      "strict": false,
+      "in_prompt": false,
+      "properties": {
+        "spaceId": {
+          "type": "string",
+          "required": true,
+          "description": "Participant space id — appended to the lock endpoint."
+        },
+        "participantId": {
+          "type": "string",
+          "required": false,
+          "description": "Display name / identity."
+        },
+        "baseEndpoint": {
+          "type": "string",
+          "required": false,
+          "description": "Base fire endpoint (default `/api/playbook/fire/aeropulse_gtm`)."
+        }
+      }
+    },
+    "gdm-matrix-text": {
+      "group": "atom",
+      "description": "Matrix-style character scramble text. Letters decode left-to-right from random characters to the final string on mount.",
+      "strict": false,
+      "properties": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Target string to decode to."
+        },
+        "color": {
+          "type": "string",
+          "required": false,
+          "description": "Text colour (default `\"#00ff41\"`)."
+        },
+        "fontSize": {
+          "type": "string",
+          "required": false,
+          "description": "Font size CSS value (default `\"11px\"`)."
+        },
+        "speed": {
+          "type": "number",
+          "required": false,
+          "description": "Milliseconds per scramble frame (default `40`)."
+        },
+        "framesPerChar": {
+          "type": "number",
+          "required": false,
+          "description": "Number of scramble frames before each character settles (default `6`)."
+        },
+        "cursor": {
+          "type": "boolean",
+          "required": false,
+          "description": "Show a blinking cursor after the text."
+        }
+      }
+    },
+    "ext-button": {
+      "group": "atom",
+      "description": "Button with animated variants (shimmer, glowingRing, perimeterShimmer, bouncing, ringHover). Integrates with A2UI action protocol.",
+      "strict": true,
+      "in_prompt": false,
+      "properties": {
+        "loading": {
+          "type": "boolean",
+          "required": false,
+          "description": "loading"
+        },
+        "tooltip": {
+          "type": "string",
+          "required": false,
+          "description": "Tooltip shown on hover."
+        },
+        "action": {
+          "type": "object",
+          "required": false,
+          "description": "A2UI action: { functionCall: { call, args } } or { event: { name } }."
+        },
+        "targetUrl": {
+          "type": "object",
+          "required": false,
+          "description": "Shorthand for action.functionCall openUrl."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "React state removed; children→text; onClick→action (A2UI protocol)"
+      }
+    },
+    "ext-badge": {
+      "group": "atom",
+      "description": "Inline status badge. Variants: default, secondary, destructive, outline.",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Badge label text."
+        },
+        "variant": {
+          "type": "string",
+          "required": false,
+          "description": "Visual style: default | secondary | destructive | outline.",
+          "default": "default"
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "children→text prop; React.HTMLAttributes dropped"
+      }
+    },
+    "ext-alert": {
+      "group": "atom",
+      "description": "Status alert banner. Variants: default, destructive.",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Alert heading text."
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "Alert body text."
+        },
+        "variant": {
+          "type": "string",
+          "required": false,
+          "description": "Visual style: default | destructive.",
+          "default": "default"
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "Compound Alert/AlertTitle/AlertDescription collapsed to single component"
+      }
+    },
+    "ext-card": {
+      "group": "molecule",
+      "description": "Content card with optional title, description, body, and footer. Collapses Card/CardHeader/CardContent/CardFooter into one component.",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "title": {
+          "type": "string",
+          "required": false,
+          "description": "Card heading."
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "Card sub-heading below title."
+        },
+        "content": {
+          "type": "string",
+          "required": false,
+          "description": "Card body text."
+        },
+        "footer": {
+          "type": "string",
+          "required": false,
+          "description": "Card footer text."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "Compound React components collapsed into single Lit element; slot layout handled internally via CSS grid.\n"
+      }
+    },
+    "ext-checkbox": {
+      "group": "atom",
+      "description": "Accessible checkbox. Fires a2ui-action event on change.",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "checked": {
+          "type": "boolean",
+          "required": false,
+          "description": "Whether checkbox is checked."
+        },
+        "disabled": {
+          "type": "boolean",
+          "required": false,
+          "description": "Disables the checkbox."
+        },
+        "label": {
+          "type": "string",
+          "required": false,
+          "description": "Visible label text."
+        },
+        "name": {
+          "type": "string",
+          "required": false,
+          "description": "Form field name."
+        },
+        "value": {
+          "type": "string",
+          "required": false,
+          "description": "Form field value."
+        },
+        "action": {
+          "type": "object",
+          "required": false,
+          "description": "A2UI action fired on change: { functionCall } or { event }."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "onCheckedChange wired to a2ui-action event dispatch; Radix CheckboxPrimitive replaced with native input + custom styling.\n"
+      }
+    },
+    "ext-input": {
+      "group": "atom",
+      "description": "Text input with optional variants (default, filled, flushed). Fires a2ui-action on value commit (Enter / blur).",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "value": {
+          "type": "string",
+          "required": false,
+          "description": "Input value."
+        },
+        "placeholder": {
+          "type": "string",
+          "required": false,
+          "description": "Placeholder text."
+        },
+        "type": {
+          "type": "string",
+          "required": false,
+          "description": "Input type: text | email | number | password | search.",
+          "default": "text"
+        },
+        "variant": {
+          "type": "string",
+          "required": false,
+          "description": "Visual style: default | filled | flushed.",
+          "default": "default"
+        },
+        "disabled": {
+          "type": "boolean",
+          "required": false,
+          "description": "Disables the input."
+        },
+        "required": {
+          "type": "boolean",
+          "required": false,
+          "description": "Marks field as required."
+        },
+        "error": {
+          "type": "string",
+          "required": false,
+          "description": "Error message shown below input."
+        },
+        "label": {
+          "type": "string",
+          "required": false,
+          "description": "Label text above input."
+        },
+        "action": {
+          "type": "object",
+          "required": false,
+          "description": "A2UI action fired on Enter or blur."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "Password toggle removed; React context replaced with direct Lit props; onChange/onBlur collapsed to action dispatch on commit.\n"
+      }
+    },
+    "ext-label": {
+      "group": "atom",
+      "description": "Accessible form label. Associates with an input via the for prop.",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "text": {
+          "type": "string",
+          "required": true,
+          "description": "Label text."
+        },
+        "for": {
+          "type": "string",
+          "required": false,
+          "description": "ID of the associated input element."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "Radix Label.Root replaced with native label; className dropped"
+      }
+    },
+    "ext-switch": {
+      "group": "atom",
+      "description": "Toggle switch. Fires a2ui-action on change.",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "checked": {
+          "type": "boolean",
+          "required": false,
+          "description": "Whether switch is on."
+        },
+        "disabled": {
+          "type": "boolean",
+          "required": false,
+          "description": "Disables the switch."
+        },
+        "label": {
+          "type": "string",
+          "required": false,
+          "description": "Visible label beside the switch."
+        },
+        "action": {
+          "type": "object",
+          "required": false,
+          "description": "A2UI action fired on toggle."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "Radix Switch replaced with native button + CSS track/thumb; onCheckedChange wired to a2ui-action event dispatch.\n"
+      }
+    },
+    "ext-textarea": {
+      "group": "atom",
+      "description": "Multi-line text input. Fires a2ui-action on commit (blur or Ctrl+Enter).",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "value": {
+          "type": "string",
+          "required": false,
+          "description": "Textarea content."
+        },
+        "placeholder": {
+          "type": "string",
+          "required": false,
+          "description": "Placeholder text."
+        },
+        "rows": {
+          "type": "number",
+          "required": false,
+          "description": "Visible row count."
+        },
+        "disabled": {
+          "type": "boolean",
+          "required": false,
+          "description": "Disables the textarea."
+        },
+        "required": {
+          "type": "boolean",
+          "required": false,
+          "description": "Marks field as required."
+        },
+        "maxLength": {
+          "type": "number",
+          "required": false,
+          "description": "Max character count."
+        },
+        "label": {
+          "type": "string",
+          "required": false,
+          "description": "Label text above textarea."
+        },
+        "action": {
+          "type": "object",
+          "required": false,
+          "description": "A2UI action fired on blur or Ctrl+Enter."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "React.forwardRef removed; onBlur/onChange collapsed to action dispatch on commit"
+      }
+    },
+    "ext-table": {
+      "group": "molecule",
+      "description": "Data table with headers and row data passed as JSON arrays. Collapses Table/TableHeader/TableBody/TableRow/TableCell into one component.",
+      "strict": true,
+      "in_prompt": false,
+      "properties": {
+        "headers": {
+          "type": "string",
+          "required": false,
+          "description": "JSON array of column header strings. e.g. '[\"Name\",\"Value\"]'"
+        },
+        "rows": {
+          "type": "string",
+          "required": false,
+          "description": "JSON array of row arrays. e.g. '[[\"Alice\",\"100\"],[\"Bob\",\"200\"]]'"
+        },
+        "caption": {
+          "type": "string",
+          "required": false,
+          "description": "Optional table caption."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "Compound HTML table structure collapsed into single Lit element; data passed as JSON-serialisable headers + rows props.\n"
+      }
+    },
+    "ext-tabs": {
+      "group": "molecule",
+      "description": "Tab navigation. Tabs defined as a JSON array of {id, label, content} objects.",
+      "strict": true,
+      "in_prompt": true,
+      "properties": {
+        "tabs": {
+          "type": "string",
+          "required": true,
+          "description": "JSON array of tab objects: [{id, label, content}]."
+        },
+        "value": {
+          "type": "string",
+          "required": false,
+          "description": "Active tab id."
+        },
+        "action": {
+          "type": "object",
+          "required": false,
+          "description": "A2UI action fired when active tab changes."
+        }
+      },
+      "source": {
+        "name": "Extend UI",
+        "url": "https://github.com/extendlabs/ui",
+        "license": "MIT",
+        "copyright": "Copyright (c) 2024 extendui",
+        "modifications": "Radix Tabs compound (TabsList/TabsTrigger/TabsContent) collapsed into single Lit element; tabs data passed as JSON prop; onValueChange→action dispatch.\n"
+      }
     }
   }
 }

@@ -1,15 +1,3 @@
-# atoms/schema.yaml — universal block vocabulary
-#
-# Surface compatibility:
-#   works_on: full support
-#   degraded_on: renders with caveats
-#   incompatible_on: do not use
-#
-# Source credit:
-#   Every atom declares its origin.
-#
-# Surfaces: web | meet-stage | googlechat | email | pdf
-
 blocks:
 - type: intro
   description: Italic series link and/or transparency note shown at the top
@@ -153,6 +141,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: iframes not supported — use image with link instead
@@ -163,6 +152,32 @@ blocks:
   fields:
     url: string
     caption: string (optional)
+  embedding_notes:
+    referrerpolicy_warning: 'Never set referrerpolicy="no-referrer" on a YouTube iframe.
+      YouTube uses the HTTP Referer header to validate the embedding domain. Suppressing
+      it causes Error 153 ("Video player configuration error") even when the video
+      owner has not disabled embedding. Omit the attribute entirely.
+
+      '
+    allow_attribute: 'Always include allow="autoplay; encrypted-media" on the iframe
+      element. This is required for autoplay to work under the browser Permissions
+      Policy.
+
+      '
+    meet_stage_params: 'On meet-stage, the renderer uses autoplay+muted params so
+      video starts immediately without user interaction: ?autoplay=1&mute=1&controls=0&loop=1&playlist={vid_id}&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&fs=0
+      autoplay=1 + mute=1 is required as a pair — Chrome blocks unmuted autoplay.
+      controls=0 hides the player bar. loop=1 requires playlist={vid_id} to work.
+
+      '
+    oopif_layout_note: 'YouTube iframes are rendered as OOPIF (Out-of-Process IFrame)
+      compositor layers in Chrome. The OOPIF layer covers only the iframe''s own bounding
+      rectangle — not the full viewport. HTML siblings placed below the iframe in
+      a flex column are fully accessible and interactive. The constraint is only that
+      you cannot overlay HTML elements on top of the iframe''s rect (z-index tricks
+      won''t work within its bounds).
+
+      '
   source: *id001
 - type: image
   description: Single image with caption, hosted at a public URL
@@ -224,7 +239,8 @@ blocks:
     caption: string (optional)
   source: *id001
 - type: github_repo_card
-  description: GitHub repo card — fetches live star/fork/language/push data from GitHub API at render time and embeds as self-contained HTML
+  description: GitHub repo card — fetches live star/fork/language/push data from GitHub
+    API at render time and embeds as self-contained HTML
   compact_description: live GitHub repo card with stars forks and language
   surfaces:
     works_on:
@@ -239,9 +255,9 @@ blocks:
     - surface: pdf
       note: not supported
   fields:
-    repo: string       # e.g. "curtiskrygier/a2ui-catalogue"
-    label: string      # optional display name override
-    description: string # optional description override
+    repo: string
+    label: string
+    description: string
   source: *id001
 - type: repo_links
   description: Formatted GitHub repo link list at end of article
@@ -312,8 +328,7 @@ blocks:
   source: *id001
 - type: table
   description: HTML table with styled headers, alternating rows, horizontal scroll
-  compact_description: data table with header row
-    on mobile
+  compact_description: data table with header row on mobile
   surfaces:
     works_on:
     - web
@@ -337,6 +352,7 @@ blocks:
     - web
     - meet-stage
     degraded_on: []
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS radio button trick not supported — use separate code blocks
@@ -374,8 +390,7 @@ blocks:
   source: *id001
 - type: before_after
   description: Side-by-side code comparison — red/green panels showing old vs new
-  compact_description: side-by-side code or content before and after comparison
-    approach
+  compact_description: side-by-side code or content before and after comparison approach
   surfaces:
     works_on:
     - web
@@ -399,8 +414,7 @@ blocks:
   source: *id001
 - type: api_reference
   description: Full API/function reference block — name, description, parameters table,
-  compact_description: API endpoint method parameters and response docs
-    returns, example
+  compact_description: API endpoint method parameters and response docs returns, example
   surfaces:
     works_on:
     - web
@@ -460,6 +474,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: iframes not supported — use two image thumbnails with links
@@ -475,6 +490,9 @@ blocks:
     right:
       url: string
       label: string (optional)
+  embedding_notes:
+    referrerpolicy_warning: See youtube atom — same rule applies. Never set referrerpolicy="no-referrer".
+    allow_attribute: Include allow="autoplay; encrypted-media" on each iframe.
   source: *id001
 - type: carousel
   description: CSS-only sliding carousel with dot indicators and prev/next arrows
@@ -548,8 +566,7 @@ blocks:
   source: *id001
 - type: stat_card
   description: Glowing neon stat card — large value with label and optional delta
-  compact_description: single KPI value with label delta and accent colour
-    indicator
+  compact_description: single KPI value with label delta and accent colour indicator
   source: &id002
     name: UIverse.io community
     url: https://uiverse.io
@@ -618,8 +635,7 @@ blocks:
       pulse: bool (optional)
 - type: sparkline
   description: Renders a small, simple line chart without axes or coordinates, showing
-  compact_description: inline SVG trend line chart
-    general trends.
+  compact_description: inline SVG trend line chart general trends.
   source: &id003
     name: UIverse.io community
     url: https://uiverse.io
@@ -628,6 +644,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Requires SVG or Canvas rendering which is not supported. Consider `metric_delta`
@@ -646,13 +663,14 @@ blocks:
     width: string (CSS width value, e.g., '80px')
 - type: heatmap
   description: Renders a graphical representation of data where individual values
-  compact_description: grid heatmap coloured by intensity value
-    are represented as colors in a matrix.
+  compact_description: grid heatmap coloured by intensity value are represented as
+    colors in a matrix.
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Requires complex grid and color rendering which is not supported. No
@@ -671,7 +689,8 @@ blocks:
       for white to red)
     unit: string (optional, unit for the data values, e.g., '°C')
 - type: punch_card
-  description: Renders a Day-of-Week vs. Hour-of-Day bubble grid (punch card) of repository or commit activity, where bubble size is proportional to activity.
+  description: Renders a Day-of-Week vs. Hour-of-Day bubble grid (punch card) of repository
+    or commit activity, where bubble size is proportional to activity.
   compact_description: 7x24 grid of glowing activity bubbles representing hourly commits
   source:
     name: a2ui-catalogue
@@ -681,6 +700,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Requires complex SVG bubble rendering which is not supported.
@@ -689,14 +709,18 @@ blocks:
     - surface: pdf
       reason: Requires SVG, not supported in static PDFs.
   fields:
-    data: list of lists of numbers (7 rows representing days of week, each containing 24 numbers representing commit frequency for each hour)
-    labels_days: list of strings (optional, e.g., ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
+    data: list of lists of numbers (7 rows representing days of week, each containing
+      24 numbers representing commit frequency for each hour)
+    labels_days: list of strings (optional, e.g., ['Mon', 'Tue', 'Wed', 'Thu', 'Fri',
+      'Sat', 'Sun'])
     color: string (optional, hex or named color for active bubbles, e.g., '#00f2ff')
     title: string (optional, title of the repository or chart, e.g., 'Commit Activity')
     subtitle: string (optional, subtitle, e.g., 'curtiskrygier/meetstudio')
 - type: sankey_flow
-  description: Renders a flow diagram (Sankey flow) where left-hand source nodes connect to right-hand target nodes via beautiful, curved gradient Bezier bands.
-  compact_description: curved dual-column gradient flow diagram for financial or pipeline streams
+  description: Renders a flow diagram (Sankey flow) where left-hand source nodes connect
+    to right-hand target nodes via beautiful, curved gradient Bezier bands.
+  compact_description: curved dual-column gradient flow diagram for financial or pipeline
+    streams
   source:
     name: a2ui-catalogue
     url: https://github.com/curtiskrygier/a2ui-catalogue
@@ -705,6 +729,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Requires complex SVG path calculations.
@@ -713,12 +738,16 @@ blocks:
     - surface: pdf
       reason: Requires SVG, not supported in static PDFs.
   fields:
-    nodes: "list of dictionaries representing columns (e.g., [{'id': 'revenue', 'label': 'Revenue', 'column': 0, 'color': '#10b981'}, ...])"
-    links: "list of dictionaries representing flows (e.g., [{'source': 'revenue', 'target': 'marketing', 'value': 25000, 'color': '#38bdf8'}, ...])"
+    nodes: 'list of dictionaries representing columns (e.g., [{''id'': ''revenue'',
+      ''label'': ''Revenue'', ''column'': 0, ''color'': ''#10b981''}, ...])'
+    links: 'list of dictionaries representing flows (e.g., [{''source'': ''revenue'',
+      ''target'': ''marketing'', ''value'': 25000, ''color'': ''#38bdf8''}, ...])'
     title: string (optional, title of the chart, e.g., 'Financial Flow Allocation')
 - type: cohort_retention
-  description: Renders a SaaS subscription or customer cohort retention triangular matrix with color-coded continuous gradients.
-  compact_description: triangular cohort retention grid with continuous color-scale rendering
+  description: Renders a SaaS subscription or customer cohort retention triangular
+    matrix with color-coded continuous gradients.
+  compact_description: triangular cohort retention grid with continuous color-scale
+    rendering
   source:
     name: a2ui-catalogue
     url: https://github.com/curtiskrygier/a2ui-catalogue
@@ -727,6 +756,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Requires complex triangular layout and color scale.
@@ -735,14 +765,17 @@ blocks:
     - surface: pdf
       reason: Requires SVG or CSS grid.
   fields:
-    cohorts: "list of dictionaries representing cohorts (e.g., [{'cohort_name': 'Jan 2026', 'original_size': 2500, 'retention_rates': [100.0, 93.4]}])"
-    periods: "list of strings representing period headers (e.g., ['Month 0', 'Month 1'])"
-    color_scale: "list of strings representing the continuous color scale (e.g., ['#1e293b', '#10b981'])"
-    title: "string (optional, chart title, e.g., 'SaaS Retention Cohorts')"
+    cohorts: 'list of dictionaries representing cohorts (e.g., [{''cohort_name'':
+      ''Jan 2026'', ''original_size'': 2500, ''retention_rates'': [100.0, 93.4]}])'
+    periods: list of strings representing period headers (e.g., ['Month 0', 'Month
+      1'])
+    color_scale: list of strings representing the continuous color scale (e.g., ['#1e293b',
+      '#10b981'])
+    title: string (optional, chart title, e.g., 'SaaS Retention Cohorts')
 - type: donut_stat
   description: Renders a single key metric with a surrounding donut chart indicating
-  compact_description: CSS ring chart with centre value and percentage
-    its proportion or progress.
+  compact_description: CSS ring chart with centre value and percentage its proportion
+    or progress.
   source: *id003
   surfaces:
     works_on:
@@ -768,8 +801,8 @@ blocks:
     size: string (CSS size value, e.g., '100px')
 - type: metric_delta
   description: Renders a key performance indicator with its current value and a numerical
-  compact_description: big number metric with directional change indicator
-    or percentage change from a previous period, often with an up/down indicator.
+  compact_description: big number metric with directional change indicator or percentage
+    change from a previous period, often with an up/down indicator.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev
@@ -789,8 +822,10 @@ blocks:
     unit: string (optional, unit for the current value, e.g., 'USD')
     previous_period_label: string (optional, e.g., 'vs. last month')
 - type: task_list
-  description: Renders a premium, glassmorphic checklist and action item tracker with status checkboxes, priorities, assignees, and due dates.
-  compact_description: glassmorphic structured checklist with priority and assignee badges
+  description: Renders a premium, glassmorphic checklist and action item tracker with
+    status checkboxes, priorities, assignees, and due dates.
+  compact_description: glassmorphic structured checklist with priority and assignee
+    badges
   source:
     name: a2ui-catalogue
     url: https://github.com/curtiskrygier/a2ui-catalogue
@@ -799,6 +834,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Requires detailed HTML/SVG listing styles.
@@ -807,10 +843,15 @@ blocks:
     - surface: pdf
       reason: Requires interactive layout rendering.
   fields:
-    title: "string (optional, e.g., 'Google Tasks & Action Items')"
-    tasks: "list of dictionaries representing tasks, where each dictionary contains: {'id': string, 'text': string, 'completed': boolean, 'priority': string (high|medium|low), 'due_date': string (optional), 'assignee': string (optional, initials e.g. 'CK')}"
+    title: string (optional, e.g., 'Google Tasks & Action Items')
+    tasks: 'list of dictionaries representing tasks, where each dictionary contains:
+      {''id'': string, ''text'': string, ''completed'': boolean, ''priority'': string
+      (high|medium|low), ''due_date'': string (optional), ''assignee'': string (optional,
+      initials e.g. ''CK'')}'
 - type: sentiment_summary
-  description: Renders an emotional summary and sentiment tracker for a call or meeting, showing positive/negative/neutral mix, sentiment index progress arc, and emotional journey area timeline.
+  description: Renders an emotional summary and sentiment tracker for a call or meeting,
+    showing positive/negative/neutral mix, sentiment index progress arc, and emotional
+    journey area timeline.
   compact_description: meeting sentiment analyzer with index arc and timeline chart
   source:
     name: a2ui-catalogue
@@ -820,6 +861,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Requires complex SVG emotional timeline path rendering.
@@ -828,14 +870,17 @@ blocks:
     - surface: pdf
       reason: Requires dynamic visual projections.
   fields:
-    title: "string (optional, e.g., 'Call Sentiment & Mood Analysis')"
-    sentiment_index: "number representing overall positive sentiment percentage (0-100, e.g., 78)"
-    emotional_journey: "list of numbers representing call sentiment score over time intervals (values -1.0 to 1.0, e.g., [0.1, -0.2, 0.4, 0.8, 0.6])"
-    themes: "list of dictionaries representing key themes with weights or moods: [{'theme': 'Technical Alignment', 'mood': 'Analytical', 'score': 85}, ...]"
+    title: string (optional, e.g., 'Call Sentiment & Mood Analysis')
+    sentiment_index: number representing overall positive sentiment percentage (0-100,
+      e.g., 78)
+    emotional_journey: list of numbers representing call sentiment score over time
+      intervals (values -1.0 to 1.0, e.g., [0.1, -0.2, 0.4, 0.8, 0.6])
+    themes: 'list of dictionaries representing key themes with weights or moods: [{''theme'':
+      ''Technical Alignment'', ''mood'': ''Analytical'', ''score'': 85}, ...]'
 - type: trend_indicator
   description: Renders a simple visual indicator (e.g., arrow, icon) representing
-  compact_description: compact inline value with mini trend bar
-    the direction of a trend, often accompanied by a descriptive text.
+  compact_description: compact inline value with mini trend bar the direction of a
+    trend, often accompanied by a descriptive text.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev
@@ -856,8 +901,7 @@ blocks:
       'up', 'red' for 'down')
 - type: breadcrumb
   description: A navigation aid indicating the user's current location within a hierarchical
-  compact_description: navigation breadcrumb trail
-    structure.
+  compact_description: navigation breadcrumb trail structure.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com
@@ -905,9 +949,11 @@ blocks:
     base_url: string (the URL prefix for all page links)
     page_param: string (e.g., 'page', the query parameter name for the page number)
 - type: stepper
-  description: A component that displays progress through a sequence of logical and
-  compact_description: multi-step form or wizard progress indicator
-    numbered steps.
+  description: Vertical step sequence where completed steps show an animated SVG
+    checkmark draw, the active step pulses with a sonar-style glow ring, and pending
+    steps are muted. State is driven by active_index — a single integer the agent
+    increments as each step completes. No JavaScript required.
+  compact_description: CSS animated vertical step sequence with checkmark draw and active pulse
   source:
     name: a2ui-catalogue
     url: https://a2ui.com
@@ -916,23 +962,23 @@ blocks:
     works_on:
     - web
     - meet-stage
+    - gas-sidebar
     degraded_on:
     - surface: googlechat
-      note: Renders as a list of text items, possibly with emojis for status, but
-        without visual connectors or progress lines.
+      note: Renders as a plain text list with emoji status markers; no connectors or animation.
     - surface: email
-      note: Renders as a simple ordered list, losing visual progress indicators and
-        interactive states.
+      note: Renders as a simple ordered list; no visual states.
     - surface: pdf
-      note: Renders as a simple ordered list, losing visual progress indicators and
-        interactive states.
+      note: Renders as a static ordered list at the active_index state; no animation.
   fields:
-    steps: 'list of {label: string, is_completed: boolean, is_current: boolean, is_optional:
-      boolean (optional), description: string (optional)}'
+    steps: 'list of strings or {label, description} objects. Each step in the sequence.'
+    active_index: 'integer (optional, default 0). Index of the currently executing step. Steps before it are completed; steps after are pending.'
+    color: 'string (optional). Accent colour for completed/active states. Default "#38bdf8".'
+    label: 'string (optional). Heading above the step list.'
 - type: tab_bar
   description: A horizontal navigation component displaying a set of clickable tabs,
-  compact_description: horizontal tab navigation bar
-    typically leading to different sections or pages.
+  compact_description: horizontal tab navigation bar typically leading to different
+    sections or pages.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com
@@ -956,8 +1002,7 @@ blocks:
       e.g., ''home'')}'
 - type: anchor_list
   description: A list of links that navigate to specific sections within the current
-  compact_description: in-page anchor navigation links
-    document or to external URLs.
+  compact_description: in-page anchor navigation links document or to external URLs.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com
@@ -977,8 +1022,7 @@ blocks:
       in-document navigation on web/pdf)}'
 - type: faq_accordion
   description: Renders a list of questions and answers, where answers are hidden until
-  compact_description: collapsible FAQ question and answer list
-    the question is clicked.
+  compact_description: collapsible FAQ question and answer list the question is clicked.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com
@@ -999,8 +1043,7 @@ blocks:
     items: list of objects, each with 'question' (string) and 'answer' (string)
 - type: glossary_term
   description: Renders a term with its definition, often with an optional link for
-  compact_description: definition term with explanation
-    more details.
+  compact_description: definition term with explanation more details.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com
@@ -1019,8 +1062,7 @@ blocks:
     link_url: optional string (URL for more details)
 - type: footnote
   description: Renders a numbered footnote reference and its corresponding text, typically
-  compact_description: numbered footnote reference
-    at the bottom of a section or page.
+  compact_description: numbered footnote reference at the bottom of a section or page.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com
@@ -1062,8 +1104,8 @@ blocks:
     avatar_url: optional string (URL to the author's avatar image)
 - type: pull_stat
   description: Renders a prominent, large statistic or number, often with a brief
-  compact_description: large display number pulled from prose for emphasis
-    descriptive label.
+  compact_description: large display number pulled from prose for emphasis descriptive
+    label.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com
@@ -1082,8 +1124,8 @@ blocks:
     color: optional string (hex code or named color for the value)
 - type: accordion_item
   description: Renders a single section of content that can be expanded or collapsed
-  compact_description: single collapsible section with toggle
-    by clicking its header, using only CSS.
+  compact_description: single collapsible section with toggle by clicking its header,
+    using only CSS.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1092,6 +1134,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Relies on CSS `:checked` pseudo-class for interactivity, which is not
@@ -1107,8 +1150,8 @@ blocks:
     content: string The main content to be shown or hidden.
 - type: tooltip
   description: Renders a small, informational popup that appears when a user hovers
-  compact_description: hover tooltip on a trigger element
-    over a specified trigger element, using only CSS.
+  compact_description: hover tooltip on a trigger element over a specified trigger
+    element, using only CSS.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1117,6 +1160,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Relies on CSS `:hover` pseudo-class for interactivity, which is not
@@ -1132,8 +1176,8 @@ blocks:
     tooltip_content: string The content displayed within the tooltip.
 - type: hover_card
   description: Renders a rich content card that appears when a user hovers over a
-  compact_description: rich hover card revealed on mouse over
-    specified trigger element, using only CSS.
+  compact_description: rich hover card revealed on mouse over specified trigger element,
+    using only CSS.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1142,6 +1186,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Relies on CSS `:hover` pseudo-class for interactivity, which is not
@@ -1160,8 +1205,8 @@ blocks:
     card_image_url: string, optional An optional image to display within the card.
 - type: collapsible_panel
   description: Renders a standalone section of content that can be toggled between
-  compact_description: expandable content panel with header toggle
-    visible and hidden states by clicking a control, using only CSS.
+  compact_description: expandable content panel with header toggle visible and hidden
+    states by clicking a control, using only CSS.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1170,6 +1215,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Relies on CSS `:checked` pseudo-class for interactivity, which is not
@@ -1187,13 +1233,14 @@ blocks:
     content: string The main content to be shown or hidden.
 - type: css_modal
   description: Renders a modal dialog that appears on click and can be dismissed,
-  compact_description: pure-CSS modal dialog triggered by checkbox
-    controlled purely by CSS without JavaScript.
+  compact_description: pure-CSS modal dialog triggered by checkbox controlled purely
+    by CSS without JavaScript.
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Relies on CSS `:checked` pseudo-class for interactivity and fixed positioning,
@@ -1251,8 +1298,7 @@ blocks:
     icon_type: string
 - type: pdf_preview
   description: Renders an image thumbnail of a PDF document with a link to the full
-  compact_description: embedded PDF preview panel
-    PDF.
+  compact_description: embedded PDF preview panel PDF.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1275,8 +1321,7 @@ blocks:
     alt_text: string
 - type: document_link
   description: Renders a clickable link to a document (e.g., PDF, DOCX), often with
-  compact_description: styled link to a downloadable document
-    a document icon.
+  compact_description: styled link to a downloadable document a document icon.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1294,8 +1339,8 @@ blocks:
     icon_type: string
 - type: video_thumbnail
   description: Renders a static image thumbnail for a video, with a play icon overlay
-  compact_description: clickable video thumbnail with play button
-    and a link to the video source.
+  compact_description: clickable video thumbnail with play button and a link to the
+    video source.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1318,8 +1363,7 @@ blocks:
     title: string
 - type: video_card
   description: Renders a card with a video thumbnail, title, and description, linking
-  compact_description: video with title description and metadata
-    to the video source.
+  compact_description: video with title description and metadata to the video source.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1342,9 +1386,11 @@ blocks:
     description: string
     alt_text: string
 - type: code_diff
-  description: Renders a side-by-side or inline comparison of two code blocks, highlighting
-  compact_description: side-by-side diff with additions and deletions highlighted
-    additions and deletions.
+  description: Unified diff view computed server-side via Python difflib. Added lines
+    have a green left border and fade-in background; removed lines have red. Unchanged
+    context lines are neutral. Optional line numbers, language badge, and title. No
+    JavaScript required — diff is computed at render time, not in the browser.
+  compact_description: server-side unified diff view with green additions and red removals
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1353,25 +1399,26 @@ blocks:
     works_on:
     - web
     - meet-stage
-    incompatible_on:
+    - gas-sidebar
+    degraded_on:
     - surface: googlechat
-      reason: Requires complex HTML/CSS for diff highlighting and layout, which is
-        not supported.
-    - surface: email
-      reason: Requires complex HTML/CSS for diff highlighting and layout, which is
-        not supported.
+      note: Renders as plain monospace text block; no colour highlighting.
     - surface: pdf
-      reason: Requires dynamic rendering for diff highlighting and layout, which is
-        not supported.
+      note: Renders as a static diff without colour; additions and removals shown with +/- prefix only.
+    incompatible_on:
+    - surface: email
+      reason: CSS background-color and border-left highlighting stripped by email clients.
   fields:
-    old_code: string
-    new_code: string
-    language: string
-    diff_type: string
+    old_code: 'string. The original text (before state).'
+    new_code: 'string. The updated text (after state).'
+    label: 'string (optional). Title shown in the header bar.'
+    language: 'string (optional). Language badge shown in header, e.g. "python", "typescript".'
+    show_line_numbers: 'bool (optional). Show line numbers. Default true.'
+    context_lines: 'integer (optional). Unchanged lines shown around each change. Default 3.'
 - type: code_snippet_pair
   description: Renders two distinct code snippets side-by-side or stacked, without
-  compact_description: two code blocks side by side without diff highlighting
-    diff highlighting.
+  compact_description: two code blocks side by side without diff highlighting diff
+    highlighting.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1393,8 +1440,7 @@ blocks:
     right_label: string
 - type: framed_screenshot
   description: Renders an image within a decorative frame, simulating a device (e.g.,
-  compact_description: device-framed screenshot with optional caption
-    browser, phone).
+  compact_description: device-framed screenshot with optional caption browser, phone).
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1403,6 +1449,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Requires complex CSS for device framing, which is not supported.
@@ -1436,8 +1483,7 @@ blocks:
     link_url: string
 - type: alert_banner
   description: A prominent banner displaying a message, often with an icon and an
-  compact_description: full-width status alert strip
-    optional action.
+  compact_description: full-width status alert strip optional action.
   source: *id003
   surfaces:
     works_on:
@@ -1459,13 +1505,13 @@ blocks:
     action_url: string Optional URL for the action button.
 - type: toast_notification
   description: A small, temporary, non-intrusive message that appears and disappears
-  compact_description: transient popup notification message
-    automatically.
+  compact_description: transient popup notification message automatically.
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Google Chat does not support transient, non-blocking UI elements or
@@ -1478,13 +1524,14 @@ blocks:
     duration: integer The time in milliseconds the toast should be visible.
 - type: loading_skeleton
   description: A placeholder UI that shows the structure of content while it's loading,
-  compact_description: animated placeholder skeleton while content loads
-    indicating active data fetching.
+  compact_description: animated placeholder skeleton while content loads indicating
+    active data fetching.
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Google Chat does not support custom UI elements with animated loading
@@ -1498,8 +1545,8 @@ blocks:
     has_image: boolean Indicates if the skeleton should include an image placeholder.
 - type: empty_state
   description: A UI pattern displayed when there is no data to show, often with an
-  compact_description: zero-data empty state with icon and call to action
-    image, message, and an optional call to action.
+  compact_description: zero-data empty state with icon and call to action image, message,
+    and an optional call to action.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1523,13 +1570,13 @@ blocks:
     action_url: string Optional URL for the call to action button.
 - type: spinner
   description: A simple rotating animation indicating that content is loading or an
-  compact_description: loading spinner indicator
-    operation is in progress.
+  compact_description: loading spinner indicator operation is in progress.
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Google Chat does not support custom animated loading indicators.
@@ -1540,8 +1587,7 @@ blocks:
     color: string The color of the spinner (e.g., "primary", "gray").
 - type: status_pill
   description: A small, colored label or "pill" used to display a concise status for
-  compact_description: coloured status pill badge
-    an item.
+  compact_description: coloured status pill badge an item.
   source: *id003
   surfaces:
     works_on:
@@ -1561,8 +1607,8 @@ blocks:
     icon: string Optional icon to display within the pill.
 - type: inline_feedback_message
   description: A small, contextual message displayed inline with content, often used
-  compact_description: inline success error or warning message
-    for validation feedback or hints.
+  compact_description: inline success error or warning message for validation feedback
+    or hints.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1582,8 +1628,7 @@ blocks:
     icon: string Optional icon to display next to the message.
 - type: rating_stars
   description: A visual component allowing users to rate an item using a series of
-  compact_description: star rating display
-    stars, or displaying a static rating.
+  compact_description: star rating display stars, or displaying a static rating.
   source: *id003
   surfaces:
     works_on:
@@ -1601,29 +1646,34 @@ blocks:
     max_rating: integer The maximum possible rating (e.g., 5 for 5 stars).
     is_interactive: boolean Indicates if the stars are clickable for user input.
 - type: progress_circle
-  description: A circular progress indicator, often with a percentage or value displayed
-  compact_description: circular progress ring with percentage
-    in the center.
+  description: SVG circular progress arc that animates from 0 to the target value on
+    mount using CSS stroke-dashoffset transition. Percentage is displayed in the centre.
+    Replaces the prior placeholder implementation with a proper animated SVG arc.
+    No JavaScript required.
+  compact_description: CSS stroke-dashoffset animated SVG progress arc with centre percentage
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    - gas-sidebar
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static arc at target value without mount animation
     incompatible_on:
     - surface: googlechat
-      reason: Google Chat does not support custom SVG or canvas-based circular progress
-        animations.
+      reason: Google Chat does not support custom SVG or CSS-animated progress arcs.
     - surface: email
-      reason: Email does not support custom SVG or canvas-based circular progress
-        animations.
+      reason: SVG animation not supported in email clients.
   fields:
-    value: integer The current progress value (0-100).
-    label: string Optional text label to display inside the circle.
-    size: string The size of the progress circle (e.g., "small", "medium", "large").
+    value: 'integer. The progress value (0–100).'
+    label: 'string (optional). Caption text below the circle.'
+    color: 'string (optional). Arc stroke colour. Default "#38bdf8".'
+    size: '"sm" | "md" | "lg"  (optional, default "md"). Circle diameter.'
 - type: action_required_card
   description: A card highlighting an important status or issue that requires immediate
-  compact_description: prominent card prompting a required user action
-    user attention, with a clear call to action.
+  compact_description: prominent card prompting a required user action user attention,
+    with a clear call to action.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -1666,8 +1716,8 @@ blocks:
     features: array
 - type: pricing_tier_card
   description: Renders a single pricing plan with its name, price, key features, and
-  compact_description: single pricing plan card with features list
-    an optional call to action.
+  compact_description: single pricing plan card with features list an optional call
+    to action.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1690,8 +1740,8 @@ blocks:
     is_highlighted: boolean
 - type: pricing_tier_group
   description: Renders a collection of pricing tier cards, typically for comparing
-  compact_description: side-by-side pricing plan comparison
-    different subscription plans.
+  compact_description: side-by-side pricing plan comparison different subscription
+    plans.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1710,8 +1760,7 @@ blocks:
     tiers: array
 - type: pros_cons_list
   description: Renders a two-column list itemizing advantages and disadvantages for
-  compact_description: two-column pros and cons comparison
-    a single subject.
+  compact_description: two-column pros and cons comparison a single subject.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1729,8 +1778,7 @@ blocks:
     cons: array
 - type: side_by_side_spec
   description: Renders a detailed comparison of two items, displaying their attributes
-  compact_description: two items compared spec by spec
-    and values side-by-side.
+  compact_description: two items compared spec by spec and values side-by-side.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1753,8 +1801,7 @@ blocks:
     specs: array
 - type: product_spec_table
   description: Renders a table detailing technical specifications or features for
-  compact_description: product specifications in a clean table
-    a single product.
+  compact_description: product specifications in a clean table a single product.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1775,8 +1822,8 @@ blocks:
     specs: array
 - type: comparison_grid
   description: Renders a grid comparing multiple products or services with features,
-  compact_description: multi-item attribute comparison grid
-    often using icons or checkmarks to indicate presence.
+  compact_description: multi-item attribute comparison grid often using icons or checkmarks
+    to indicate presence.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1798,8 +1845,7 @@ blocks:
     features: array
 - type: versus_block
   description: Renders a block explicitly comparing two entities with a prominent
-  compact_description: head-to-head two-option versus card
-    "VS" separator.
+  compact_description: head-to-head two-option versus card "VS" separator.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1824,8 +1870,7 @@ blocks:
     comparison_points: array
 - type: rating_comparison
   description: Renders a comparison of multiple items based on star ratings or numerical
-  compact_description: multiple items rated across dimensions
-    scores.
+  compact_description: multiple items rated across dimensions scores.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1841,8 +1886,8 @@ blocks:
     items: array
 - type: capability_checklist
   description: Renders a list of capabilities, indicating which items possess each
-  compact_description: feature capability tick list per tier
-    capability using checkmarks or similar indicators.
+  compact_description: feature capability tick list per tier capability using checkmarks
+    or similar indicators.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
@@ -1871,6 +1916,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS pseudo-classes like :checked and advanced styling are not supported.
@@ -1884,8 +1930,7 @@ blocks:
     name: string
 - type: expandable_text
   description: Renders a block of text that can be expanded or collapsed to reveal
-  compact_description: truncated text with read more expand toggle
-    more content.
+  compact_description: truncated text with read more expand toggle more content.
   source:
     name: a2ui-catalogue
     url: https://a2ui.dev
@@ -1894,6 +1939,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS pseudo-classes like :checked or :target and dynamic content display
@@ -1915,6 +1961,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS transforms, transitions, and pseudo-classes like :hover are not
@@ -1930,13 +1977,13 @@ blocks:
     trigger_on_hover: boolean
 - type: image_hotspots
   description: Renders an image with interactive points that display information on
-  compact_description: image with clickable annotated hotspot overlays
-    hover.
+  compact_description: image with clickable annotated hotspot overlays hover.
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS positioning, pseudo-classes like :hover, and dynamic content display
@@ -1958,6 +2005,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS pseudo-classes like :hover or :focus-within and dynamic display
@@ -1978,6 +2026,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS pseudo-classes like :checked and :hover for interactive forms are
@@ -1993,13 +2042,13 @@ blocks:
     name: string
 - type: segmented_control
   description: Renders a group of mutually exclusive buttons for selection, styled
-  compact_description: mutually exclusive option selector strip
-    as a single control.
+  compact_description: mutually exclusive option selector strip as a single control.
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS pseudo-classes like :checked and advanced styling for form elements
@@ -2021,6 +2070,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS transforms, transitions, and pseudo-classes like :hover are not
@@ -2042,6 +2092,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS pseudo-classes like :checked and advanced styling for form elements
@@ -2057,13 +2108,13 @@ blocks:
     name: string
 - type: css_slide_panel
   description: Renders a panel that slides into view from the side of the screen on
-  compact_description: CSS-only slide-in panel drawer
-    activation.
+  compact_description: CSS-only slide-in panel drawer activation.
   source: *id003
   surfaces:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: CSS transforms, transitions, and pseudo-classes like :target or :checked
@@ -2079,8 +2130,8 @@ blocks:
     slide_from_side: string
 - type: testimonial_card
   description: Renders a single customer testimonial with text, author details, and
-  compact_description: customer testimonial with photo name and quote
-    an optional avatar.
+  compact_description: customer testimonial with photo name and quote an optional
+    avatar.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -2105,8 +2156,7 @@ blocks:
     rating: integer
 - type: star_rating_display
   description: Renders a visual representation of a star rating, optionally with a
-  compact_description: read-only star rating with score and count
-    total review count.
+  compact_description: read-only star rating with score and count total review count.
   source: *id003
   surfaces:
     works_on:
@@ -2126,8 +2176,7 @@ blocks:
     review_count: integer
 - type: avatar_group
   description: Renders a stack or row of small user avatars, often indicating a group
-  compact_description: stacked user avatar group with overflow count
-    or community.
+  compact_description: stacked user avatar group with overflow count or community.
   source: *id003
   surfaces:
     works_on:
@@ -2147,8 +2196,8 @@ blocks:
     label: string
 - type: contributor_list
   description: Renders a list of individuals who have contributed to a project or
-  compact_description: list of contributors with avatar and role
-    community, with their names, roles, and optional links or avatars.
+  compact_description: list of contributors with avatar and role community, with their
+    names, roles, and optional links or avatars.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -2191,8 +2240,7 @@ blocks:
     title: string
 - type: social_proof_banner
   description: Renders a prominent banner highlighting a key social proof metric or
-  compact_description: social proof strip with stats and logos
-    achievement.
+  compact_description: social proof strip with stats and logos achievement.
   source: *id003
   surfaces:
     works_on:
@@ -2238,8 +2286,7 @@ blocks:
     date: string
 - type: expert_endorsement
   description: Renders an endorsement from an industry expert, including their quote,
-  compact_description: expert quote with credentials and photo
-    name, and credentials.
+  compact_description: expert quote with credentials and photo name, and credentials.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -2264,8 +2311,7 @@ blocks:
     expert_avatar_url: string
 - type: review_callout
   description: Renders a short, impactful quote from a customer review, often accompanied
-  compact_description: highlighted customer review excerpt
-    by a star rating.
+  compact_description: highlighted customer review excerpt by a star rating.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -2290,8 +2336,7 @@ blocks:
     product_name: string
 - type: social_feed_embed
   description: Renders an embedded snippet of a social media post, such as a tweet
-  compact_description: embedded social media post or feed
-    or Instagram post.
+  compact_description: embedded social media post or feed or Instagram post.
   source:
     name: a2ui-catalogue
     url: https://a2ui.com/catalogue
@@ -2300,6 +2345,7 @@ blocks:
     works_on:
     - web
     - meet-stage
+    degraded_on:
     incompatible_on:
     - surface: googlechat
       reason: Google Chat does not support embedding arbitrary HTML or iframes for
@@ -2313,10 +2359,11 @@ blocks:
     embed_code: string
     platform: string
     post_url: string
-
 - type: terminal_block
-  description: Renders a static or interactive command-line interface terminal window showing input commands and output logs.
-  compact_description: display terminal commands and code output in a simulated console window
+  description: Renders a static or interactive command-line interface terminal window
+    showing input commands and output logs.
+  compact_description: display terminal commands and code output in a simulated console
+    window
   surfaces:
     works_on:
     - web
@@ -2324,20 +2371,24 @@ blocks:
     - surface: meet-stage
       note: Interactive copy-to-clipboard actions and prompt animations are disabled.
     - surface: googlechat
-      note: Renders as standard unformatted monospace text block without terminal window aesthetics.
+      note: Renders as standard unformatted monospace text block without terminal
+        window aesthetics.
     - surface: email
-      note: CSS styling for terminal headers and simulated window controls are stripped or flattened.
+      note: CSS styling for terminal headers and simulated window controls are stripped
+        or flattened.
   fields:
     command: string. The execution command displayed at the prompt.
     output: string. The stdout or stderr text block response from the command.
-    shell: "string: bash | zsh | powershell | cmd. The console design theme."
+    shell: 'string: bash | zsh | powershell | cmd. The console design theme.'
   source:
     name: a2ui-catalogue
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: file_tree
-  description: Renders a hierarchical layout displaying directory structures, folders, and individual files for software projects.
-  compact_description: present hierarchical directory structures and files for software project navigation
+  description: Renders a hierarchical layout displaying directory structures, folders,
+    and individual files for software projects.
+  compact_description: present hierarchical directory structures and files for software
+    project navigation
   surfaces:
     works_on:
     - web
@@ -2355,8 +2406,10 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: tabbed_code
-  description: Renders multiple code snippets organized inside an interactive, multi-tab container component.
-  compact_description: organize multiple programming language snippets inside an interactive tab container
+  description: Renders multiple code snippets organized inside an interactive, multi-tab
+    container component.
+  compact_description: organize multiple programming language snippets inside an interactive
+    tab container
   surfaces:
     works_on:
     - web
@@ -2368,14 +2421,17 @@ blocks:
     - surface: email
       note: Interactivity is broken so all snippet variations render stacked vertically.
   fields:
-    tabs: array. Collection of objects containing the language identifier, tab label, and code string.
+    tabs: array. Collection of objects containing the language identifier, tab label,
+      and code string.
   source:
     name: shadcn/ui
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: http_request_block
-  description: Renders a formatted API request block displaying the HTTP method badge, URL endpoint, headers, and body.
-  compact_description: document REST API endpoints with HTTP methods, headers, and payloads
+  description: Renders a formatted API request block displaying the HTTP method badge,
+    URL endpoint, headers, and body.
+  compact_description: document REST API endpoints with HTTP methods, headers, and
+    payloads
   surfaces:
     works_on:
     - web
@@ -2387,7 +2443,7 @@ blocks:
     - surface: email
       note: Complex inline structures and method badge background colors drop out.
   fields:
-    method: "string: GET | POST | PUT | DELETE | PATCH. The HTTP verb."
+    method: 'string: GET | POST | PUT | DELETE | PATCH. The HTTP verb.'
     url: string. The fully qualified or relative API endpoint route.
     headers: object. Key-value pairs detailing required HTTP headers.
     body: string. Optional request payload, typically stringified JSON.
@@ -2396,8 +2452,10 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: env_var_list
-  description: Renders a clear configuration list detailing system environment variable keys, descriptions, and default values.
-  compact_description: list configuration environment variables with descriptions and default values
+  description: Renders a clear configuration list detailing system environment variable
+    keys, descriptions, and default values.
+  compact_description: list configuration environment variables with descriptions
+    and default values
   surfaces:
     works_on:
     - web
@@ -2409,14 +2467,17 @@ blocks:
     - surface: email
       note: Table alignment borders can break depending on the email client.
   fields:
-    variables: array. List of objects including key name, description, requirement status, and default.
+    variables: array. List of objects including key name, description, requirement
+      status, and default.
   source:
     name: a2ui-catalogue
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: prerequisite_checklist
-  description: Renders a callout box highlighting required tools, knowledge, or setups needed before starting a guide.
-  compact_description: highlight prerequisite knowledge and system requirements before starting a tutorial
+  description: Renders a callout box highlighting required tools, knowledge, or setups
+    needed before starting a guide.
+  compact_description: highlight prerequisite knowledge and system requirements before
+    starting a tutorial
   surfaces:
     works_on:
     - web
@@ -2433,8 +2494,10 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: keyboard_shortcut
-  description: Renders inline text visual tags mimicking keyboard keys to highlight shortcuts or hotkey combinations.
-  compact_description: display visual keyboard key combinations for application shortcuts and hotkeys
+  description: Renders inline text visual tags mimicking keyboard keys to highlight
+    shortcuts or hotkey combinations.
+  compact_description: display visual keyboard key combinations for application shortcuts
+    and hotkeys
   surfaces:
     works_on:
     - web
@@ -2451,27 +2514,32 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: api_param_table
-  description: Renders a structured documentation table outlining parameter fields, data types, requirements, and fallback options.
-  compact_description: reference table detailing API parameters, data types, and default values
+  description: Renders a structured documentation table outlining parameter fields,
+    data types, requirements, and fallback options.
+  compact_description: reference table detailing API parameters, data types, and default
+    values
   surfaces:
     works_on:
     - web
     degraded_on:
     - surface: meet-stage
-      note: Wide table blocks introduce harsh horizontal scrolling on restricted screen areas.
+      note: Wide table blocks introduce harsh horizontal scrolling on restricted screen
+        areas.
     - surface: googlechat
       note: Complete loss of structural grids, collapsing into standard text sentences.
     - surface: email
-      note: Responsive tabular configurations fail, causing text truncation or line wrapping.
+      note: Responsive tabular configurations fail, causing text truncation or line
+        wrapping.
   fields:
-    parameters: array. Objects defining name, type, required flag, default value, and description.
+    parameters: array. Objects defining name, type, required flag, default value,
+      and description.
   source:
     name: shadcn/ui
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
-
 - type: version_badge
-  description: Displays a small visual tag showing software release or dependency version numbers.
+  description: Displays a small visual tag showing software release or dependency
+    version numbers.
   compact_description: software release or dependency version number tag
   surfaces:
     works_on:
@@ -2483,13 +2551,14 @@ blocks:
       note: Custom border radius and background colors may fail to render.
   fields:
     version: string. The semantic version number or release label to display.
-    status: "string: stable | beta | alpha | rc. The lifecycle stage."
+    status: 'string: stable | beta | alpha | rc. The lifecycle stage.'
   source:
     name: Flowbite
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: deprecation_notice
-  description: Displays a prominent warning banner indicating a feature or API is no longer supported.
+  description: Displays a prominent warning banner indicating a feature or API is
+    no longer supported.
   compact_description: warning banner for deprecated features or unsupported APIs
   surfaces:
     works_on:
@@ -2507,7 +2576,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: experimental_banner
-  description: Renders a callout box identifying a feature or code path as experimental or unstable.
+  description: Renders a callout box identifying a feature or code path as experimental
+    or unstable.
   compact_description: highlight experimental or unstable feature notice callout
   surfaces:
     works_on:
@@ -2543,7 +2613,8 @@ blocks:
     url: https://uiverse.io/
     license: MIT
 - type: copy_code_button
-  description: Renders a discrete interactive button that copies associated text or code to the clipboard.
+  description: Renders a discrete interactive button that copies associated text or
+    code to the clipboard.
   compact_description: button to copy specified text or code to clipboard
   surfaces:
     works_on:
@@ -2562,7 +2633,8 @@ blocks:
     url: https://uiverse.io/
     license: MIT
 - type: log_output
-  description: Displays a scrollable monospace block containing raw system or compilation log strings.
+  description: Displays a scrollable monospace block containing raw system or compilation
+    log strings.
   compact_description: scrollable monospace server or compiler log output block
   surfaces:
     works_on:
@@ -2581,7 +2653,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: json_tree_viewer
-  description: Displays a nested, expandable visual explorer for structural JSON data objects.
+  description: Displays a nested, expandable visual explorer for structural JSON data
+    objects.
   compact_description: expandable visual explorer for nested JSON data
   surfaces:
     works_on:
@@ -2600,7 +2673,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: key_takeaways
-  description: Displays a highlighted summary box containing critical bullet points from an article.
+  description: Displays a highlighted summary box containing critical bullet points
+    from an article.
   compact_description: highlighted summary of main conclusions and critical takeaways
   surfaces:
     works_on:
@@ -2617,7 +2691,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: summary_box
-  description: Renders a condensed overview panel summarising article content at a glance.
+  description: Renders a condensed overview panel summarising article content at a
+    glance.
   compact_description: condensed introductory panel with article overview
   surfaces:
     works_on:
@@ -2634,7 +2709,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: learning_objectives
-  description: Displays a checklist-style panel outlining competencies a reader will gain from the content.
+  description: Displays a checklist-style panel outlining competencies a reader will
+    gain from the content.
   compact_description: checklist of educational goals and competencies gained post-reading
   surfaces:
     works_on:
@@ -2651,7 +2727,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: changelog_entry
-  description: Renders a single timeline entry documenting additions, fixes, or modifications in a software release.
+  description: Renders a single timeline entry documenting additions, fixes, or modifications
+    in a software release.
   compact_description: timeline entry documenting product modifications per release
   surfaces:
     works_on:
@@ -2672,7 +2749,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: release_notes
-  description: Displays a grouped publication document containing categorised changes for a version launch.
+  description: Displays a grouped publication document containing categorised changes
+    for a version launch.
   compact_description: grouped product release documentation by change category
   surfaces:
     works_on:
@@ -2692,7 +2770,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: further_reading
-  description: Displays a curated list of links and references for extending understanding beyond the article.
+  description: Displays a curated list of links and references for extending understanding
+    beyond the article.
   compact_description: curated references for extending topic research
   surfaces:
     works_on:
@@ -2709,7 +2788,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: resources_list
-  description: Renders a clean inventory list of downloadable assets or reference files with metadata.
+  description: Renders a clean inventory list of downloadable assets or reference
+    files with metadata.
   compact_description: downloadable project assets and attached resource links
   surfaces:
     works_on:
@@ -2726,7 +2806,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: sidebar_note
-  description: Displays an off-axis callout block containing peripheral thoughts, caveats, or fun facts.
+  description: Displays an off-axis callout block containing peripheral thoughts,
+    caveats, or fun facts.
   compact_description: off-axis container for peripheral notes or caveats
   surfaces:
     works_on:
@@ -2745,9 +2826,9 @@ blocks:
     name: shadcn/ui
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
-
 - type: difficulty_badge
-  description: Displays a small visual marker representing the technical complexity level of an article.
+  description: Displays a small visual marker representing the technical complexity
+    level of an article.
   compact_description: label technical complexity level of blog content
   surfaces:
     works_on:
@@ -2758,13 +2839,15 @@ blocks:
     - surface: email
       note: Custom background and border treatments may fail to display.
   fields:
-    level: "string: beginner | intermediate | advanced. The target audience expertise tier."
+    level: 'string: beginner | intermediate | advanced. The target audience expertise
+      tier.'
   source:
     name: Flowbite
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: caution_block
-  description: Renders a high-visibility callout box warning readers about potential pitfalls or destructive actions.
+  description: Renders a high-visibility callout box warning readers about potential
+    pitfalls or destructive actions.
   compact_description: highlight dangerous pitfalls or critical destructive actions
   surfaces:
     works_on:
@@ -2781,7 +2864,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: checklist_interactive
-  description: Renders a list of items with actionable checkboxes for readers to track task progress.
+  description: Renders a list of items with actionable checkboxes for readers to track
+    task progress.
   compact_description: interactive task tracking checklist for article milestones
   surfaces:
     works_on:
@@ -2800,7 +2884,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: glossary_inline
-  description: Renders a specialised inline element displaying technical term definitions on hover.
+  description: Renders a specialised inline element displaying technical term definitions
+    on hover.
   compact_description: inline hover tooltips for complex technical term definitions
   surfaces:
     works_on:
@@ -2820,7 +2905,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: time_estimate
-  description: Displays the estimated duration required to fully read or complete an article.
+  description: Displays the estimated duration required to fully read or complete
+    an article.
   compact_description: estimated reading duration badge for article content
   surfaces:
     works_on:
@@ -2837,7 +2923,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: progress_checkpoint
-  description: Displays an indicator showing the reader's current location within a multi-step sequence.
+  description: Displays an indicator showing the reader's current location within
+    a multi-step sequence.
   compact_description: milestone progress indicator across multi-step tutorial
   surfaces:
     works_on:
@@ -2857,7 +2944,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: social_share_bar
-  description: Displays a row of quick-action buttons enabling readers to share the post to external networks.
+  description: Displays a row of quick-action buttons enabling readers to share the
+    post to external networks.
   compact_description: social media buttons for sharing article to external networks
   surfaces:
     works_on:
@@ -2870,14 +2958,15 @@ blocks:
     - surface: email
       note: Dynamic script-based link builders cannot load inside messages.
   fields:
-    platforms: "array. Permitted networks: twitter | linkedin | facebook | reddit."
+    platforms: 'array. Permitted networks: twitter | linkedin | facebook | reddit.'
     url: string. Optional URL override, defaults to current page.
   source:
     name: UIverse.io community
     url: https://uiverse.io/
     license: MIT
 - type: newsletter_cta
-  description: Displays an input block encouraging readers to subscribe to an email update list.
+  description: Displays an input block encouraging readers to subscribe to an email
+    update list.
   compact_description: email subscription form for recurring reader updates
   surfaces:
     works_on:
@@ -2897,7 +2986,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: author_bio_card
-  description: Renders a profile section containing the creator's avatar, bio, and links.
+  description: Renders a profile section containing the creator's avatar, bio, and
+    links.
   compact_description: profile block displaying content creator biographical details
   surfaces:
     works_on:
@@ -2917,7 +3007,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: related_posts_grid
-  description: Displays a curated grid of preview cards for complementary reading material.
+  description: Displays a curated grid of preview cards for complementary reading
+    material.
   compact_description: grid of recommended alternative post reading cards
   surfaces:
     works_on:
@@ -2936,7 +3027,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: series_overview_card
-  description: Renders a navigation box indexing all parts within a multi-part article series.
+  description: Renders a navigation box indexing all parts within a multi-part article
+    series.
   compact_description: navigation index for multi-part article series parts
   surfaces:
     works_on:
@@ -2954,7 +3046,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: reaction_group
-  description: Displays an interactive set of emoji elements collecting emotional sentiment feedback from readers.
+  description: Displays an interactive set of emoji elements collecting emotional
+    sentiment feedback from readers.
   compact_description: emoji reaction counters collecting reader sentiment feedback
   surfaces:
     works_on:
@@ -2967,13 +3060,14 @@ blocks:
     - surface: email
       note: Tracking selections are inert without network connection.
   fields:
-    enabled_emojis: "array. Tracked emojis: thumbs_up | heart | rocket | mind_blown."
+    enabled_emojis: 'array. Tracked emojis: thumbs_up | heart | rocket | mind_blown.'
   source:
     name: UIverse.io community
     url: https://uiverse.io/
     license: MIT
 - type: share_quote
-  description: Displays a visually distinct callout showcasing a key phrase designed for social clipping.
+  description: Displays a visually distinct callout showcasing a key phrase designed
+    for social clipping.
   compact_description: prominent blockquote optimised for social media sharing
   surfaces:
     works_on:
@@ -2993,7 +3087,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: follow_cta
-  description: Renders a banner encouraging readers to connect with official social channels.
+  description: Renders a banner encouraging readers to connect with official social
+    channels.
   compact_description: call to action driving social media community expansion
   surfaces:
     works_on:
@@ -3011,7 +3106,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: follow_button
-  description: Displays a single button allowing a user to subscribe directly to a profile.
+  description: Displays a single button allowing a user to subscribe directly to a
+    profile.
   compact_description: direct profile subscription button for social platforms
   surfaces:
     works_on:
@@ -3025,14 +3121,14 @@ blocks:
       note: Scripted follow actions degrade to plain hyperlinks.
   fields:
     target_handle: string. Handle identifier of target profile.
-    platform: "string: twitter | github | linkedin. The platform."
+    platform: 'string: twitter | github | linkedin. The platform.'
   source:
     name: UIverse.io community
     url: https://uiverse.io/
     license: MIT
-
 - type: reading_progress_bar
-  description: Renders a horizontal visual bar tracking the reader's scroll completion depth within the article.
+  description: Renders a horizontal visual bar tracking the reader's scroll completion
+    depth within the article.
   compact_description: track and display article reading progress completion status
   surfaces:
     works_on:
@@ -3051,8 +3147,10 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: table_of_contents
-  description: Renders an active list directory of navigation links targeting main content sections.
-  compact_description: navigate article sections using structured heading directory links
+  description: Renders an active list directory of navigation links targeting main
+    content sections.
+  compact_description: navigate article sections using structured heading directory
+    links
   surfaces:
     works_on:
     - web
@@ -3070,7 +3168,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: article_hero
-  description: Renders a prominent visual header displaying title, metadata, and background cover imagery.
+  description: Renders a prominent visual header displaying title, metadata, and background
+    cover imagery.
   compact_description: display prominent introductory headline and banner media
   surfaces:
     works_on:
@@ -3089,7 +3188,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: scroll_to_top
-  description: Renders an interactive button providing smooth automated viewport reset to page top.
+  description: Renders an interactive button providing smooth automated viewport reset
+    to page top.
   compact_description: quickly return viewport to top of page document
   surfaces:
     works_on:
@@ -3102,13 +3202,14 @@ blocks:
     - surface: email
       note: Inline frame actions break across email display engines.
   fields:
-    behavior: "string: smooth | auto. Scroll animation profile."
+    behavior: 'string: smooth | auto. Scroll animation profile.'
   source:
     name: a2ui-catalogue
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: article_series_nav
-  description: Renders an organized multi-part sequence navigation panel mapping serial publication installments.
+  description: Renders an organized multi-part sequence navigation panel mapping serial
+    publication installments.
   compact_description: navigate interconnected parts inside multi-part blog series
   surfaces:
     works_on:
@@ -3126,7 +3227,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: embed_codepen
-  description: Renders an embedded interactive CodePen sandbox workspace within the document.
+  description: Renders an embedded interactive CodePen sandbox workspace within the
+    document.
   compact_description: embed interactive CodePen workspace development environments
   surfaces:
     works_on:
@@ -3146,7 +3248,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: embed_stackblitz
-  description: Renders an integrated live development engine frame executing StackBlitz workspace code.
+  description: Renders an integrated live development engine frame executing StackBlitz
+    workspace code.
   compact_description: embed dynamic StackBlitz live IDE code sandboxes
   surfaces:
     works_on:
@@ -3182,7 +3285,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: embed_tweet
-  description: Displays a fully rendered standalone publication card containing Twitter status data.
+  description: Displays a fully rendered standalone publication card containing Twitter
+    status data.
   compact_description: embed live public Twitter status updates and media
   surfaces:
     works_on:
@@ -3201,7 +3305,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: embed_google_slides
-  description: Renders an interactive presentation iframe viewer loading Google Slides resources.
+  description: Renders an interactive presentation iframe viewer loading Google Slides
+    resources.
   compact_description: embed interactive Google Slides presentation slide decks
   surfaces:
     works_on:
@@ -3220,7 +3325,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: lottie_animation
-  description: Renders an active vector illustration display controlled via Lottie runtime rules.
+  description: Renders an active vector illustration display controlled via Lottie
+    runtime rules.
   compact_description: render lightweight high-performance vector Lottie animations
   surfaces:
     works_on:
@@ -3240,7 +3346,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: figma_embed
-  description: Renders a real-time collaborative preview referencing explicit Figma design canvas artboards.
+  description: Renders a real-time collaborative preview referencing explicit Figma
+    design canvas artboards.
   compact_description: embed collaborative live Figma design file prototype previews
   surfaces:
     works_on:
@@ -3259,7 +3366,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: color_swatch_grid
-  description: Displays a grid of color swatches with labels and hex values for design system palettes.
+  description: Displays a grid of color swatches with labels and hex values for design
+    system palettes.
   compact_description: grid of named color swatches with hex values
   surfaces:
     works_on:
@@ -3295,7 +3403,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: benchmark_comparison
-  description: Side-by-side performance benchmark visualization comparing multiple implementations.
+  description: Side-by-side performance benchmark visualization comparing multiple
+    implementations.
   compact_description: side-by-side performance benchmark comparison bars
   surfaces:
     works_on:
@@ -3331,7 +3440,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: chartjs_line
-  description: Renders an interactive line chart using Chart.js for time-series or trend data.
+  description: Renders an interactive line chart using Chart.js for time-series or
+    trend data.
   compact_description: interactive Chart.js line chart for trend data
   surfaces:
     works_on:
@@ -3369,7 +3479,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: metric_comparison_card
-  description: Card comparing a current metric value against a previous period with delta indicator.
+  description: Card comparing a current metric value against a previous period with
+    delta indicator.
   compact_description: metric card comparing current vs previous period
   surfaces:
     works_on:
@@ -3387,7 +3498,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: mini_sparkline_set
-  description: Compact grid of multiple labeled sparklines for at-a-glance multi-metric comparison.
+  description: Compact grid of multiple labeled sparklines for at-a-glance multi-metric
+    comparison.
   compact_description: compact grid of multiple labeled sparklines
   surfaces:
     works_on:
@@ -3403,7 +3515,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: status_dashboard
-  description: Compact grid showing live operational status of multiple services with color indicators.
+  description: Compact grid showing live operational status of multiple services with
+    color indicators.
   compact_description: grid of service status indicators with color states
   surfaces:
     works_on:
@@ -3419,7 +3532,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: uptime_timeline
-  description: Visual timeline of service uptime over a rolling window with per-day status blocks.
+  description: Visual timeline of service uptime over a rolling window with per-day
+    status blocks.
   compact_description: 30-day uptime timeline with per-day status blocks
   surfaces:
     works_on:
@@ -3435,7 +3549,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: command_palette
-  description: Keyboard-driven command palette overlay for quick navigation and action execution.
+  description: Keyboard-driven command palette overlay for quick navigation and action
+    execution.
   compact_description: keyboard-driven command palette with shortcut hints
   surfaces:
     works_on:
@@ -3454,7 +3569,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: search_result_card
-  description: Styled card displaying a single search result with title, snippet, and URL.
+  description: Styled card displaying a single search result with title, snippet,
+    and URL.
   compact_description: single search result card with title snippet URL
   surfaces:
     works_on:
@@ -3472,7 +3588,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: post_metadata_bar
-  description: Displays article metadata — author, publish date, read time, and optional tags — in a compact bar.
+  description: Displays article metadata — author, publish date, read time, and optional
+    tags — in a compact bar.
   compact_description: article metadata bar with author date read time
   surfaces:
     works_on:
@@ -3491,7 +3608,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: footnote_group
-  description: Renders a numbered list of footnotes at the bottom of an article or section.
+  description: Renders a numbered list of footnotes at the bottom of an article or
+    section.
   compact_description: numbered footnote list at section or article end
   surfaces:
     works_on:
@@ -3507,7 +3625,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: notification_badge
-  description: Small badge overlaid on an icon or element to indicate unread count or alert state.
+  description: Small badge overlaid on an icon or element to indicate unread count
+    or alert state.
   compact_description: unread count badge overlaid on icon element
   surfaces:
     works_on:
@@ -3560,7 +3679,8 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: abbr_tooltip
-  description: Inline abbreviation with a tooltip revealing the full expanded form on hover.
+  description: Inline abbreviation with a tooltip revealing the full expanded form
+    on hover.
   compact_description: inline abbreviation with hover tooltip full form
   surfaces:
     works_on:
@@ -3578,11 +3698,13 @@ blocks:
     url: https://github.com/curtiskrygier/a2ui-catalogue
     license: MIT
 - type: copy_to_clipboard
-  description: Inline code or text element with a one-click copy button that provides feedback on success.
+  description: Inline code or text element with a one-click copy button that provides
+    feedback on success.
   compact_description: copy-to-clipboard button with inline code and feedback
   surfaces:
     works_on:
     - web
+    - meet-stage
     degraded_on:
     - surface: meet-stage
       note: Clipboard API may be blocked.
@@ -3594,4 +3716,2240 @@ blocks:
   source:
     name: a2ui-catalogue
     url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: conversion_funnel
+  description: Renders a premium pipeline conversion funnel with tapered glowing step
+    bars, percentage conversion rates, and leakage drop-off markers.
+  compact_description: pipeline conversion funnel with step tapering and leak markers
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires detailed custom SVG drawing.
+  fields:
+    title: string (optional, e.g., 'Acquisition Funnel')
+    steps: 'list of dictionaries representing funnel stages: [{''stage'': ''Visits'',
+      ''value'': 10000}, {''stage'': ''Signups'', ''value'': 4500}, ...]'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: gauge_sla
+  description: Renders a semi-circular radial gauge track with high contrast status
+    quadrants, a glowing needle tick, and a prominent central KPI readout.
+  compact_description: radial SLA gauge with glowing pointer and large metric value
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex SVG layouts.
+  fields:
+    title: string (optional, e.g., 'API Response SLA')
+    value: number representing current value (e.g., 99.4)
+    max_value: number representing maximum gauge scale (e.g., 100)
+    unit: string (optional, e.g., '%')
+    label: string (optional, e.g., 'SLA Met')
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: stacked_area
+  description: Renders cumulative layered area chart trends utilizing overlapping
+    translucent gradient fills and glowing series borders.
+  compact_description: stacked area chart with overlapping glowing translucent gradients
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires complex SVG gradients.
+  fields:
+    title: string (optional, e.g., 'SaaS Cumulative Workloads')
+    labels: list of strings representing X-axis ticks (e.g., ['Q1', 'Q2', 'Q3', 'Q4'])
+    series: 'list of dictionaries representing stacked layers: [{''label'': ''Enterprise'',
+      ''data'': [10, 25, 45, 60], ''color'': ''#00f2ff''}, ...]'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: scatter_trend
+  description: Renders a coordinate scatter grid representing discrete data points
+    intersected by a prominent glowing linear regression line.
+  compact_description: coordinate scatter plot with regression trend line
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires custom grid mapping.
+  fields:
+    title: string (optional, e.g., 'CSAT vs. Support Response Time')
+    data_points: 'list of [x, y] coordinates: [[1.2, 95], [2.5, 88], [3.1, 75]]'
+    label_x: string (optional, e.g., 'Response Time (Hours)')
+    label_y: string (optional, e.g., 'CSAT Score')
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: call_mood_board
+  description: Renders a premium, aesthetic call emotion summary and theme board showing
+    detected sentiments, dominant moods with color codings, active themes, and word
+    weightings.
+  compact_description: visual summary board of call sentiments moods and active themes
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires detailed flex layout and gradients.
+  fields:
+    title: string (optional, e.g., 'Call Mood & Themes Summary')
+    moods: 'list of dictionaries representing call emotions: [{''mood'': ''Collaborative'',
+      ''intensity'': 85, ''color'': ''#10b981''}, ...]'
+    themes: 'list of dictionaries representing keywords/themes: [{''term'': ''Pricing'',
+      ''weight'': 90, ''sentiment'': ''neutral''}, ...]'
+    summary: string (optional summary paragraph)
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: github_activity_grid
+  description: Renders a high-fidelity SVG representation of a GitHub-style contribution
+    activity calendar with colored commitment density blocks, total contributions,
+    and streak statistics.
+  compact_description: SVG GitHub-style contribution grid and activity tracker
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    incompatible_on:
+    - surface: googlechat
+      reason: Requires detailed SVG grid rendering.
+  fields:
+    title: string (optional, e.g., 'GitHub Repository Activity')
+    username: string (optional, e.g., 'curtiskrygier')
+    total_contributions: integer (optional, e.g., 342)
+    streak_days: integer (optional, e.g., 18)
+    activity: list of integers (0-4) or dictionary of weeks/days for rendering grid
+      squares
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: form
+  description: Form container with labelled field controls and explicit submit/cancel
+    buttons. Fields are expressed as a list of {label, type, name, placeholder, options,
+    rules} entries.
+  compact_description: labelled form with fields and submit button
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Google Chat has its own card input model — use key_value or action buttons
+    - surface: email
+      reason: Interactive form controls do not function in email clients
+    - surface: pdf
+      reason: Static render only — use table or key_value for read-only representation
+    degraded_on:
+    - surface: meet-stage
+      note: Renders and collects input visually; form submit has no stage routing
+        — use with follow_up_chips for conversational submission
+  fields:
+    title: string (optional). Form heading shown above fields.
+    submit_label: string (optional, default 'Submit'). Label for the primary submit
+      button.
+    cancel_label: string (optional). If set, renders a secondary cancel button.
+    fields:
+      type: array
+      items:
+        label: string. Visible field label.
+        name: string. Field identifier used in form submission.
+        type: 'string. One of: text, email, password, number, url, textarea, select,
+          radio, checkbox, switch, slider, date. Default: text.'
+        placeholder: string (optional).
+        options: array of {value, label} (required for select, radio, checkbox types).
+        default_value: string | boolean | number (optional).
+        rules: array of strings (optional). Validation rules e.g. ['required', 'email',
+          'minLength:2'].
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: form_input
+  description: Standalone labelled text input field — text, email, password, number,
+    or url. Use inside a form atom or as a standalone search/filter control.
+  compact_description: single labelled input field
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Use Chat card input widget instead
+    - surface: email
+      reason: Input controls non-functional in email
+    - surface: pdf
+      reason: Static only
+    degraded_on:
+    - surface: meet-stage
+      note: Renders as a styled input on stage; data capture requires stage-level
+        routing
+  fields:
+    label: string. Visible label above the input.
+    name: string. Field identifier.
+    type: 'string (optional). One of: text, email, password, number, url. Default:
+      text.'
+    placeholder: string (optional).
+    rules: array of strings (optional). e.g. ['required', 'email', 'minLength:2'].
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: form_select
+  description: Labelled dropdown select with a list of value/label options. Supports
+    required validation and an optional placeholder prompt.
+  compact_description: labelled dropdown select with options
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Use Chat card dropdown widget instead
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only — use key_value
+    degraded_on:
+    - surface: meet-stage
+      note: Renders as a styled select; data capture requires stage-level routing
+  fields:
+    label: string. Visible label.
+    name: string. Field identifier.
+    placeholder: string (optional). e.g. 'Select an option…'
+    options:
+      type: array
+      description: List of {value, label} pairs.
+    rules: array of strings (optional). e.g. ['required'].
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: form_radio_group
+  description: Labelled group of radio buttons for single-option selection. Each option
+    has a value, visible label, and optional description.
+  compact_description: radio button group for single-option selection
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Use Chat card radio widget instead
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only
+    degraded_on:
+    - surface: meet-stage
+      note: Radio selection renders correctly; value capture requires stage-level
+        routing
+  fields:
+    label: string (optional). Group label.
+    name: string. Field identifier.
+    options:
+      type: array
+      description: List of {value, label, description?} entries.
+    default_value: string (optional). Pre-selected option value.
+    rules: array of strings (optional). e.g. ['required'].
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: form_checkbox_group
+  description: Labelled group of checkboxes for multi-option selection. Each checkbox
+    has a name, visible label, optional description, and optional default checked
+    state.
+  compact_description: checkbox group for multi-option selection
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Use Chat card multi-select widget instead
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only
+    degraded_on:
+    - surface: meet-stage
+      note: Checkbox selection renders correctly; value capture requires stage-level
+        routing
+  fields:
+    label: string (optional). Group label.
+    name: string. Aggregate field identifier for form submission.
+    items:
+      type: array
+      description: List of {name, label, description?, default_checked?} entries.
+    rules: array of strings (optional).
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: form_switch_group
+  description: Group of named toggle switches — on/off controls with optional labels
+    and descriptions. Suitable for settings panels, notification preferences, and
+    feature flags.
+  compact_description: group of labelled toggle switches
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: meet-stage
+      note: Toggle switches render correctly; value capture requires stage-level routing
+    incompatible_on:
+    - surface: googlechat
+      reason: Use Chat card switch widget instead
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only — use status_dashboard for read-only equivalent
+  fields:
+    label: string (optional). Section label above the switches.
+    name: string. Aggregate field identifier.
+    items:
+      type: array
+      description: List of {name, label?, description?, default_checked?} entries.
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: form_slider
+  description: Numeric range slider with a min, max, and optional step. Supports continuous
+    (smooth) and discrete (stepped) variants. Renders a labelled track with a draggable
+    thumb.
+  compact_description: numeric range slider input
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Non-functional in Chat cards
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only — use progress_bar for visual representation
+    degraded_on:
+    - surface: meet-stage
+      note: Slider renders and is draggable; value capture requires stage-level routing
+  fields:
+    label: string (optional). Visible label above the slider.
+    name: string. Field identifier.
+    min: number. Minimum value.
+    max: number. Maximum value.
+    step: number (optional). Increment size. Omit for continuous.
+    default_value: number (optional). Initial thumb position.
+    variant: 'string (optional). One of: continuous, discrete. Default: continuous.'
+    rules: array of strings (optional).
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: form_date_picker
+  description: Date picker input supporting single-date selection or a date-range
+    (start + end). Renders a calendar popover. Use inside a form or standalone.
+  compact_description: date or date-range picker input
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: Non-functional in Chat cards
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only
+    degraded_on:
+    - surface: meet-stage
+      note: Date input renders and is clickable; value capture requires stage-level
+        routing
+  fields:
+    label: string (optional). Visible label.
+    name: string. Field identifier.
+    mode: 'string (optional). One of: single, range. Default: single.'
+    placeholder: string (optional). e.g. 'Pick a date'.
+    rules: array of strings (optional). e.g. ['required'].
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: modal
+  description: Modal dialog overlay with a title, configurable size, and arbitrary
+    content children. Opened programmatically or via a trigger button. Closes on X,
+    Escape, or backdrop click.
+  compact_description: modal dialog overlay with title and content
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    incompatible_on:
+    - surface: googlechat
+      reason: Chat has no modal primitive
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Non-functional in PDF
+    degraded_on: []
+  fields:
+    title: string. Modal heading.
+    size: 'string (optional). One of: sm, md, lg. Default: md.'
+    children:
+      type: array
+      description: Content atoms to render inside the modal body.
+    trigger_label: string (optional). If set, renders a button that opens the modal.
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: follow_up_chips
+  description: A row of tappable suggestion chips placed at the end of a response
+    or slide, prompting the user with pre-written follow-up questions or actions.
+    Each chip fires its text as a new user message when clicked.
+  compact_description: clickable follow-up suggestion chips
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: meet-stage
+      note: Chips render correctly; click actions need stage WebSocket routing to
+        produce AI responses
+    incompatible_on:
+    - surface: googlechat
+      reason: Use Chat card action buttons instead
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only
+  fields:
+    items:
+      type: array
+      description: List of suggestion strings. e.g. ['What's the ROI?', 'Show me by
+        region', 'Compare to last year'].
+    label: string (optional). Small heading above the chips. e.g. 'You might also
+      ask:'
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: choicebox_group
+  description: Card-style option selector where each option renders as a full card
+    with icon, title, and description. The entire card is the click target — richer
+    than radio buttons. Inspired by Vercel Geist Choicebox. Ideal for plan selection,
+    framework choice, and AI-generated setup wizards.
+  compact_description: card-style option selector with icon, title, description per card
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: meet-stage
+      note: Cards render and are selectable; value capture requires stage-level routing
+    incompatible_on:
+    - surface: googlechat
+      reason: Use Chat card action buttons instead
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only
+  fields:
+    label: string (optional). Group heading above the cards.
+    name: string. Form field name for the selected value(s).
+    multiple: boolean (optional, default false). If true allows multiple selections.
+    accent: string (optional, default #1a73e8). Selection highlight colour.
+    submit_label: string (optional). If set, renders a submit button below the cards.
+    items:
+      type: array
+      description: List of {value, title, description?, icon?, disabled?} entries.
+  source: &a2ui
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: feedback_prompt
+  description: In-context feedback collection widget for rating content or AI response
+    quality. Supports thumbs up/down or 1–5 star ratings with optional follow-up
+    text. Inspired by Vercel Geist Feedback pattern.
+  compact_description: thumbs or star rating feedback collection widget
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: meet-stage
+      note: Renders and is interactive; action_url POST requires stage-level routing
+    incompatible_on:
+    - surface: googlechat
+      reason: Use Chat card star rating widget instead
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Static only
+  fields:
+    question: string (optional). Label text above the widget. e.g. "Was this helpful?"
+    style: 'string (optional). One of: thumbs | stars. Default: thumbs.'
+    placeholder: string (optional). Follow-up textarea placeholder shown after the
+      rating buttons.
+    action_url: string (optional). Endpoint for form POST on submit.
+  source: *a2ui
+- type: entity_list
+  description: List of named resources — each row shows an avatar or icon, a title,
+    a subtitle, a status badge, and optional trailing metadata. Covers project lists,
+    deployment rosters, and team member panels. Inspired by Vercel Geist Entity component.
+  compact_description: named resource rows with avatar, status badge, and meta
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    items:
+      type: array
+      description: List of {name, subtitle?, icon?, status?, meta?} entries.
+  source: *a2ui
+- type: prompt_template
+  description: Displays an LLM prompt with interpolation slots highlighted in a distinct
+    colour. Includes an optional copy-to-clipboard button. Ideal for AI documentation,
+    tutorials, and prompt engineering articles.
+  compact_description: LLM prompt with highlighted {variable} slots and copy button
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as plain code block without slot highlighting
+    - surface: email
+      note: Renders as plain code block without slot highlighting
+  fields:
+    template: string. The prompt text containing {slot} placeholders.
+    accent: string (optional, default #7c3aed). Colour used to highlight slots.
+    copyable: boolean (optional, default true). Show copy button.
+    label: string (optional). Small label shown above the template block.
+  source: *a2ui
+- type: model_card
+  description: AI model specification card showing model name, provider, context window,
+    pricing tier, and a row of capability badges. First-class atom for AI-native content
+    and agent documentation.
+  compact_description: AI model spec card with context window, pricing, and capability badges
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    name: string. Model display name, e.g. "Claude Sonnet 4.6".
+    provider: string (optional). Provider name, e.g. "Anthropic".
+    context_window: string (optional). e.g. "200 k tokens".
+    pricing: string (optional). e.g. "$3 / M tokens in".
+    capabilities:
+      type: array
+      description: 'List of short capability badge strings, e.g. ["tool use", "vision", "streaming"].'
+    accent: 'string (optional, default #7c3aed). Accent colour for provider label and badges.'
+  source: *a2ui
+- type: conversation_snippet
+  description: Renders a prompt-response pair as two chat bubbles — a user bubble on
+    the right and an AI response bubble on the left. Ideal for showing LLM examples,
+    chatbot flows, and agent interaction patterns in documentation.
+  compact_description: user prompt and AI response as chat bubbles
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    user_label: string (optional, default "You"). Label above the user bubble.
+    user: string. The user prompt text.
+    ai_label: string (optional, default "Assistant"). Label above the AI bubble.
+    response: string. The AI response text.
+    accent: string (optional, default #1a73e8). Colour for the user bubble background.
+  source: *a2ui
+- type: shortcut_legend
+  description: Keyboard shortcut cheat-sheet grid. Multiple shortcuts displayed in
+    a compact two-column layout, each showing the key combination and its action label.
+    Distinct from keyboard_shortcut which shows a single combination inline.
+  compact_description: keyboard shortcut cheat-sheet grid with key combos and labels
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    title: string (optional). Heading above the grid.
+    items:
+      type: array
+      description: List of {keys, action} entries. keys is an array of key strings
+        e.g. ["⌘", "K"]. action is the human-readable description.
+  source: *a2ui
+- type: rating_summary_bar
+  description: Aggregate star-rating histogram showing the percentage breakdown per
+    star level (5★ through 1★). Distinct from rating_stars which shows a single score —
+    this shows the full distribution with bar lengths proportional to vote share.
+  compact_description: star rating histogram with percentage bars per star level
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    average: number. Overall average rating (e.g. 4.3).
+    total: number. Total number of ratings.
+    breakdown:
+      type: array
+      description: List of {stars, count} from 5 down to 1.
+    accent: string (optional, default #f59e0b). Bar fill colour.
+  source: *a2ui
+- type: roadmap_card
+  description: Quarter-based product roadmap showing milestones across Q1–Q4 or custom
+    periods. Each period contains a list of items with a status indicator (done, in-progress,
+    planned). Useful for product announcements and release planning slides.
+  compact_description: quarter-based product roadmap with status-tagged milestones
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    title: string (optional). Heading above the roadmap.
+    periods:
+      type: array
+      description: List of {label, items} where each item is {text, status}. status
+        is one of done | in-progress | planned.
+  source: *a2ui
+- type: notification_stack
+  description: Persistent notification inbox showing a list of notification items,
+    each with an icon or emoji, a title, a body snippet, a timestamp, and an optional
+    unread indicator dot. Distinct from toast_notification which is a transient single
+    pop-up — the stack is a persistent grouped list.
+  compact_description: persistent notification inbox list with unread indicators
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    title: string (optional). Heading above the list, e.g. "Notifications".
+    items:
+      type: array
+      description: List of {icon?, title, body?, time?, unread?} entries. unread is
+        boolean, default false.
+  source: *a2ui
+- type: inline_alert
+  description: Compact inline-level alert embedded within content flow — an icon
+    and short message that appears beside labels, form fields, or within paragraphs
+    without disrupting layout. Distinct from alert_banner (full-width strip) and
+    toast_notification (transient overlay).
+  compact_description: inline icon-plus-text alert embedded in content flow
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: renders as plain text prefix with emoji icon; no colour or border styling
+    - surface: email
+      note: icon glyph only; background colour unreliable across clients
+    - surface: pdf
+      note: renders as plain text with emoji prefix; no colour
+  fields:
+    type: string. Severity level — "info", "warning", "error", or "success".
+    message: string. The alert text.
+    detail: string (optional). A secondary line of smaller detail text.
+    icon: string (optional). Override the default icon for the severity type.
+  source: *a2ui
+- type: tag_block
+  description: Horizontal wrapping block of plain content tags — feature labels,
+    category chips, or keyword pills. Neutral styling. Distinct from badge_group
+    which carries semantic status colour. Adapted from the TagBlock pattern in OpenUI
+    OUI benchmark samples.
+  compact_description: horizontal wrap of neutral content chip labels
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as space-separated text labels; no chip styling
+  fields:
+    tags: array of strings. The tag labels.
+    color: string (optional). Override chip accent — hex or CSS colour. Default is
+      neutral gray.
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: variant_selector
+  description: CSS-only variant picker — each option is a selectable card with a
+    label and optional description, rendered as hidden radio inputs with label:has(input:checked)
+    styling. Used for product size, colour, or plan variant selection. Adapted from
+    the RadioGroup/RadioItem pattern in OpenUI OUI benchmark samples.
+  compact_description: CSS radio card group for variant or option picking
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS :checked and :has() pseudo-classes not supported in card rendering
+    - surface: email
+      reason: CSS pseudo-class interactivity not supported in email clients
+    - surface: pdf
+      reason: interactive selection not possible in static PDF
+  fields:
+    name: string. Form field name used in radio input group.
+    label: string (optional). Group label shown above the options.
+    items:
+      type: array
+      description: List of {value, title, description?} option objects.
+    default_value: string (optional). Pre-selected option value.
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: markdown_block
+  description: Renders an arbitrary GitHub-Flavoured Markdown string as formatted
+    HTML — bold, italic, inline code, fenced code blocks, lists, tables, blockquotes,
+    and links. Useful when content is authored in or retrieved as Markdown and needs
+    faithful rendering without mapping to individual atoms. Adapted from the MarkDownRenderer
+    pattern in OpenUI OUI benchmark samples.
+  compact_description: GFM markdown string rendered to HTML inline
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: some markup stripped by Chat card renderer; tables and code blocks fall
+        back to plain text
+  fields:
+    content: string. The Markdown source string to render.
+    variant: string (optional). "default" (standard margins) or "compact" (tight
+      spacing for dense layouts). Default is "default".
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: chartjs_pie
+  description: Multi-slice pie or donut chart rendered as inline SVG — category
+    proportions with a colour-coded legend. Distinct from donut_stat which shows
+    a single metric as a CSS ring. Adapted from the PieChart/Slice pattern in OpenUI
+    OUI benchmark samples.
+  compact_description: multi-slice pie or donut SVG chart with legend
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: SVG may not render; falls back to percentage list
+    incompatible_on:
+    - surface: email
+      reason: inline SVG blocked by most email clients — use an image export instead
+  fields:
+    title: string (optional). Chart heading.
+    variant: string (optional). "pie" or "donut". Default "donut".
+    data:
+      type: array
+      description: List of {label, value} slice objects.
+    colors: array of strings (optional). Hex colours per slice; auto-assigned if
+      omitted.
+    show_legend: boolean (optional). Show colour-keyed legend below chart. Default
+      true.
+    show_labels: boolean (optional). Show percentage labels on slices. Default true.
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: text_callout
+  description: Compact tinted note or tip block used inline within cards, forms,
+    or panels. Lighter than callout — no left-border accent, no icon; just a soft
+    colour-tinted background with a small bold title above body text. Adapted from
+    the TextCallout pattern in OpenUI OUI benchmark samples.
+  compact_description: lightweight tinted inline tip or note block no icon
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - googlechat
+    - email
+    - pdf
+  fields:
+    variant: string. Display variant — "info", "success", "warning", "neutral".
+    title: string. Short bold label (e.g. "Tip", "Note", "Good to know").
+    description: string. Body text.
+  source:
+    name: OpenUI / Thesys
+    url: https://github.com/thesysdev/openui
+    license: MIT
+- type: source_citation
+  description: Inline-numbered RAG source reference card — shows a citation number,
+    source title, optional excerpt, and optional URL. Designed to accompany AI-generated
+    content that cites retrieved documents. Pairs with in-body superscript references
+    [1], [2] etc. Original a2ui-catalogue atom.
+  compact_description: numbered RAG source card with title excerpt and URL
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as plain numbered list item; no card styling or excerpt block
+  fields:
+    sources:
+      type: array
+      description: List of {number, title, url?, excerpt?, author?, date?} citation
+        objects.
+    heading: string (optional). Section heading above the list, e.g. "Sources".
+  source: *a2ui
+- type: llm_comparison_table
+  description: Side-by-side comparison of outputs from multiple language models for
+    the same prompt — model name, output text, and optional latency/cost/token metadata
+    per column. Designed for model evaluation, A/B testing, and capability demonstrations.
+    Original a2ui-catalogue atom.
+  compact_description: side-by-side multi-model output comparison table
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as sequential key-value blocks; side-by-side layout not supported
+    - surface: email
+      note: multi-column layout collapses in most email clients; renders as stacked
+        blocks
+  fields:
+    prompt: string (optional). The shared input prompt shown above the comparison.
+    models:
+      type: array
+      description: List of {name, output, latency_ms?, cost_usd?, tokens?} model
+        result objects.
+    show_meta: boolean (optional). Show latency/cost/token row below each output.
+      Default true if any model provides meta fields.
+  source: *a2ui
+- type: confidence_bar
+  description: Horizontal confidence or probability bar — shows a percentage value
+    with a label and colour-coded fill indicating certainty level. Used for classification
+    confidence, sentiment strength, retrieval relevance scores, or any normalised
+    probability output. Original a2ui-catalogue atom.
+  compact_description: labelled probability bar with colour-coded confidence fill
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as plain percentage text e.g. Label 82%; no bar visualisation
+  fields:
+    label: string. What is being measured, e.g. Positive Sentiment or Retrieval Relevance.
+    value: number. Confidence percentage 0-100.
+    items: array (optional). List of {label, value} for multi-row display instead
+      of single bar.
+    color: string (optional). Override bar fill colour. Auto-assigned green/amber/red
+      by value band if omitted.
+  source: *a2ui
+- type: token_budget_meter
+  description: Visual context-window usage meter — shows tokens consumed versus the
+    model's total context limit, with a colour-coded fill that shifts amber then red
+    as capacity is approached. Designed for AI agent dashboards, session monitoring,
+    and prompt-engineering tooling. Original a2ui-catalogue atom.
+  compact_description: context window token usage meter with capacity warning colours
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as "Used X / Y tokens (Z%)" plain text; no visual meter
+    - surface: email
+      note: bar renders statically; colour may be stripped by email client
+  fields:
+    used: integer. Tokens consumed so far.
+    total: integer. Model context window size, e.g. 200000.
+    model: string (optional). Model name shown as subtitle, e.g. "claude-sonnet-4-6".
+    label: string (optional). Override the default "Context window" heading.
+    warn_at: number (optional). Percentage threshold to shift to amber. Default 70.
+    critical_at: number (optional). Percentage threshold to shift to red. Default
+      90.
+    animate: "boolean (optional). Count up from 0 to `used` using CSS @property animation. Bar grows in sync. Uses dark styling suited to Meet stage. Default false (static)."
+    duration: number (optional). Animation duration in seconds when animate is
+      true. Default 2.0.
+  source: *a2ui
+# ── Shopify Polaris atoms ─────────────────────────────────────────────────────
+- type: product_thumbnail
+  description: Shopify Polaris-style product card showing optional image, title,
+    vendor, SKU, price with optional compare-at strike-through, status badge, and
+    tag chips. Adapted from Polaris ResourceItem + Thumbnail patterns.
+  compact_description: product card with image, price, status badge, and tags
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as plain text with price; no image or badge styling
+  fields:
+    title: string. Product display name.
+    vendor: string (optional). Brand or supplier name.
+    sku: string (optional). Stock-keeping unit code.
+    price: string. Formatted price, e.g. "$49.00".
+    compare_at_price: string (optional). Strike-through original price.
+    status: string (optional). One of active | draft | archived. Default active.
+    image_url: string (optional). Product image URL.
+    tags: array of strings (optional). Flat tag list rendered as chips.
+  source:
+    name: Shopify Polaris
+    url: https://github.com/Shopify/polaris
+    license: MIT
+- type: order_status_card
+  description: Shopify Polaris-style order summary card showing order number, date,
+    fulfilment status badge, customer name, line item list, and total. Status is
+    colour-coded — fulfilled (green), unfulfilled (amber), partial (blue), cancelled
+    (red), refunded (grey). Adapted from Polaris Card + Badge patterns.
+  compact_description: e-commerce order card with status badge and line item list
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as plain order summary text; no colour or badge styling
+  fields:
+    order_number: string. Order identifier, e.g. "#1042".
+    date: string (optional). Order date displayed next to the order number.
+    status: string. One of fulfilled | unfulfilled | partial | cancelled | refunded.
+    customer: string (optional). Customer display name.
+    items: array (optional). List of {title, qty, price} line items.
+    total: string (optional). Formatted grand total, e.g. "$124.00".
+  source:
+    name: Shopify Polaris
+    url: https://github.com/Shopify/polaris
+    license: MIT
+- type: inventory_table
+  description: Shopify Polaris-style inventory management table showing SKU, product
+    name, available quantity, committed quantity, and warehouse location per row.
+    Rows with available stock below the optional threshold are highlighted amber
+    as a low-stock warning. Adapted from Polaris DataTable patterns.
+  compact_description: inventory table with SKU, stock levels, and low-stock row highlight
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as a simple text list of product names and quantities
+  fields:
+    title: string (optional). Table heading.
+    items: array. List of {sku?, product, available, committed?, location?, threshold?}.
+      threshold triggers amber low-stock highlight when available < threshold.
+  source:
+    name: Shopify Polaris
+    url: https://github.com/Shopify/polaris
+    license: MIT
+# ── Atlassian Design System atoms ────────────────────────────────────────────
+- type: jira_ticket
+  description: Atlassian Design System Jira issue card showing issue key, type icon
+    (bug/story/task/epic/subtask), one-line summary, status lozenge, priority indicator,
+    assignee, optional description, and label chips. Adapted from Atlassian Design
+    System Card + Lozenge patterns.
+  compact_description: Jira issue card with type icon, status lozenge, priority, and assignee
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as plain text with key and summary; no type icon or status badge
+  fields:
+    key: string. Issue key, e.g. "PROJ-123".
+    issue_type: string (optional). One of bug | story | task | epic | subtask. Default task.
+    summary: string. Issue title or one-line description.
+    status: string (optional). Column name e.g. "To Do", "In Progress", "Done".
+    priority: string (optional). One of highest | high | medium | low | lowest.
+    assignee: string (optional). Assignee display name.
+    description: string (optional). Short description or acceptance criteria.
+    labels: array of strings (optional). Label chips shown below the description.
+  source:
+    name: Atlassian Design System
+    url: https://atlassian.design
+    license: Apache-2.0
+- type: sprint_board
+  description: Atlassian Design System Jira-style sprint board rendered as kanban
+    columns. Each column has a name, ticket-count badge, and compact issue cards
+    (key, summary, type icon, priority dot). Distinct from prerequisite_checklist
+    which is a linear checklist. Adapted from Atlassian Design System Board patterns.
+  compact_description: kanban sprint board with named columns and compact issue cards
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: email
+      note: multi-column layout collapses; renders as sequential column headings with bullet lists
+    - surface: googlechat
+      note: renders as plain text column names with ticket counts and key-summary pairs
+  fields:
+    sprint_name: string (optional). Sprint label shown above the board.
+    columns: array. List of {name, items[]} where each item is {key, summary, type?,
+      priority?}.
+  source:
+    name: Atlassian Design System
+    url: https://atlassian.design
+    license: Apache-2.0
+- type: lozenge
+  description: Atlassian Design System semantic status pill with six strictly defined
+    appearance variants — default (grey), success (green), removed (red), inprogress
+    (blue), moved (yellow), new (teal). Uppercase rounded-rectangle label. Distinct
+    from badge_group which uses arbitrary colours; lozenge maps to Jira/Confluence
+    status semantics. Adapted from Atlassian Design System Lozenge component.
+  compact_description: Atlassian-semantic status pill with defined appearance variants
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as plain uppercase text label; no colour background
+  fields:
+    text: string. The lozenge label (single lozenge mode).
+    appearance: string (optional). One of default | success | removed | inprogress
+      | moved | new. Default default.
+    items: array (optional). List of {text, appearance} for a row of multiple lozenges.
+      Overrides single text/appearance fields.
+  source:
+    name: Atlassian Design System
+    url: https://atlassian.design
+    license: Apache-2.0
+# ── IBM Carbon Design System atoms ───────────────────────────────────────────
+- type: data_grid
+  description: IBM Carbon Design System enterprise data grid with typed columns (string/number/status/tag),
+    optional row-selection checkboxes, sortable column indicators, zebra-stripe rows,
+    and optional pagination footer. More capable than table and data_table_sortable
+    for enterprise data-dense layouts. Adapted from IBM Carbon DataTable patterns.
+  compact_description: enterprise data grid with typed columns, row selection, and pagination
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: email
+      note: renders as a plain HTML table; no selection checkboxes or sort indicators
+    - surface: googlechat
+      note: renders as a simple text list; no table structure
+  fields:
+    title: string (optional). Dark header bar above the grid.
+    columns: array. List of {header, key, type?, sortable?}. type is one of string
+      | number | status | tag.
+    rows: array. List of row objects where each key matches a column key.
+    selectable: boolean (optional). Show row-selection checkboxes. Default false.
+    pagination: object (optional). '{per_page} splits rows into CSS-tab pages; clicking a page number label switches pages without JavaScript. Omit for single-page display.'
+  source:
+    name: IBM Carbon Design System
+    url: https://github.com/carbon-design-system/carbon
+    license: Apache-2.0
+- type: tree_view
+  description: IBM Carbon Design System hierarchical tree for displaying recursive
+    data structures — organisational charts, category hierarchies, nested permission
+    models, BOM trees. More semantically general than file_tree which is file-system
+    specific. Expanded/collapsed state set per node. Adapted from IBM Carbon TreeView
+    component.
+  compact_description: recursive hierarchical tree with expand/collapse per node
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: renders as an indented plain text tree; no expand/collapse indicators
+  fields:
+    title: string (optional). Label above the tree panel.
+    nodes: array. Recursive list of {label, icon?, expanded?, meta?, children?[]}
+      node objects.
+  source:
+    name: IBM Carbon Design System
+    url: https://github.com/carbon-design-system/carbon
+    license: Apache-2.0
+- type: heatmap_calendar
+  description: IBM Carbon-inspired calendar heatmap showing activity density by date
+    across one or more calendar months. Data is a list of date-value pairs; cells
+    are coloured by intensity across a configurable colour scale. Distinct from heatmap
+    (arbitrary x/y grid) and github_activity_grid (year-spanning GitHub-specific
+    format). Adapted from IBM Carbon AI Applications data visualisation patterns.
+  compact_description: calendar month heatmap with date-value density colouring
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: email
+      note: renders as a static colour grid; tooltips unavailable
+    - surface: googlechat
+      note: renders as a plain text date-count list; no visual grid
+  fields:
+    title: string (optional). Heading above the calendar grid.
+    data: array. List of {date, count} objects where date is "YYYY-MM-DD".
+    months: integer (optional). Number of calendar months to render. Default 3.
+    color_scale: array of strings (optional). CSS colours from empty to maximum density.
+      Default IBM Carbon blue scale.
+    unit: string (optional). Unit label appended to count in tooltips, e.g. "commits".
+  source:
+    name: IBM Carbon Design System
+    url: https://github.com/carbon-design-system/carbon
+    license: Apache-2.0
+# React / Tailwind ecosystem atoms (shadcn/ui, Radix UI, Tailwind UI patterns)
+- type: combobox
+  description: Searchable filterable dropdown that narrows its option list as the
+    user types. Renders with a search icon, chevron, and an open option list for
+    article preview. Native <datalist> enables browser-level autocomplete.
+  compact_description: searchable filterable dropdown — shadcn/Headless UI pattern
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static select; no interactivity
+    incompatible_on:
+    - surface: googlechat
+      reason: No custom form widget support
+    - surface: email
+      reason: Non-functional in email
+  fields:
+    label: string (optional). Visible label above the field.
+    name: string. Field identifier.
+    placeholder: string (optional). Input placeholder text.
+    options: array of {value, label} pairs.
+    selected: string (optional). Pre-selected option value.
+    rules: array of strings (optional). e.g. ['required'].
+  source:
+    name: shadcn/ui
+    url: https://github.com/shadcn-ui/ui
+    license: MIT
+- type: feature_grid
+  description: A responsive CSS grid of feature tiles, each with an icon, title,
+    and description paragraph. Supports 2 or 3 columns and optional per-tile badges.
+    The canonical Tailwind UI marketing feature section pattern.
+  compact_description: icon + title + description feature grid — Tailwind UI pattern
+  surfaces:
+    works_on:
+    - web
+    - pdf
+    degraded_on:
+    - surface: meet-stage
+      note: Grid collapses to single column on narrow stage panels
+    - surface: email
+      note: Grid layout may collapse in email clients; renders as stacked list
+    incompatible_on:
+    - surface: googlechat
+      reason: No CSS grid support
+  fields:
+    heading: string (optional). Section heading above the grid.
+    description: string (optional). Section sub-heading or intro paragraph.
+    columns: integer (optional). 2 or 3. Default 3.
+    features: array of objects with fields — icon (emoji or text), title, description,
+      badge (optional short label), color (optional hex accent).
+  source:
+    name: Tailwind UI / shadcn
+    url: https://tailwindui.com
+    license: MIT
+- type: navigation_menu
+  description: Multi-level horizontal navigation bar with a brand/logo slot, top-level
+    nav items, optional dropdown submenus, and a right-aligned CTA button. First item
+    with children renders its submenu panel open for preview. Radix NavigationMenu pattern.
+  compact_description: multi-level horizontal nav with submenu panels — Radix pattern
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: pdf
+      note: Renders as a flat link list
+    incompatible_on:
+    - surface: googlechat
+      reason: No navigation widget type
+    - surface: email
+      reason: Navigation bars are not meaningful in email
+    - surface: meet-stage
+      reason: Stage canvas has no persistent nav chrome
+  fields:
+    brand: string (optional). Brand name shown on the left.
+    brand_url: string (optional). URL for the brand link.
+    items: array of objects with — label, url, children (optional array of {label,
+      url, description}).
+    cta: object (optional). {label, url} for a right-aligned call-to-action button.
+  source:
+    name: Radix UI / shadcn
+    url: https://www.radix-ui.com/primitives/docs/components/navigation-menu
+    license: MIT
+- type: multi_select_input
+  description: Tag/chip style multi-value selector. Displays selected values as
+    removable chips above a filtered option list. Shadcn multi-select pattern.
+  compact_description: chip-style multi-value select input — shadcn pattern
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    incompatible_on:
+    - surface: googlechat
+      reason: No custom form widget support
+    - surface: email
+      reason: Non-functional in email
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static chip list; no interactivity
+  fields:
+    label: string (optional). Visible label above the field.
+    name: string. Field identifier.
+    placeholder: string (optional). Input placeholder when no chips are selected.
+    options: array of {value, label} pairs.
+    selected: array of value strings. Pre-selected values shown as chips.
+  source:
+    name: shadcn/ui
+    url: https://github.com/shadcn-ui/ui
+    license: MIT
+- type: otp_input
+  description: One-time password entry field. Renders N individual digit boxes
+    (default 6) with filled/unfilled visual state. Shadcn InputOTP pattern.
+  compact_description: N-box one-time password digit input — shadcn OTP pattern
+  surfaces:
+    works_on:
+    - web
+    incompatible_on:
+    - surface: googlechat
+      reason: No custom input widget support
+    - surface: email
+      reason: Non-functional in email
+    - surface: pdf
+      reason: Input fields are non-functional in PDF
+    degraded_on:
+    - surface: meet-stage
+      note: Renders as static digit boxes; no keyboard routing
+  fields:
+    length: integer (optional). Number of digit boxes. Default 6.
+    value: string (optional). Pre-filled digits.
+    label: string (optional). Visible label above the boxes.
+  source:
+    name: shadcn/ui
+    url: https://github.com/shadcn-ui/ui
+    license: MIT
+- type: bento_grid
+  description: Asymmetric CSS grid of feature tiles. First tile typically spans
+    multiple columns for visual emphasis. Supports per-tile icons, titles,
+    descriptions, and accent colors. MagicUI/shadcn bento pattern.
+  compact_description: asymmetric bento-box feature tile grid — MagicUI/shadcn pattern
+  surfaces:
+    works_on:
+    - web
+    - pdf
+    degraded_on:
+    - surface: meet-stage
+      note: Grid collapses to single column on narrow panels
+    - surface: email
+      note: Grid may collapse in email clients
+    incompatible_on:
+    - surface: googlechat
+      reason: No CSS grid support
+  fields:
+    heading: string (optional). Section heading above the grid.
+    columns: integer (optional). Number of grid columns. Default 3.
+    tiles: array of objects with — title, subtitle, icon (emoji), span (integer,
+      default 1; span 2 fills two columns), color (optional hex), background (optional hex).
+  source:
+    name: MagicUI / shadcn
+    url: https://magicui.design
+    license: MIT
+- type: cta_section
+  description: Full-width call-to-action banner with headline, body text, a primary
+    button, and an optional secondary ghost button. Renders on a solid color
+    background. Tailwind UI CTA section pattern.
+  compact_description: full-width CTA banner with headline and buttons — Tailwind UI pattern
+  surfaces:
+    works_on:
+    - web
+    - email
+    - pdf
+    degraded_on:
+    - surface: meet-stage
+      note: Background color may not render in all stage environments
+    - surface: googlechat
+      reason: No full-width layout support; renders as a card with buttons
+  fields:
+    heading: string. Main headline.
+    body: string. Descriptive paragraph.
+    primary_cta: object. {label, url} for the primary action button.
+    secondary_cta: object (optional). {label, url} for a ghost secondary button.
+    background: string (optional). CSS color for the banner background. Default #1a73e8.
+  source:
+    name: Tailwind UI
+    url: https://tailwindui.com
+    license: MIT
+- type: animated_counter
+  description: CSS @property counter animation that counts up from zero to target
+    values without JavaScript. Uses @keyframes with CSS custom properties typed
+    as integers. Each counter has a value, label, optional prefix/suffix, and color.
+  compact_description: CSS-only animated counter that counts up to target values
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: pdf
+      note: Renders as static final values; no animation
+    - surface: meet-stage
+      note: Animation plays; @property support varies by browser version
+    incompatible_on:
+    - surface: googlechat
+      reason: No CSS animation support
+    - surface: email
+      reason: CSS animations not supported in email clients
+  fields:
+    counters: array of objects with — value (integer), label, prefix (optional),
+      suffix (optional), color (optional hex).
+    duration: number (optional). Animation duration in seconds. Default 2.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: media_stream_card
+  description: Auto-detecting media embed that accepts a raw URL and builds the correct
+    iframe for YouTube, Loom, Google Slides, or Vimeo. Displays a labelled card
+    shell with a skeleton shimmer while loading. Designed for stage-first delivery
+    where the URL is the only payload.
+  compact_description: Auto-detecting YouTube/Loom/Slides/Vimeo embed with skeleton loader
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a linked thumbnail image only
+    - surface: email
+      note: Renders as a static linked image placeholder
+    incompatible_on:
+    - surface: googlechat
+      reason: Iframe embeds not supported in Chat cards
+  fields:
+    url: string (required). Raw URL — YouTube, Loom, Google Slides, Vimeo, or any
+      embeddable URL. Platform is auto-detected.
+    title: string (optional). Card label shown above the iframe. Defaults to detected platform name.
+    height: string (optional). CSS height for the iframe container. Default 360px.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: live_aggregator
+  description: Comparative progress-bar display for real-time vote/response data.
+    Accepts an items array of label+value pairs and renders normalised horizontal
+    bars with optional value labels. Designed for stage-first delivery where items
+    update incrementally via fiber.
+  compact_description: Real-time comparative bars for votes, counts, or percentages
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: Renders as a static bar list; no transitions
+    - surface: pdf
+      note: Renders as a static bar list
+    incompatible_on:
+    - surface: googlechat
+      reason: Rich progress bar layout not supported in Chat cards
+  fields:
+    items: array of objects — label (string), value (number), color (optional hex).
+    title: string (optional). Section heading above the bars.
+    max_value: number (optional). Denominator for bar widths; auto-computed from
+      max item value if omitted.
+    show_values: boolean (optional). Show numeric value next to each bar. Default true.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: vote_button_group
+  description: Styled multi-option vote selector with three visual variants —
+    pill (rounded filled), neon (dark with cyan glow), and default (flat bordered).
+    Encodes the Cyberpunk Maverick voting pattern as a schema atom. CSS-only
+    interactivity using checkbox/radio inputs.
+  compact_description: Multi-option vote buttons in pill, neon, or default style
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: email
+      note: Renders as a static button list; no selection state
+    - surface: pdf
+      note: Renders as a flat option list
+    incompatible_on:
+    - surface: googlechat
+      reason: Custom button styling not supported in Chat cards
+  fields:
+    options: array of objects — label (string), value (string), selected (boolean optional).
+    style: string (optional). One of pill, neon, default. Default pill.
+    title: string (optional). Section heading above the buttons.
+    allow_multi: boolean (optional). Allow multiple selections. Default false.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: effect_overlay
+  description: CSS-animated celebration overlay triggered by a named effect type.
+    confetti fires falling coloured rectangles via keyframe animation. trophy
+    bounces a large emoji with a scale-in animation. pulse radiates a glowing
+    circle. fireworks scatters particles radially. Designed as a schema atom
+    wrapper around the canvas particle blast used in Cyberpunk Maverick demos.
+  compact_description: CSS confetti/trophy/pulse celebration overlay triggered by name
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static icon and message only
+    - surface: email
+      note: CSS animations not supported; renders as static icon
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS animation not supported in Chat cards
+  fields:
+    trigger: string (required). One of confetti, trophy, pulse, fireworks.
+    status: string (optional). Small label shown above the effect (e.g. resolved, done).
+    message: string (optional). Text shown below the icon.
+    color: string (optional). Primary accent color for pulse effect. Default #00f2ff.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: skeleton_stage_card
+  description: Dark-themed shimmer skeleton loader for stage use while a playbook
+    is processing. Four variants — card (avatar + text lines), list (avatar rows),
+    media (image header + caption), chat (alternating message bubbles). All use
+    a CSS linear-gradient shimmer animation with no JavaScript.
+  compact_description: Dark shimmer skeleton loader in card/list/media/chat variants
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as empty grey boxes without animation
+    incompatible_on:
+    - surface: googlechat
+      reason: CSS animation not supported in Chat cards
+    - surface: email
+      reason: CSS animations not supported in email clients
+  fields:
+    variant: string (optional). One of card, list, media, chat. Default card.
+    lines: integer (optional). Number of text lines or list rows to show. Default 3.
+    count: integer (optional). Number of skeleton cards to stack. Default 1.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: marquee_strip
+  description: Infinite horizontally-scrolling strip of text labels or logo+text
+    items, driven by a CSS @keyframes animation with no JavaScript. Ideal for
+    customer logo rows, tech-stack badges, testimonial tickers, and social proof
+    strips. Pause-on-hover is CSS-only.
+  compact_description: infinite CSS-animated horizontal marquee of text or logo items
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static single-line row without animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as static flex row
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    items: 'array. Each item is a string or {text, image_url} object.'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    direction: '"left" | "right"  (optional, default "left")'
+    pause_on_hover: 'bool (optional, default true). Pause scroll on hover.'
+    label: 'string (optional). Small header label above the strip.'
+    gap: 'string (optional). CSS gap between items. Default "40px".'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Aceternity UI — Infinite Moving Cards
+    url: https://ui.aceternity.com/components/infinite-moving-cards
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: typewriter_text
+  description: Text that animates itself character by character using a CSS
+    steps() width animation on a monospace element. A blinking cursor is included
+    by default. Useful for hero hooks, slide reveals, and LLM demo showcases.
+    No JavaScript required.
+  compact_description: CSS typewriter animation that reveals text character by character
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - gas-sidebar
+    degraded_on:
+    - surface: pdf
+      note: Renders as fully-visible static text without animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as plain text
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    text: string. The text to type out.
+    size: 'string (optional). Font size e.g. "32px". Default "28px".'
+    weight: 'string (optional). Font weight e.g. "700". Default "700".'
+    color: 'string (optional). Text colour. Default "#1a1a1a".'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    cursor: 'bool (optional). Show blinking cursor. Default true.'
+    delay: 'string (optional). CSS delay before typing starts. Default "0s".'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Aceternity UI — Typewriter Effect
+    url: https://ui.aceternity.com/components/typewriter-effect
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: animated_border_card
+  description: Card with a continuously rotating gradient border, created by a
+    spinning conic-gradient pseudo-element — no JavaScript. Two accent colours
+    blend through the border. Inner content area has a solid background. Ideal
+    for highlighting key facts, announcements, or featured atoms in a catalogue.
+  compact_description: card with CSS rotating gradient animated border
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static card with a solid border; animation not captured
+    - surface: googlechat
+      note: CSS animation not supported; renders as a plain card
+    incompatible_on:
+    - surface: email
+      reason: CSS animations and pseudo-elements not supported in email clients
+  fields:
+    title: string (optional). Card heading.
+    body: string. Card body content (markdown inline formatting supported).
+    accent: 'string (optional). Primary border gradient colour. Default "#38bdf8".'
+    accent2: 'string (optional). Secondary border gradient colour. Default "#818cf8".'
+    background: 'string (optional). Inner card background colour. Default "#ffffff".'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    border_width: 'integer (optional). Border thickness in px. Default 2.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Aceternity UI — Moving Border
+    url: https://ui.aceternity.com/components/moving-border
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: aurora_background
+  description: Dark panel with three independently-animating radial gradient blobs
+    that drift and scale using CSS @keyframes — creating an aurora borealis effect
+    with no JavaScript. Supports optional title and body text overlaid on the effect.
+    Ideal for hero sections, cover slides, and atmospheric backgrounds on meet-stage.
+  compact_description: animated aurora borealis gradient blob background, CSS-only
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static gradient panel without animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as solid background
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    colors: 'array of up to 3 hex colour strings (optional). Default ["#38bdf8","#818cf8","#34d399"].'
+    speed: '"slow" | "normal" | "fast"  (optional, default "slow")'
+    opacity: 'float 0–1 (optional, default 0.5). Blob layer opacity.'
+    background: 'string (optional). Panel background colour. Default "#0a0f1d".'
+    title: string (optional). Text heading overlaid on the aurora.
+    body: string (optional). Body text overlaid on the aurora (markdown inline supported).
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Aceternity UI — Aurora Background
+    url: https://ui.aceternity.com/components/aurora-background
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: dot_grid_background
+  description: Panel with a CSS repeating dot, grid, or cross background pattern
+    using background-image with radial-gradient or linear-gradient. No SVG, no
+    JavaScript. Useful as a texture layer behind content in dark or light themes.
+  compact_description: CSS repeating dot or grid pattern panel background
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: background-image patterns may not render in Chat card containers
+    incompatible_on:
+    - surface: email
+      reason: CSS background-image patterns not reliably supported in email clients
+  fields:
+    variant: '"dots" | "grid" | "cross"  (optional, default "dots")'
+    title: string (optional). Text heading overlaid on the pattern.
+    body: string (optional). Body text overlaid on the pattern (markdown inline supported).
+    dot_color: 'string (optional). Dot or line colour. Default "rgba(148,163,184,0.35)".'
+    background: 'string (optional). Panel background fill. Default "#0d1525".'
+    spacing: 'integer (optional). Grid cell size in px. Default 24.'
+    dot_size: 'integer (optional). Dot radius in px (dots variant only). Default 1.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Aceternity UI — Grid and Dot Backgrounds
+    url: https://ui.aceternity.com/components/grid-and-dot-backgrounds
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: shimmer_button
+  description: Inline button or link with a diagonal shimmer sweep animation driven
+    by CSS background-position keyframes. The shimmer accent colour sweeps across
+    the button on a loop. No JavaScript. Use for primary CTAs on dark backgrounds.
+  compact_description: button with CSS background-position shimmer sweep animation
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static styled button without animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as a plain button
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    label: string. Button text.
+    href: string (optional). If set, renders as an anchor tag.
+    size: '"sm" | "md" | "lg"  (optional, default "md")'
+    accent: 'string (optional). Shimmer highlight colour. Default "#38bdf8".'
+    background: 'string (optional). Button background colour. Default "#1e293b".'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    description: string (optional). Small text below the button.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Aceternity UI — Shimmer Button
+    url: https://ui.aceternity.com/components/shimmer-button
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: card_stack
+  description: Two to four cards stacked with CSS transform rotate and translateY,
+    creating a fanned deck effect. The front card shows full title and body; back
+    cards are progressively rotated and faded. No JavaScript — purely presentational.
+    Useful for showcasing multiple items with a premium layered feel.
+  compact_description: CSS-fanned stack of 2–4 cards with rotation and opacity tiers
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: CSS transform may not render correctly in all PDF engines
+    - surface: googlechat
+      note: Absolute positioning and transforms may collapse in Chat card layout
+    incompatible_on:
+    - surface: email
+      reason: CSS transforms and absolute positioning not supported in email clients
+  fields:
+    cards: 'array. Each card: {title, body, accent}. Max 4 cards.'
+    background: 'string (optional). Card background colour. Default "#1e293b".'
+    border_color: 'string (optional). Card border colour. Default "rgba(255,255,255,0.08)".'
+    height: 'integer (optional). Card height in px. Default 160.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Aceternity UI — Card Stack
+    url: https://ui.aceternity.com/components/card-stack
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: meteor_shower
+  description: Dark panel with CSS-animated diagonal streaks that fall across the
+    surface like a meteor shower. Each meteor is a rotated span with a linear-gradient
+    tail, animated with staggered delays — no JavaScript, no canvas. Optional title
+    and body text render above the effect layer.
+  compact_description: CSS-animated diagonal falling meteor streaks on a dark panel
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static dark panel without animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as a plain dark block
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    count: 'integer (optional). Number of meteors. Default 20. Max 40.'
+    color: 'string (optional). Meteor streak colour. Default "#38bdf8".'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    background: 'string (optional). Panel background colour. Default "#0a0f1d".'
+    title: string (optional). Text heading overlaid on the effect.
+    body: string (optional). Body text overlaid on the effect (markdown inline supported).
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Aceternity UI — Meteors
+    url: https://ui.aceternity.com/components/meteors
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: blur_fade_in
+  description: Container that animates from blurred and transparent to fully visible
+    on mount. Uses CSS @keyframes with filter:blur() and opacity together — no JavaScript.
+    Configurable delay, duration, and direction (up, down, left, right, none).
+  compact_description: CSS blur-to-focus fade-in container reveal
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: gas-sidebar
+      note: Use direction "none" — translation offsets can clip against the 300px iframe edge.
+        Opacity-only fade works correctly.
+    - surface: pdf
+      note: Renders as a static visible panel without animation
+    - surface: googlechat
+      note: CSS animation not supported; renders immediately visible
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    children: array of atom objects to render inside the container (optional).
+    title: string (optional). Heading text.
+    body: string (optional). Body text (markdown inline supported).
+    delay: 'string (optional). CSS delay before animation starts, e.g. "0.3s". Default "0s".'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    direction: '"up" | "down" | "left" | "right" | "none"  (optional, default "up"). Drift direction on reveal.'
+    blur: 'string (optional). Starting blur radius, e.g. "8px". Default "8px".'
+    background: 'string (optional). Panel background. Default transparent.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Magic UI — Blur Fade
+    url: https://magicui.design/docs/components/blur-fade
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: glow_button
+  description: Button or anchor that uses CSS box-shadow to signal state. Three named
+    states — disabled (grey), ready (brand), fired (success pulse) — each with a
+    distinct glow colour and optional pulse animation. State is set via the state
+    field; no JavaScript required.
+  compact_description: CSS box-shadow state-signalling button with disabled/ready/fired glow
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - gas-sidebar
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static button without glow or animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as a flat button
+    incompatible_on:
+    - surface: email
+      reason: CSS box-shadow and animations not supported in most email clients
+  fields:
+    label: string. Button text.
+    state: '"disabled" | "ready" | "fired"  (optional, default "ready")'
+    href: string (optional). If set renders as an anchor tag.
+    color_ready: 'string (optional). Glow colour in ready state. Default "#38bdf8".'
+    color_fired: 'string (optional). Glow colour in fired state. Default "#34d399".'
+    size: '"sm" | "md" | "lg"  (optional, default "md")'
+    description: string (optional). Small caption text below the button.
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Magic UI — Shimmer Button / Animated Subscribe Button
+    url: https://magicui.design/docs/components/animated-subscribe-button
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: animated_beam
+  description: Inline SVG panel showing two labelled endpoint nodes connected by a
+    path with a pulsing light dot that travels along it, animating via CSS
+    stroke-dashoffset. No JavaScript, no mousemove. Visualises data routing between
+    two named components.
+  compact_description: CSS stroke-dashoffset animated SVG beam between two labelled nodes
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: gas-sidebar
+      note: SVG width is constrained to 300px; use short from_label/to_label (≤6 chars)
+        to avoid node text overflow.
+    - surface: pdf
+      note: Renders as a static SVG path without animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as a static diagram
+    incompatible_on:
+    - surface: email
+      reason: SVG animation and CSS keyframes not supported in email clients
+  fields:
+    from_label: string. Left/source node label.
+    to_label: string. Right/target node label.
+    label: string (optional). Small caption above the beam diagram.
+    body: string (optional). Description text below the diagram.
+    active: 'bool (optional). Whether the beam pulse animates. Default true.'
+    color: 'string (optional). Beam and node accent colour. Default "#38bdf8".'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    curved: 'bool (optional). Use a curved cubic-bezier path. Default true.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Magic UI — Animated Beam
+    url: https://magicui.design/docs/components/animated-beam
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: encrypted_reveal
+  description: Text that appears to scramble through random alphanumeric characters
+    before locking into the final readable string. Implemented entirely in CSS using
+    a steps() @keyframes animation cycling through server-side pre-generated scrambled
+    frames — no JavaScript required.
+  compact_description: CSS steps() scramble-to-reveal text animation
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static panel showing the final text only
+    - surface: googlechat
+      note: CSS animation not supported; renders as plain text immediately
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    text: string. The final text to reveal.
+    size: 'string (optional). Font size e.g. "32px". Default "28px".'
+    weight: 'string (optional). Font weight. Default "700".'
+    color: 'string (optional). Text colour. Default "#f1f5f9".'
+    scramble_color: 'string (optional). Colour of scramble characters. Default "#38bdf8".'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    delay: 'string (optional). CSS delay before reveal starts. Default "0s".'
+    frames: 'integer (optional). Number of scramble frames before lock. Default 8.'
+    background: 'string (optional). Container background. Default transparent.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Magic UI — Text Animate / Encrypted Text
+    url: https://magicui.design/docs/components/text-animate
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: word_flip
+  description: Inline overflow-hidden container that cycles through a list of words
+    using a CSS steps() translateY animation. The agent provides the word array;
+    the component handles all timing and looping. Useful for dynamic hero headlines
+    such as "Grow your [Retention | Revenue | Signups]". No JavaScript required.
+  compact_description: CSS steps() vertical word carousel in an overflow-hidden inline container
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - gas-sidebar
+    degraded_on:
+    - surface: pdf
+      note: Renders all words stacked vertically (overflow visible); use first word only as fallback.
+    - surface: googlechat
+      note: CSS animation not supported; renders the first word only as plain text.
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    words: 'array of strings. The words to cycle through. Minimum 2.'
+    prefix: 'string (optional). Static text before the flipping section, e.g. "Grow your ".'
+    suffix: 'string (optional). Static text after the flipping section.'
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal"). Per-word hold duration.'
+    color: 'string (optional). Flipping word colour. Default "#38bdf8".'
+    size: 'string (optional). Font size, e.g. "32px". Default "inherit".'
+    weight: 'string (optional). Font weight of flipping words. Default "700".'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Magic UI — Text Animate
+    url: https://magicui.design/docs/components/text-animate
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: sonar_pulse
+  description: A visual attention primitive that emits three concentric ring pulses
+    outward from a centre point using staggered CSS @keyframes. Each ring animates
+    independently with a 1-second delay offset, creating a continuous sonar effect.
+    Four named variants map to semantic colours. No JavaScript required.
+  compact_description: CSS concentric ring pulse animation for attention signalling
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - gas-sidebar
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static coloured circle without ring animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as a plain coloured dot
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    variant: '"critical" | "success" | "info" | "warning"  (optional, default "critical")'
+    active: 'bool (optional). If false renders as a static dot. Default true.'
+    label: 'string (optional). Short text label centred in the pulse ring.'
+    size: '"sm" | "md" | "lg"  (optional, default "md"). Controls ring diameter.'
+    body: 'string (optional). Caption text below the pulse ring.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+  source_inspiration:
+    name: Magic UI — Ripple
+    url: https://magicui.design/docs/components/ripple
+    note: Pattern inspiration only — renderer is an original Python implementation
+- type: typewriter
+  description: Text that reveals itself character-by-character using a CSS steps() width animation on an overflow-hidden monospace container, with an optional blinking cursor. No JavaScript required.
+  compact_description: CSS character-by-character typewriter reveal with optional cursor
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as static completed text; no animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as plain text
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    text: string. The text to type out.
+    speed: '"slow" | "normal" | "fast"  (optional, default "normal")'
+    cursor: 'bool (optional). Show blinking cursor after typing. Default true.'
+    color: 'string (optional). Text colour. Default "#0f172a".'
+    size: 'string (optional). Font size e.g. "1.4rem". Default "1.4rem".'
+    weight: 'string (optional). Font weight. Default "600".'
+    background: 'string (optional). Container background. Default "#f8fafc".'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: number_odometer
+  description: Slot-machine style digit-by-digit flip animation where each digit column independently scrolls to its target value using staggered CSS translateY keyframes. Distinct from animated_counter which counts up sequentially — this flips each digit column independently.
+  compact_description: Slot-machine digit-column flip to target number
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as static number; no animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as plain number
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    value: string. The target number to display e.g. "1337" or "42.5k".
+    label: 'string (optional). Caption below the number.'
+    color: 'string (optional). Digit colour. Default "#0f172a".'
+    accent: 'string (optional). Accent colour. Default "#4f46e5".'
+    size: 'string (optional). Font size. Default "3rem".'
+    duration: 'number (optional). Animation duration in seconds. Default 1.2.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: typing_indicator
+  description: Three bouncing dots inside a chat bubble that signals an agent or user is composing a response. Each dot animates with a staggered delay using CSS @keyframes translateY, creating a continuous wave effect.
+  compact_description: Three-dot bouncing chat typing indicator bubble
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - gas-sidebar
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static placeholder bubble; no animation
+    - surface: googlechat
+      note: CSS animation not supported; renders as plain text
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    name: 'string (optional). Agent or user name shown above the bubble. Default "Agent".'
+    variant: '"dark" | "light"  (optional, default "dark"). Bubble colour scheme.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: countdown_timer
+  description: Flip-clock style countdown display showing hours, minutes, and seconds in individual digit tiles. Renders a static snapshot of the target time — pair with a dataModelUpdate SSE stream to tick the values.
+  compact_description: Flip-clock countdown timer display (static tiles, data-driven ticking)
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as plain text time string
+    - surface: pdf
+      note: Renders as static time display
+    incompatible_on:
+    - surface: email
+      reason: Dynamic ticking not supported; renders as static snapshot
+  fields:
+    hours: 'integer (optional). Hours component. Default 0.'
+    minutes: 'integer (optional). Minutes component. Default 4.'
+    seconds: 'integer (optional). Seconds component. Default 59.'
+    label: 'string (optional). Caption below the timer.'
+    variant: '"dark" | "light"  (optional, default "dark").'
+    accent: 'string (optional). Separator and accent colour. Default "#00f2ff".'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: gradient_text
+  description: Heading text rendered with an animated shifting gradient fill using CSS background-clip:text and a background-position keyframe. The gradient flows continuously between the from/to colours, creating a shimmer effect on titles and hero text.
+  compact_description: Animated gradient-fill heading text via CSS background-clip
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as flat-coloured text (first gradient stop)
+    - surface: googlechat
+      note: CSS background-clip not supported; renders as plain bold text
+    incompatible_on:
+    - surface: email
+      reason: CSS background-clip:text not supported in email clients
+  fields:
+    text: string. The heading text to display.
+    from: 'string (optional). Gradient start colour. Default "#4f46e5".'
+    to: 'string (optional). Gradient end colour. Default "#06b6d4".'
+    via: 'string (optional). Optional midpoint colour.'
+    size: 'string (optional). Font size. Default "2rem".'
+    weight: 'string (optional). Font weight. Default "800".'
+    duration: 'number (optional). Cycle duration in seconds. Default 4.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: reveal_on_scroll
+  description: Content block that starts invisible and fades + slides into view when scrolled into the viewport, using an IntersectionObserver with a CSS class toggle. Requires a small inline script — degrades gracefully to visible static content where JS is unavailable.
+  compact_description: IntersectionObserver scroll-triggered fade+slide reveal
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Content renders visible immediately (no scroll context)
+    - surface: pdf
+      note: Renders as fully visible static block
+    - surface: googlechat
+      note: Renders as plain text block
+    incompatible_on:
+    - surface: email
+      reason: JavaScript not supported in email clients
+  fields:
+    title: 'string (optional). Bold heading inside the block.'
+    body: 'string (optional). Body text inside the block.'
+    direction: '"up" | "down" | "left" | "right"  (optional, default "up"). Drift direction before reveal.'
+    duration: 'number (optional). Transition duration in seconds. Default 0.7.'
+    accent: 'string (optional). Left border accent colour. Default "#4f46e5".'
+    background: 'string (optional). Block background. Default "#f8fafc".'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: word_scramble
+  description: Text that begins as a stream of random alphanumeric characters and progressively resolves left-to-right into the final string using CSS @keyframes content with steps(). Pure CSS — no JavaScript. Each frame pre-generates a partially-revealed scramble via Python at render time.
+  compact_description: CSS steps() left-to-right character scramble-to-reveal
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as the final resolved text only
+    - surface: googlechat
+      note: CSS animation not supported; renders as final text
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations not supported in email clients
+  fields:
+    text: string. The final text to reveal.
+    duration: 'number (optional). Total animation duration in seconds. Default 2.0.'
+    color: 'string (optional). Final text colour. Default "#0f172a".'
+    scramble_color: 'string (optional). Scramble character colour. Default "#4f46e5".'
+    size: 'string (optional). Font size. Default "2.5rem".'
+    weight: 'string (optional). Font weight. Default "800".'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: svg_path_draw
+  description: An SVG path that animates drawing itself from start to end using the stroke-dasharray / stroke-dashoffset CSS technique. The agent selects a named shape (arrow, check, circle, zigzag, infinity) or supplies a custom SVG path string.
+  compact_description: SVG stroke-dashoffset self-drawing path animation
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a fully-drawn static SVG path
+    - surface: googlechat
+      note: SVG animation not supported; renders as a static icon
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations on SVG not supported in email clients
+  fields:
+    shape: '"arrow" | "check" | "circle" | "zigzag" | "infinity"  (optional, default "arrow")'
+    color: 'string (optional). Stroke colour. Default "#4f46e5".'
+    width: 'integer (optional). Stroke width in px. Default 3.'
+    duration: 'number (optional). Draw duration in seconds. Default 1.5.'
+    label: 'string (optional). Caption below the SVG.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: toast_notification
+  description: A fixed-position slide-in notification toast that appears from a corner of the viewport, holds for 3.5 seconds, then slides back out — all via CSS keyframes. Renders a viewport placeholder in the article flow with the toast positioned fixed above it.
+  compact_description: CSS slide-in/out fixed-position notification toast
+  surfaces:
+    works_on:
+    - web
+    - gas-sidebar
+    degraded_on:
+    - surface: meet-stage
+      note: Fixed positioning relative to Meet iframe; renders at iframe edge
+    - surface: pdf
+      note: Renders as a styled notification card inline (not fixed)
+    - surface: googlechat
+      note: Renders as a plain notification text card
+    incompatible_on:
+    - surface: email
+      reason: CSS keyframe animations and fixed positioning not supported
+  fields:
+    title: 'string (optional). Bold notification title. Default "Changes saved".'
+    message: 'string (optional). Body text. Default "Your updates have been applied successfully."'
+    variant: '"success" | "error" | "info" | "warning"  (optional, default "success")'
+    position: '"bottom-right" | "bottom-left" | "top-right" | "top-left"  (optional, default "bottom-right")'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
+    license: MIT
+- type: parallax_card
+  description: A card with CSS perspective and a mousemove JavaScript handler that rotates the card along both axes in response to cursor position, creating a 3D parallax tilt effect. Text layers use translateZ to create depth separation. Requires a minimal inline script.
+  compact_description: 3D CSS perspective tilt card with mousemove parallax depth
+  surfaces:
+    works_on:
+    - web
+    - gas-sidebar
+    degraded_on:
+    - surface: meet-stage
+      note: Renders as a flat dark card; mouse events may not propagate through Meet iframe
+    - surface: pdf
+      note: Renders as a flat static card
+    - surface: googlechat
+      note: Renders as a plain text card
+    incompatible_on:
+    - surface: email
+      reason: JavaScript and 3D CSS transforms not supported in email clients
+  fields:
+    title: 'string (optional). Card heading.'
+    body: 'string (optional). Card body text.'
+    badge: 'string (optional). Small pill badge above the title.'
+    accent: 'string (optional). Badge background colour. Default "#4f46e5".'
+    background: 'string (optional). Card background. Default "#0f172a".'
+    depth: 'integer (optional). Maximum tilt angle in degrees. Default 15.'
+  source:
+    name: a2ui-catalogue
+    url: https://a2ui.dev/catalogue
     license: MIT

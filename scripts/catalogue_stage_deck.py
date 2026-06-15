@@ -41,7 +41,7 @@ CATEGORIES = {
     "Technical Reference": ["cli_command", "copy_code_button", "env_var_list", "json_tree_viewer", "keyboard_shortcut", "log_output", "prerequisite_checklist"],
     "Warnings & Status": ["alert_banner", "deprecation_notice", "experimental_banner", "status_pill", "version_badge"],
     "Media": ["carousel", "color_swatch_grid", "diagram", "framed_screenshot", "gallery", "image", "image_hotspots", "image_pair", "image_with_caption", "pdf_preview", "video_card", "video_pair", "video_thumbnail", "zoomable_image"],
-    "Data Visualization": ["benchmark_comparison", "chartjs_bar", "chartjs_line", "data_table_sortable", "donut_stat", "heatmap", "task_list", "sentiment_summary", "metric_comparison_card", "metric_delta", "mini_sparkline_set", "progress_bar", "progress_circle", "sparkline", "status_dashboard", "trend_indicator", "uptime_timeline"],
+    "Data Visualization": ["benchmark_comparison", "chartjs_bar", "chartjs_line", "data_table_sortable", "donut_stat", "heatmap", "task_list", "sentiment_summary", "metric_comparison_card", "metric_delta", "mini_sparkline_set", "progress_bar", "progress_circle", "sparkline", "status_dashboard", "trend_indicator", "uptime_timeline", "conversion_funnel", "gauge_sla", "stacked_area", "scatter_trend", "call_mood_board", "github_activity_grid"],
     "Social & Engagement": ["author_bio_card", "avatar_group", "contributor_list", "customer_logo_grid", "expert_endorsement", "follow_button", "follow_cta", "media_mention_card", "newsletter_cta", "reaction_group", "review_callout", "share_quote", "social_feed_embed", "social_share_bar", "testimonial_card"],
     "UI Utilities": ["command_palette", "empty_state", "inline_feedback_message", "loading_skeleton", "search_result_card", "spinner", "toast_notification"],
     "Utilities & Links": ["document_link", "github_repo_card", "repo_links"],
@@ -176,6 +176,41 @@ GEN_DATA = {
     'benchmark_comparison': {'items': [{'label': 'A2UI', 'value': 95}, {'label': 'Baseline', 'value': 120}]},
     'chartjs_bar': {'labels': ['Jan', 'Feb', 'Mar'], 'datasets': [{'label': 'Renders', 'data': [42, 65, 88]}]},
     'chartjs_line': {'labels': ['Jan', 'Feb', 'Mar'], 'datasets': [{'label': 'Uptime', 'data': [99.2, 99.8, 99.5]}]},
+    'conversion_funnel': {
+        'title': 'SaaS Onboarding Conversion Funnel',
+        'steps': [
+            {'stage': 'Web Visits', 'value': 25000},
+            {'stage': 'Account Created', 'value': 12500},
+            {'stage': 'Workspace Set Up', 'value': 8200},
+            {'stage': 'First Query Run', 'value': 6100},
+            {'stage': 'Paid Upgrade', 'value': 1220}
+        ]
+    },
+    'gauge_sla': {
+        'title': 'Enterprise SLA Gauge status',
+        'value': 99.85,
+        'max_value': 100.0,
+        'unit': '%',
+        'label': 'Uptime Met'
+    },
+    'stacked_area': {
+        'title': 'SaaS Cumulative Monthly Recurring Revenue (MRR)',
+        'labels': ['Q1', 'Q2', 'Q3', 'Q4'],
+        'series': [
+            {'label': 'Enterprise Plan', 'data': [12000, 24000, 48000, 72000], 'color': '#00f2ff'},
+            {'label': 'Growth Plan', 'data': [8000, 16000, 28000, 42000], 'color': '#7c3aed'},
+            {'label': 'Starter Plan', 'data': [3000, 6000, 11000, 18000], 'color': '#10b981'}
+        ]
+    },
+    'scatter_trend': {
+        'title': 'Scatter Correlation: Response Time vs. Customer CSAT',
+        'data_points': [
+            [0.5, 98], [1.2, 95], [1.8, 92], [2.1, 88], [2.8, 85],
+            [3.2, 80], [4.0, 74], [4.5, 71], [5.2, 65], [6.0, 58]
+        ],
+        'label_x': 'Response Time (Hours)',
+        'label_y': 'CSAT Score'
+    },
     'data_table_sortable': {'headers': ['Atom', 'Surfaces'], 'rows': [['stat_card', 'Web, Meet'], ['callout', 'All']]},
     'donut_stat': {'label': 'Completion', 'value': 75, 'max': 100},
     'heatmap': {'data': [[3, 7, 2], [8, 1, 6], [2, 9, 3]]},
@@ -197,6 +232,28 @@ GEN_DATA = {
             {'theme': 'UX Fluidity & Micro-interactions', 'mood': 'Engaged', 'score': 95},
             {'theme': 'Deployment Integration Cost', 'mood': 'Hesitant', 'score': 45}
         ]
+    },
+    'call_mood_board': {
+        'title': 'Team Call Atmosphere Summary',
+        'moods': [
+            {'mood': 'Collaborative', 'intensity': 85, 'color': '#10b981'},
+            {'mood': 'Focused', 'intensity': 90, 'color': '#38bdf8'},
+            {'mood': 'Energetic', 'intensity': 75, 'color': '#f59e0b'},
+            {'mood': 'Anxious', 'intensity': 15, 'color': '#ef4444'}
+        ],
+        'themes': [
+            {'term': 'Web article rendering speed', 'weight': 95, 'sentiment': 'positive'},
+            {'term': 'Google Tasks OAuth flow', 'weight': 80, 'sentiment': 'neutral'},
+            {'term': 'Deployment cost concern', 'weight': 60, 'sentiment': 'negative'}
+        ],
+        'summary': 'The engineering team demonstrates exceptional focus on Web UI rendering latency. While there is minor hesitation around cloud hosting budgets, our workspace roadmap alignment remains extremely strong.'
+    },
+    'github_activity_grid': {
+        'title': 'MeetStudio Submodule Activity',
+        'username': 'curtiskrygier',
+        'total_contributions': 342,
+        'streak_days': 18,
+        'activity': [0, 1, 2, 3, 4, 3, 2, 1, 0, 4, 4, 3, 2, 1, 0, 2, 3, 4, 1, 2]
     },
     'metric_comparison_card': {'label': 'Response time', 'value': 95, 'previous': 120},
     'metric_delta': {'label': 'Weekly signups', 'value': '+23%'},
