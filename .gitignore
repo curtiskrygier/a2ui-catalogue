@@ -5,4 +5,11 @@ dist/
 .env
 .env.local
 *.log
+*.bak
 a2uithoughts.md
+__pycache__/
+*.pyc
+*.pyo
+benchmarks/.openui_cache/
+catalogue_meet_preview.html
+catalogue_web_preview.html
