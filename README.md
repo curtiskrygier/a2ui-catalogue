@@ -316,4 +316,4 @@ MIT. See [LICENSE](LICENSE) for details.
 
 ---
 
-Built for and maintained by **Google Meet Studio**.
+Built for and maintained by **[Google Meet Studio](https://github.com/curtiskrygier/meetstudio)**.
