@@ -1312,16 +1312,19 @@ _RENDERERS['tabs'] = function(b) {
   if (!tabList.length) return '';
   var uid = Math.random().toString(36).substr(2,6);
   var css = '<style>';
+  css += '.tm-tab-panel-' + uid + '{display:none;padding:16px;}';
+  css += '.tm-tab-lbl-' + uid + '{padding:10px 18px;cursor:pointer;font-size:0.85rem;font-weight:600;color:#5f6368;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color 0.15s;}';
   tabList.forEach(function(t, i){
+    css += '#tb' + uid + '_' + i + ':checked ~ .tm-tab-labels-' + uid + ' .tm-tab-lbl-' + uid + ':nth-child(' + (i+1) + '){color:#1a73e8;border-bottom-color:#1a73e8;}';
     css += '#tb' + uid + '_' + i + ':checked ~ .tm-tab-panels-' + uid + ' .tm-tab-panel-' + uid + ':nth-child(' + (i+1) + '){display:block;}';
   });
   css += '</style>';
   var inputs = tabList.map(function(t, i){
     return '<input type="radio" id="tb' + uid + '_' + i + '" name="tab_' + uid + '" style="display:none;"' + (i===0?' checked':'') + '>';
   }).join('');
-  var labels = '<div style="display:flex;flex-wrap:wrap;border-bottom:2px solid #e5e7eb;margin-bottom:0;">' +
+  var labels = '<div class="tm-tab-labels-' + uid + '" style="display:flex;flex-wrap:wrap;border-bottom:2px solid #e5e7eb;margin-bottom:0;">' +
     tabList.map(function(t, i){
-      return '<label for="tb' + uid + '_' + i + '" style="padding:10px 18px;cursor:pointer;font-size:0.85rem;font-weight:600;color:#5f6368;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color 0.15s;">' + _esc(t.label||('Tab '+(i+1))) + '</label>';
+      return '<label for="tb' + uid + '_' + i + '" class="tm-tab-lbl-' + uid + '">' + _esc(t.label||('Tab '+(i+1))) + '</label>';
     }).join('') + '</div>';
   var panels = '<div class="tm-tab-panels-' + uid + '">' +
     tabList.map(function(t, i){
@@ -1336,7 +1339,7 @@ _RENDERERS['tabs'] = function(b) {
       } else if (t.code) {
         content = '<pre><code>' + _esc(t.code) + '</code></pre>';
       }
-      return '<div class="tm-tab-panel-' + uid + '" style="display:none;padding:16px;">' + content + '</div>';
+      return '<div class="tm-tab-panel-' + uid + '">' + content + '</div>';
     }).join('') + '</div>';
   return '<div style="margin:1.5rem 0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">' + css + inputs + labels + panels + '</div>';
 };
