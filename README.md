@@ -7,7 +7,7 @@
 **A component vocabulary for agent-driven interfaces.**  
 The model names an atom. The renderer compiles the HTML, CSS, SVG, and animation.
 
-[![Atoms](https://img.shields.io/badge/atoms-193-00f2ff?style=flat-square&labelColor=04060f)](atoms/)
+[![Atoms](https://img.shields.io/badge/atoms-257-00f2ff?style=flat-square&labelColor=04060f)](atoms/)
 [![Surfaces](https://img.shields.io/badge/surfaces-5-a78bfa?style=flat-square&labelColor=04060f)](spec/)
 [![License](https://img.shields.io/badge/license-MIT-34d399?style=flat-square&labelColor=04060f)](LICENSE)
 [![A2UI](https://img.shields.io/badge/spec-v0.9_draft-f472b6?style=flat-square&labelColor=04060f)](spec/)
@@ -46,7 +46,7 @@ A2UI        68 tok  ████
 
 ---
 
-## 193 atoms across 5 surfaces
+## 257 atoms across 5 surfaces
 
 Atoms declare which surfaces they support at the schema level. An agent picks an atom by name, supplies parameters, and the renderer handles the rest.
 
@@ -73,7 +73,7 @@ Agents **never** write HTML. They compose from the vocabulary.
 | — | Not applicable |
 
 <details>
-<summary><strong>View full compatibility matrix (193 atoms)</strong></summary>
+<summary><strong>View full compatibility matrix (257 atoms)</strong></summary>
 
 | Atom | web | meet-stage | googlechat | email | pdf | Source |
 |---|---|---|---|---|---|---|
@@ -316,4 +316,4 @@ MIT. See [LICENSE](LICENSE) for details.
 
 ---
 
-Built for and maintained by **[Google Meet Studio](https://github.com/curtiskrygier/meetstudio)**.
+Built for and maintained by **[Meet Studio](https://github.com/curtiskrygier/meetstudio)**.
