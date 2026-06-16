@@ -8,6 +8,7 @@
 The model names an atom. The renderer compiles the HTML, CSS, SVG, and animation.
 
 [![Atoms](https://img.shields.io/badge/atoms-267-00f2ff?style=flat-square&labelColor=04060f)](atoms/)
+[![GAS atoms](https://img.shields.io/badge/GAS_renderer-260_atoms-7c3aed?style=flat-square&labelColor=04060f)](apps-script-surface/)
 [![Surfaces](https://img.shields.io/badge/surfaces-5-a78bfa?style=flat-square&labelColor=04060f)](spec/)
 [![License](https://img.shields.io/badge/license-MIT-34d399?style=flat-square&labelColor=04060f)](LICENSE)
 [![A2UI](https://img.shields.io/badge/spec-v0.9_draft-f472b6?style=flat-square&labelColor=04060f)](spec/)
@@ -30,12 +31,48 @@ A2UI        68 tok  ████
 
 ---
 
+## Google Apps Script renderer — try it live
+
+**260 atoms running natively in Google Apps Script.** No CDN, no dependencies, no server. Paste a JSON block list, get a rendered page.
+
+> **[▶ Open the A2UI Page Generator](https://script.google.com/macros/s/AKfycbxDpNWMnEKmO0M94EiUB8QU3p4gs-cAv3AXhIWO0VtMaTF3BkuOo8FbK69mknE1PAHtSg/exec)**
+
+```json
+{
+  "title": "Hello A2UI",
+  "theme": "light",
+  "blocks": [
+    { "component": "heading", "level": 1, "text": "My first A2UI page" },
+    { "component": "callout", "icon": "💡", "text": "Built with **260 atoms** in Google Apps Script." },
+    { "component": "chartjs_bar", "title": "Quick chart", "bar_color": "#6366f1",
+      "data": [{ "label": "A", "value": 80 }, { "label": "B", "value": 45 }, { "label": "C", "value": 62 }] }
+  ]
+}
+```
+
+### What's in the GAS renderer
+
+| Feature | Detail |
+|---|---|
+| **260 registered atoms** | Full parity with `renderers/web_article.py` |
+| **CSS-only interactions** | Tabs, carousel, gallery lightbox, modals, accordions — zero JS required |
+| **Inline SVG charts** | Bar, line, pie, donut, heatmap, punch card, sankey, cohort retention, GitHub activity grid |
+| **8 form input types** | text, email, select, radio, checkbox, switch, slider, date — native HTML controls |
+| **Animation fallbacks** | 32 motion atoms degrade to readable content cards |
+| **No CDN** | Works inside GAS sandboxed iframes with no external requests |
+| **Large payload support** | Automatically switches to POST for schemas too large for a URL |
+
+Copy [`apps-script-surface/a2ui-gem-renderer/atom.gs`](apps-script-surface/a2ui-gem-renderer/atom.gs) and [`atoms_charts.gs`](apps-script-surface/a2ui-gem-renderer/atoms_charts.gs) into any GAS project and call `renderAtoms(blocks, { theme: 'light' })`.
+
+---
+
 ## What's in this repo
 
 | Directory | Contents |
 |---|---|
 | `atoms/` | Atom schema definitions (193 atoms, `schema.yaml`) |
 | `renderers/` | Surface renderers — web article, meet stage, Google Chat |
+| `apps-script-surface/` | **GAS renderer** — `atom.gs` + `atoms_charts.gs` (260 atoms, no CDN) |
 | `web-article/` | Web article renderer (`renderer.py`) |
 | `components/` | Lit Web Components for the meet-stage surface |
 | `scripts/` | Publishing pipeline to Firestore |
@@ -368,7 +405,9 @@ Nine UI libraries benchmarked against the A2UI atom vocabulary — gaps identifi
 1. Copy `spec/schema.yaml` into your agent's system prompt or tool definition
 2. Teach your agent the composition pattern — pick atoms by name, supply parameters
 3. Parse the agent's output and render using:
-   - The renderers in this repo (`renderers/`, `web-article/`)
+   - **Google Apps Script** — copy `atom.gs` + `atoms_charts.gs` into any GAS project, call `renderAtoms(blocks)`
+   - **Python / web** — use `renderers/web_article.py` (server-side, supports all 267 atoms including animations)
+   - **Meet Stage** — `renderers/meet_stage.py` for live presentation panels via `gdm-html-panel`
    - Your own renderer — the spec is framework-agnostic
 
 The renderer handles HTML, CSS, SVG, and animation. The model never touches them.
