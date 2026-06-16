@@ -225,6 +225,7 @@
 
 <script>
   var BASE_URL = 'https://script.google.com/macros/s/AKfycbxDpNWMnEKmO0M94EiUB8QU3p4gs-cAv3AXhIWO0VtMaTF3BkuOo8FbK69mknE1PAHtSg/exec';
+  var URL_LIMIT = 6000; // chars — stay well under GAS query string limit
 
   function generate() {
     var raw = document.getElementById('json-input').value.trim();
@@ -233,7 +234,6 @@
 
     if (!raw) { showError('Paste your JSON first.'); return; }
 
-    // Escape any literal newlines/tabs inside string literals caused by copy-paste
     var sanitized = raw.replace(/"(?:[^"\\]|\\.)*"/g, function(m) {
       return m.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
     });
@@ -246,21 +246,52 @@
     }
 
     try {
-      // Re-stringify to collapse pretty-print newlines and escape any control chars
       var clean   = JSON.stringify(parsed);
       var encoded = btoa(unescape(encodeURIComponent(clean)));
-      var url = BASE_URL + '?p=' + encodeURIComponent(encoded);
-      showUrl(url);
+      var url     = BASE_URL + '?p=' + encodeURIComponent(encoded);
+
+      if (url.length <= URL_LIMIT) {
+        // Small schema — shareable URL
+        showUrl(url, true);
+      } else {
+        // Large schema — POST to avoid URL length limit
+        showUrl(null, false);
+        _postRender(clean);
+      }
     } catch (e) {
       showError('Encoding failed: ' + e.message);
     }
   }
 
-  function showUrl(url) {
-    document.getElementById('url-text').textContent = url;
-    document.getElementById('open-link').href = url;
-    document.getElementById('url-row').style.display = 'block';
-    document.getElementById('url-row').scrollIntoView({ behavior: 'smooth' });
+  function _postRender(json) {
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = BASE_URL;
+    form.target = '_blank';
+    var inp = document.createElement('input');
+    inp.type = 'hidden';
+    inp.name = 'p';
+    inp.value = json;
+    form.appendChild(inp);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  }
+
+  function showUrl(url, shareable) {
+    var row = document.getElementById('url-row');
+    if (url) {
+      document.getElementById('url-text').textContent = url;
+      document.getElementById('open-link').href = url;
+      document.getElementById('open-link').style.display = 'inline-block';
+      document.querySelector('.copy-btn').style.display = 'inline-block';
+    } else {
+      document.getElementById('url-text').textContent = 'Large schema — opening via POST (not shareable as URL)';
+      document.getElementById('open-link').style.display = 'none';
+      document.querySelector('.copy-btn').style.display = 'none';
+    }
+    row.style.display = 'block';
+    row.scrollIntoView({ behavior: 'smooth' });
   }
 
   function copyUrl() {
