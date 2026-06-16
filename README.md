@@ -7,7 +7,7 @@
 **A component vocabulary for agent-driven interfaces.**  
 The model names an atom. The renderer compiles the HTML, CSS, SVG, and animation.
 
-[![Atoms](https://img.shields.io/badge/atoms-257-00f2ff?style=flat-square&labelColor=04060f)](atoms/)
+[![Atoms](https://img.shields.io/badge/atoms-267-00f2ff?style=flat-square&labelColor=04060f)](atoms/)
 [![Surfaces](https://img.shields.io/badge/surfaces-5-a78bfa?style=flat-square&labelColor=04060f)](spec/)
 [![License](https://img.shields.io/badge/license-MIT-34d399?style=flat-square&labelColor=04060f)](LICENSE)
 [![A2UI](https://img.shields.io/badge/spec-v0.9_draft-f472b6?style=flat-square&labelColor=04060f)](spec/)
@@ -73,7 +73,7 @@ Agents **never** write HTML. They compose from the vocabulary.
 | — | Not applicable |
 
 <details>
-<summary><strong>View full compatibility matrix (257 atoms)</strong></summary>
+<summary><strong>View full compatibility matrix (267 atoms)</strong></summary>
 
 | Atom | web | meet-stage | googlechat | email | pdf | Source |
 |---|---|---|---|---|---|---|
@@ -334,6 +334,16 @@ Agents **never** write HTML. They compose from the vocabulary.
 | `svg_path_draw` | ✅ | ✅ | ⚠️ | ❌ | ⚠️ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
 | `toast_notification` | ✅ | ⚠️ | ⚠️ | ❌ | ⚠️ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
 | `parallax_card` | ✅ | ⚠️ | ⚠️ | ❌ | ⚠️ | [a2ui-catalogue](https://a2ui.dev/catalogue) |
+| `quiz_question` | ✅ | ⚠️ | ❌ | ❌ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `fill_in_blank` | ✅ | ⚠️ | ❌ | ❌ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `match_exercise` | ✅ | ⚠️ | ❌ | ❌ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `hint_reveal` | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `achievement_badge` | ✅ | ✅ | ⚠️ | ✅ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `score_summary` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `xp_bar` | ✅ | ✅ | ❌ | ❌ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `lesson_nav` | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `course_progress_card` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
+| `highlighted_text` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | [a2ui-catalogue](https://github.com/curtiskrygier/a2ui-catalogue) |
 
 ✅ works fully  ⚠️ degraded — renders with caveats  ❌ incompatible — do not use
 

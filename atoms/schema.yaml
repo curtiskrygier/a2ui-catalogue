@@ -5953,3 +5953,243 @@ blocks:
     name: a2ui-catalogue
     url: https://a2ui.dev/catalogue
     license: MIT
+- type: quiz_question
+  description: Multiple-choice or true/false question card with CSS checkbox trick for answer reveal. Correct option is highlighted green on selection, wrong options dim. No JavaScript required — pure CSS :checked selectors drive the feedback state. Optionally shows an explanation block after any answer is chosen.
+  compact_description: MCQ or true/false question with CSS-only correct/wrong feedback
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: CSS :checked feedback works inside iframe but radio reset across slides may not persist
+    - surface: pdf
+      note: Renders as a static numbered question list with options as bullet points — no interactivity
+    incompatible_on:
+    - surface: googlechat
+      reason: No CSS interactivity — use poll_block instead
+    - surface: email
+      reason: CSS :checked selectors not supported in email clients
+  fields:
+    question: 'string. The question text.'
+    options: 'list[string]. Answer options — 2 to 6 items.'
+    correct: 'integer. Zero-based index of the correct option.'
+    explanation: 'string (optional). Shown after any option is selected.'
+    style: '"default" | "dark" | "minimal"  (optional, default "default")'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: fill_in_blank
+  description: Cloze-test exercise where one or more blanks in a sentence or paragraph are replaced by inline input fields. On submission a minimal inline script compares trimmed lowercase input against accepted answers and highlights each blank green (correct) or red (wrong). A retry button resets all inputs.
+  compact_description: cloze-test sentence with inline inputs and correct/wrong highlight on submit
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Inputs render but JS submit handler may be sandboxed — test in target iframe
+    - surface: pdf
+      note: Renders as a sentence with underline placeholder blanks — no interactivity
+    incompatible_on:
+    - surface: googlechat
+      reason: No form input or JS support
+    - surface: email
+      reason: Form inputs and JS not supported in email clients
+  fields:
+    template: 'string. Sentence with {blank} placeholders marking each gap.'
+    answers: 'list[string | list[string]]. Accepted answer(s) per blank in order. A list entry may itself be a list of acceptable alternatives.'
+    hint: 'string (optional). Shown below the exercise as a nudge.'
+    case_sensitive: 'boolean (optional, default false).'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: match_exercise
+  description: Click-to-pair matching exercise. Two columns of items are shown — left (terms) and right (definitions). Learner clicks a term then a definition to form a pair. Matched pairs lock and highlight green; a mismatch briefly flashes red then resets. A score chip shows pairs matched / total. Driven by a minimal inline script.
+  compact_description: click-to-pair matching exercise with green lock and red mismatch flash
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Click events work inside iframe; rendered as two-column grid
+    - surface: pdf
+      note: Renders as a two-column table of terms and definitions — no interactivity
+    incompatible_on:
+    - surface: googlechat
+      reason: No JS or interactive state
+    - surface: email
+      reason: No JS support in email clients
+  fields:
+    pairs: 'list[{term: string, definition: string}]. 3 to 8 pairs recommended.'
+    shuffle: 'boolean (optional, default true). Randomise right-column order on render.'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: hint_reveal
+  description: A "Show hint" disclosure button that expands to reveal help text. Built on the HTML details/summary element — no JavaScript required. The summary label toggles between "Show hint" and "Hide hint". Styled with a subtle left-border accent and muted background to visually separate it from body content.
+  compact_description: show/hide hint disclosure using HTML details/summary — no JS
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a plain text block with no toggle — hint always visible
+    - surface: pdf
+      note: Renders as a static tinted block with hint always visible
+    - surface: email
+      note: details/summary not reliably supported — renders hint as always-visible indented block
+  fields:
+    hint: 'string. The hint text revealed on expand.'
+    label: 'string (optional). Button label. Default "Show hint".'
+    accent: 'string (optional). Left-border and icon colour. Default "#6366f1".'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: achievement_badge
+  description: Unlockable achievement or completion badge displayed as a circular icon with a title, description, and optional unlock date. Locked state shows a greyscale padlock overlay. Suitable for course completion, streak milestones, and skill certifications. Renders as a centred card or inline pill depending on size variant.
+  compact_description: unlockable achievement badge with locked/unlocked state and optional date
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - email
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a plain text badge name and description — no icon or visual styling
+  fields:
+    title: 'string. Achievement name.'
+    description: 'string (optional). Short achievement description.'
+    icon: 'string (optional). Emoji or single character used as the badge icon. Default "🏆".'
+    locked: 'boolean (optional, default false). Shows greyscale padlock overlay when true.'
+    unlocked_at: 'string (optional). ISO date string shown beneath the badge when unlocked.'
+    color: 'string (optional). Badge accent colour. Default "#f59e0b".'
+    size: '"card" | "pill"  (optional, default "card")'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: score_summary
+  description: End-of-exercise or end-of-module score card showing correct answers, total questions, percentage, and optional time taken. Animates the score fraction on render using a CSS counter. Includes a contextual pass/fail or grade label and an optional retry/continue CTA row.
+  compact_description: end-of-exercise score card with correct/total, percentage, grade, and CTA
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a plain text score line — no visual card or animation
+    - surface: email
+      note: CSS counter animation stripped — renders as static score text card
+  fields:
+    correct: 'integer. Number of correct answers.'
+    total: 'integer. Total number of questions.'
+    time_taken: 'string (optional). Human-readable time string e.g. "2m 14s".'
+    pass_threshold: 'integer (optional). Percentage (0–100) required to pass. Drives pass/fail label colour.'
+    retry_label: 'string (optional). Label for the retry button. Omit to hide retry CTA.'
+    continue_label: 'string (optional). Label for the continue button. Omit to hide continue CTA.'
+    continue_url: 'url (optional). Destination for the continue button.'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: xp_bar
+  description: Experience points or gamification progress bar showing current XP, level label, and XP needed to reach the next level. The fill animates from the previous value to the current value on render via CSS transition. A level-up flash overlay triggers when xp_current equals or exceeds xp_next.
+  compact_description: animated XP/points progress bar with level label and level-up flash
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    degraded_on:
+    - surface: pdf
+      note: Renders as a static labelled progress bar — no animation or level-up effect
+    incompatible_on:
+    - surface: googlechat
+      reason: No CSS animation or progress bar support
+    - surface: email
+      reason: CSS transitions and animation not reliably supported
+  fields:
+    level_label: 'string. Current level name e.g. "Level 3 — Intermediate".'
+    xp_current: 'integer. Current XP within the current level.'
+    xp_next: 'integer. XP required to reach the next level.'
+    accent: 'string (optional). Bar fill colour. Default "#6366f1".'
+    show_flash: 'boolean (optional, default true). Trigger level-up flash when xp_current >= xp_next.'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: lesson_nav
+  description: Previous/next lesson navigation bar with the current lesson title centred and module context shown above. Each side shows the adjacent lesson title and a directional arrow. Optionally shows a completion checkbox for the current lesson that persists via localStorage.
+  compact_description: prev/next lesson navigation with module context and optional completion checkbox
+  surfaces:
+    works_on:
+    - web
+    degraded_on:
+    - surface: meet-stage
+      note: Renders as a simplified prev/next pill row — localStorage persistence unavailable in iframe
+    - surface: pdf
+      note: Renders as a static prev/next text row with lesson titles
+    - surface: googlechat
+      note: Renders as a plain text prev/next line — no navigation links
+    - surface: email
+      note: Renders as a plain text nav row — links may be stripped by email clients
+  fields:
+    module_label: 'string (optional). Module or section name shown above the nav bar.'
+    current_title: 'string. Title of the current lesson.'
+    prev_title: 'string (optional). Title of the previous lesson. Omit to hide prev arrow.'
+    prev_url: 'url (optional). Link for the previous lesson.'
+    next_title: 'string (optional). Title of the next lesson. Omit to hide next arrow.'
+    next_url: 'url (optional). Link for the next lesson.'
+    show_completion: 'boolean (optional, default false). Show a "Mark as complete" checkbox persisted in localStorage.'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: course_progress_card
+  description: Overall course completion card showing a list of modules with individual progress bars and a top-level aggregate progress ring. Each module row shows its title, lesson count, and percentage complete. Suitable for a course sidebar or dashboard widget.
+  compact_description: course-level progress card with per-module bars and aggregate completion ring
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Renders as a plain text list of module titles and completion percentages
+    - surface: email
+      note: CSS progress bars stripped — renders as a static text list with percentages
+  fields:
+    course_title: 'string. Course name shown at the top of the card.'
+    modules: 'list[{title: string, lessons_total: integer, lessons_done: integer}].'
+    accent: 'string (optional). Progress fill colour. Default "#6366f1".'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
+- type: highlighted_text
+  description: Inline passage of text with a coloured highlight background and an optional margin annotation note. The annotation appears as a side-note pill on hover (CSS :hover) or as a visible aside on smaller viewports. Useful for reading comprehension exercises, exam technique callouts, and annotated source analysis.
+  compact_description: highlighted text passage with optional hover margin annotation note
+  surfaces:
+    works_on:
+    - web
+    - meet-stage
+    - pdf
+    degraded_on:
+    - surface: googlechat
+      note: Highlight background stripped — renders as plain text with annotation appended in brackets
+    - surface: email
+      note: Hover annotation not supported — annotation rendered as inline parenthetical
+  fields:
+    text: 'string. The passage to highlight.'
+    annotation: 'string (optional). Margin note revealed on hover.'
+    color: 'string (optional). Highlight background colour. Default "#fef08a" (yellow).'
+    annotation_color: 'string (optional). Annotation pill background. Default "#fbbf24".'
+  source:
+    name: a2ui-catalogue
+    url: https://github.com/curtiskrygier/a2ui-catalogue
+    license: MIT
