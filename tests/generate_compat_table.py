@@ -25,8 +25,8 @@ SYMBOLS = {
 def surface_status(atom: dict, surface: str) -> str:
     s = atom.get("surfaces", {})
     works_on      = s.get("works_on", [])
-    degraded_on   = [e["surface"] for e in s.get("degraded_on", [])]
-    incompatible  = [e["surface"] for e in s.get("incompatible_on", [])]
+    degraded_on   = [e["surface"] for e in (s.get("degraded_on") or [])]
+    incompatible  = [e["surface"] for e in (s.get("incompatible_on") or [])]
 
     if surface in incompatible:
         return SYMBOLS["incompatible"]
