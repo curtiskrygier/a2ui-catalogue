@@ -12,7 +12,7 @@ import yaml
 
 CATALOGUE_ROOT = Path(__file__).parent.parent
 SCHEMA_PATH = CATALOGUE_ROOT / "atoms" / "schema.yaml"
-SURFACES = ["web", "meet-stage", "googlechat", "email", "pdf"]
+SURFACES = ["web", "meet-stage", "googlechat", "email", "pdf", "apps-script-web"]
 
 SYMBOLS = {
     "works":        "✅",

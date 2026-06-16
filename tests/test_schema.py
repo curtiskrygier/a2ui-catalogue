@@ -43,7 +43,7 @@ def test_incompatible_has_reason(atoms):
 
 def test_degraded_has_note(atoms):
     for name, atom in atoms.items():
-        for entry in atom.get("surfaces", {}).get("degraded_on", []):
+        for entry in atom.get("surfaces", {}).get("degraded_on", []) or []:
             assert "note" in entry, f"{name}: degraded_on entry missing 'note'"
             assert "surface" in entry, f"{name}: degraded_on entry missing 'surface'"
 
